@@ -6,7 +6,7 @@
 
 **Architecture:** React renders the app shell and feature screens. Dexie/IndexedDB is the source of truth and a transactional outbox records cloud work. A small sync engine exchanges owner-scoped records and private images with Supabase. PDF generation consumes an immutable quotation snapshot locally, so quoting and export continue to work offline.
 
-**Tech Stack:** React 19.2.8, TypeScript 7.0.2, Vite 8.2.2, React Router 7.18.3, Dexie 4.4.5, Supabase JS 2.112.4, React Hook Form 7.86.0, Zod 4.5.4, React PDF 4.9.0, vite-plugin-pwa 1.3.0, Vitest 4.1.11, Testing Library, Playwright 1.62.1, Supabase CLI 2.116.0.
+**Tech Stack:** React 19.2.8, TypeScript 6.0.3 (latest version compatible with typescript-eslint 8.68.0), Vite 8.2.2, React Router 7.18.3, Dexie 4.4.5, Supabase JS 2.112.4, React Hook Form 7.86.0, Zod 4.5.4, React PDF 4.9.0, vite-plugin-pwa 1.3.0, Vitest 4.1.11, Testing Library, Playwright 1.62.1, Supabase CLI 2.116.0.
 
 **Spec:** `docs/superpowers/specs/2026-08-29-construction-quotation-pwa-design.md`
 
@@ -75,14 +75,14 @@
 
 **Files:** Create `package.json`, `index.html`, `tsconfig.json`, `vite.config.ts`, `playwright.config.ts`, `.env.example`, `src/main.tsx`, `src/app/App.tsx`, `src/test/setup.ts`, `src/styles/tokens.css`, `src/styles/global.css`, `src/pwa/register.ts`, `src/pwa/PwaUpdatePrompt.tsx`, `public/icons/*`.
 
-- [ ] Write `src/app/App.test.tsx` asserting the app name, bottom navigation, one centered create action, and no duplicate top-right create action.
-- [ ] Run `npm test -- --run src/app/App.test.tsx`; confirm failure because the project is not scaffolded.
-- [ ] Scaffold Vite React TypeScript and pin the versions listed above. Add scripts: `dev`, `build`, `lint`, `test`, `test:watch`, `test:e2e`, `typecheck`.
-- [ ] Add semantic tokens for the approved blues and state colors, surfaces, typography, spacing, radii, shadows, safe-area insets, dark mode, focus rings, and 44 px targets.
-- [ ] Configure the web manifest (`name`, `short_name`, `display: standalone`, portrait orientation, theme/background colors, 192/512/maskable icons) and `registerType: 'prompt'`.
-- [ ] Implement the minimal shell and update prompt; defer reload while a form reports dirty state.
-- [ ] Run `npm test -- --run src/app/App.test.tsx`, `npm run typecheck`, and `npm run build`; confirm all pass.
-- [ ] Commit: `feat: scaffold installable quotation PWA`.
+- [x] Write `src/app/App.test.tsx` asserting the app name, bottom navigation, one centered create action, and no duplicate top-right create action.
+- [x] Run `npm test -- --run src/app/App.test.tsx`; confirm failure because the project is not scaffolded.
+- [x] Scaffold Vite React TypeScript and pin compatible versions. Add scripts: `dev`, `build`, `lint`, `test`, `test:watch`, `test:e2e`, `typecheck`.
+- [x] Add semantic tokens for the approved blues and state colors, surfaces, typography, spacing, radii, shadows, safe-area insets, dark mode, focus rings, and 44 px targets.
+- [x] Configure the web manifest (`name`, `short_name`, `display: standalone`, portrait orientation, theme/background colors, 192/512/maskable icons) and `registerType: 'prompt'`.
+- [x] Implement the minimal shell and update prompt; defer reload while a form reports dirty state.
+- [x] Run `npm test -- --run src/app/App.test.tsx`, `npm run typecheck`, and `npm run build`; confirm all pass.
+- [x] Commit: `feat: scaffold installable quotation PWA`.
 
 ## Task 2: Domain types, money arithmetic, and quotation rules
 
