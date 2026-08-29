@@ -101,14 +101,14 @@
 
 **Files:** Create `src/db/database.ts`, `src/db/repositories.ts`, `src/db/seed.ts`, `src/db/repositories.test.ts`; update `src/app/providers.tsx`.
 
-- [ ] Model Dexie tables for `businessProfiles`, `clients`, `projectLocations`, `quotations`, `workItems`, `quotationImages`, and `outbox`; index owner, quotation, status, updated time, and outbox retry time.
-- [ ] Define `QuotationRepository { get, list, save, duplicate, softDelete }` and `OutboxRepository { enqueue, nextBatch, markSucceeded, markFailed }`.
-- [ ] Write failing fake-indexeddb tests proving save + outbox enqueue are one transaction, child items are replaced atomically, soft deletion is queued, and an aborted write leaves neither domain rows nor outbox rows.
-- [ ] Run `npm test -- --run src/db/repositories.test.ts`; confirm failure.
-- [ ] Implement database version 1, repositories, stable UUID creation, timestamps, tombstones, and idempotent outbox keys.
-- [ ] Add a development-only seed behind `import.meta.env.DEV`; never seed production.
-- [ ] Run the repository tests and `npm run typecheck`; confirm pass.
-- [ ] Commit: `feat: add local database and transactional outbox`.
+- [x] Model Dexie tables for `businessProfiles`, `clients`, `projectLocations`, `quotations`, `workItems`, `quotationImages`, and `outbox`; index quotation, status, updated time, and outbox retry time. Owner indexes are added with cloud ownership in Task 8.
+- [x] Define `QuotationRepository { get, list, save, duplicate, softDelete }` and `OutboxRepository { enqueue, nextBatch, markSucceeded, markFailed }`.
+- [x] Write failing fake-indexeddb tests proving save + outbox enqueue are one transaction, child items are replaced atomically, soft deletion is queued, and an aborted write leaves neither domain rows nor outbox rows.
+- [x] Run `npm test -- --run src/db/repositories.test.ts`; confirm failure.
+- [x] Implement database version 1, repositories, stable IDs, timestamps, tombstones, and idempotent outbox keys.
+- [x] Add a development-only seed behind `import.meta.env.DEV`; never seed production.
+- [x] Run the repository tests and `npm run typecheck`; confirm pass.
+- [x] Commit: `feat: add local database and transactional outbox`.
 
 ## Task 4: App shell, home dashboard, and business profile
 
