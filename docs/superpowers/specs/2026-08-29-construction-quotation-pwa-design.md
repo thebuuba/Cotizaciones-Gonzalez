@@ -1,7 +1,7 @@
 # Construction quotation PWA design
 
 Date: 2026-08-29
-Status: Awaiting written specification review
+Status: Approved
 
 ## 1. Purpose
 
