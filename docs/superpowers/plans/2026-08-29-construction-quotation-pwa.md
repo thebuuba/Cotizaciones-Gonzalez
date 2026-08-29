@@ -114,13 +114,13 @@
 
 **Files:** Create `src/app/router.tsx`, `src/app/providers.tsx`, `src/components/*`, `src/features/home/HomePage.tsx`, `src/features/settings/SettingsPage.tsx`, `src/features/business/BusinessProfileForm.tsx`, `src/features/business/businessProfileSchema.ts`; add corresponding tests.
 
-- [ ] Write failing UI tests for active tabs, monthly quoted total, draft/sent/approved counters, recent quotations, sync badge, dark mode, and business-profile validation.
-- [ ] Run those tests; confirm failure.
-- [ ] Implement routes for Home, Quotations, Clients, Settings, and editor/detail/preview children. Build the screenshot-inspired dashboard with no top-right plus.
-- [ ] Implement profile fields: logo, business name, owner, phone, email, address, and signature. Persist locally and enqueue changes.
-- [ ] Use pale status backgrounds with dark text for green/amber states; preserve WCAG AA contrast for body text.
-- [ ] Run feature tests, `npm run typecheck`, and `npm run build`; confirm pass.
-- [ ] Commit: `feat: add dashboard shell and business profile`.
+- [x] Write failing UI tests for active tabs, monthly quoted total, draft/sent/approved counters, recent quotations, sync badge, dark mode behavior, and business-profile validation.
+- [x] Run those tests; confirm failure.
+- [x] Implement routes for Home, Quotations, Clients, Settings, and editor/detail/preview children. Build the screenshot-inspired dashboard with no top-right plus.
+- [x] Implement profile fields: logo, business name, owner, phone, email, address, and signature. Persist locally and enqueue changes.
+- [x] Use pale status backgrounds with dark text for green/amber states; preserve WCAG AA contrast for body text.
+- [x] Run feature tests, `npm run typecheck`, and `npm run build`; confirm pass.
+- [x] Commit: `feat: add dashboard shell and business profile`.
 
 ## Task 5: Client and project-location management
 

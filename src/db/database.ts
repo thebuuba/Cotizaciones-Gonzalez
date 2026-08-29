@@ -4,7 +4,7 @@ import type { BusinessProfile, Client, ProjectLocation, Quotation, QuotationImag
 
 export interface OutboxOperation {
   id: string
-  entityType: 'quotation'
+  entityType: 'quotation' | 'businessProfile' | 'client' | 'projectLocation'
   entityId: string
   action: 'upsert' | 'delete'
   payload?: unknown

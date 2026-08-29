@@ -1,4 +1,4 @@
-import type { QuotationSnapshot } from '../domain/types'
+import type { BusinessProfile, QuotationSnapshot } from '../domain/types'
 import type { AppDatabase, OutboxOperation } from './database'
 
 function operation(snapshot: QuotationSnapshot, action: OutboxOperation['action'], at: string): OutboxOperation {
@@ -70,5 +70,17 @@ export class DexieOutboxRepository {
   async markSucceeded(id: string): Promise<void> { await this.db.outbox.delete(id) }
   async markFailed(id: string, error: string, nextAttemptAt: string): Promise<void> {
     await this.db.outbox.where('id').equals(id).modify((item) => { item.attempt += 1; item.error = error; item.nextAttemptAt = nextAttemptAt })
+  }
+}
+
+export class DexieBusinessProfileRepository {
+  constructor(private readonly db: AppDatabase) {}
+  get(): Promise<BusinessProfile | undefined> { return this.db.businessProfiles.toCollection().first() }
+  async save(profile: BusinessProfile): Promise<void> {
+    const item: OutboxOperation = { id: `businessProfile:${profile.id}:upsert:${profile.updatedAt}`, entityType: 'businessProfile', entityId: profile.id, action: 'upsert', payload: profile, createdAt: profile.updatedAt, nextAttemptAt: profile.updatedAt, attempt: 0 }
+    await this.db.transaction('rw', this.db.businessProfiles, this.db.outbox, async () => {
+      await this.db.businessProfiles.put(profile)
+      await this.db.outbox.put(item)
+    })
   }
 }
