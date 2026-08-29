@@ -88,14 +88,14 @@
 
 **Files:** Create `src/domain/types.ts`, `src/domain/money.ts`, `src/domain/quotation.ts`, `src/domain/money.test.ts`, `src/domain/quotation.test.ts`, `src/test/factories.ts`.
 
-- [ ] Define `Currency = 'DOP' | 'USD'`, quotation/status/sync unions, normalized entity types, and immutable `QuotationSnapshot`.
-- [ ] Define `Discount` as `{type:'none';value:0} | {type:'percentage';value:number} | {type:'fixed';value:number}` where fixed values are minor units and percentages are basis points.
-- [ ] Write failing table tests for `calculateTotals(pricesMinor, discount)`: empty items, two prices, percentage rounding, fixed discount, discount capped at subtotal, and both currencies.
-- [ ] Write failing tests for `formatMoney`, `validateQuotationForExport`, and `duplicateQuotation(source, now)`; duplication must assign new IDs, clear status to draft, retain client/project/items, and exclude sync metadata.
-- [ ] Run `npm test -- --run src/domain`; confirm failures.
-- [ ] Implement integer-only totals, `Intl.NumberFormat`, export validation, snapshot creation, and duplication. Keep functions pure.
-- [ ] Run `npm test -- --run src/domain` and `npm run typecheck`; confirm pass.
-- [ ] Commit: `feat: define quotation domain and money rules`.
+- [x] Define `Currency = 'DOP' | 'USD'`, quotation/status/sync unions, normalized entity types, and immutable `QuotationSnapshot`.
+- [x] Define `Discount` as `{type:'none';value:0} | {type:'percentage';value:number} | {type:'fixed';value:number}` where fixed values are minor units and percentages are basis points.
+- [x] Write failing table tests for `calculateTotals(pricesMinor, discount)`: empty items, two prices, percentage rounding, fixed discount, discount capped at subtotal, and both currencies.
+- [x] Write failing tests for `formatMoney`, `validateQuotationForExport`, and `duplicateQuotation(source, now)`; duplication must assign new IDs, clear status to draft, retain client/project/items, and exclude sync metadata.
+- [x] Run `npm test -- --run src/domain`; confirm failures.
+- [x] Implement integer-only totals, `Intl.NumberFormat`, export validation, snapshot creation, and duplication. Keep functions pure.
+- [x] Run `npm test -- --run src/domain` and `npm run typecheck`; confirm pass.
+- [x] Commit: `feat: define quotation domain and money rules`.
 
 ## Task 3: Dexie database, local repositories, and transactional outbox
 
