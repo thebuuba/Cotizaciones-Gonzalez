@@ -8,9 +8,12 @@ export default defineConfig({
     trace: 'on-first-retry'
   },
   webServer: {
-    command: 'npm run build && npm run dev -- --host 127.0.0.1 --port 4173',
+    command: 'npm run build && npm run preview -- --host 127.0.0.1 --port 4173',
     url: 'http://127.0.0.1:4173',
     reuseExistingServer: !process.env.CI
   },
-  projects: [{ name: 'Mobile Chromium', use: { ...devices['iPhone 13'] } }]
+  projects: [
+    { name: 'Mobile WebKit', testIgnore: /offline\.spec\.ts/, use: { ...devices['iPhone 13'] } },
+    { name: 'Offline Chromium', testMatch: /offline\.spec\.ts/, use: { ...devices['Pixel 5'] } }
+  ]
 })

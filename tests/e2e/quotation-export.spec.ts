@@ -2,10 +2,13 @@ import { expect, test } from '@playwright/test'
 import { mkdir } from 'node:fs/promises'
 import path from 'node:path'
 
+import { signIn } from './helpers'
+
 test('creates and exports the approved quotation sheet', async ({ page }) => {
   test.setTimeout(120_000)
   const outputDirectory = path.resolve('tmp/pdfs')
   await mkdir(outputDirectory, { recursive: true })
+  await signIn(page)
   await page.goto('/clientes')
   await page.getByRole('button', { name: 'Nuevo cliente' }).click()
   await page.getByLabel('Nombre del cliente').fill('María Rodríguez')

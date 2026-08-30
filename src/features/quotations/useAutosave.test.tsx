@@ -46,4 +46,17 @@ describe('useAutosave', () => {
     expect(view.getByText('saved')).toBeInTheDocument()
     vi.useRealTimers()
   })
+
+  it('flushes the latest valid revision when the editor unmounts before the debounce', async () => {
+    vi.useFakeTimers()
+    const onSave = vi.fn().mockResolvedValue(undefined)
+    const view = render(<Harness onSave={onSave} />)
+    fireEvent.click(view.getByRole('button', { name: 'Cambiar' }))
+
+    view.unmount()
+    await act(async () => Promise.resolve())
+
+    expect(onSave).toHaveBeenCalledWith('cambio')
+    vi.useRealTimers()
+  })
 })

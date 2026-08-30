@@ -75,5 +75,11 @@ export function useAutosave<T>({ value, canSave, onSave, delay = 400, revision: 
     return () => document.removeEventListener('visibilitychange', handleVisibility)
   }, [flush])
 
+  useEffect(() => {
+    return () => {
+      if (timerRef.current || inFlightRef.current) void flush()
+    }
+  }, [flush])
+
   return { status, flush }
 }

@@ -93,4 +93,13 @@ describe('SyncEngine', () => {
     expect(local.restore).toHaveBeenCalledWith(backup, new Set(['quotation:quote-1']))
     expect(engine.getState()).toBe('pending')
   })
+
+  it('reports a pull failure without leaking an unhandled rejection', async () => {
+    const { cloud, engine } = harness([])
+    cloud.pull.mockRejectedValueOnce(new Error('servidor no disponible'))
+
+    await expect(engine.run()).resolves.toBeUndefined()
+
+    expect(engine.getState()).toBe('error')
+  })
 })

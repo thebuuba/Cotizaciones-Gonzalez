@@ -29,6 +29,14 @@ describe('ClientsPage', () => {
     expect(onStartQuotation).toHaveBeenCalledWith('c1', 'l1')
   })
 
+  it('starts from the contact address when a client has no project locations', async () => {
+    const user = userEvent.setup()
+    const onStartQuotation = vi.fn()
+    render(<ClientsPage clients={records} onSave={vi.fn()} onStartQuotation={onStartQuotation} />)
+    await user.click(screen.getByRole('button', { name: 'Cotizar para Carlos López' }))
+    expect(onStartQuotation).toHaveBeenCalledWith('c2')
+  })
+
   it('opens an existing client with contact and locations ready to edit', async () => {
     const user = userEvent.setup()
     render(<ClientsPage clients={records} onSave={vi.fn()} onStartQuotation={vi.fn()} />)

@@ -51,6 +51,12 @@ export class DexieQuotationRepository {
       await this.db.materialItems.where('quotationId').equals(savedSnapshot.quotation.id).delete()
       await this.db.materialItems.bulkPut(savedSnapshot.materialItems)
       await this.db.outbox.put(operation(savedSnapshot, 'upsert', savedSnapshot.quotation.updatedAt))
+      await this.db.outbox.put({
+        id: `businessProfile:${savedSnapshot.business.id}:upsert:${savedSnapshot.quotation.updatedAt}`,
+        entityType: 'businessProfile', entityId: savedSnapshot.business.id, action: 'upsert',
+        payload: savedSnapshot.business, createdAt: savedSnapshot.quotation.updatedAt,
+        nextAttemptAt: savedSnapshot.quotation.updatedAt, attempt: 0,
+      })
     })
   }
 

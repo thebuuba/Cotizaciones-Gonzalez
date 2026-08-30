@@ -69,7 +69,7 @@ export class SyncEngine {
       this.setState('offline')
       return Promise.resolve()
     }
-    this.running = this.synchronize().finally(() => { this.running = undefined })
+    this.running = this.synchronize().catch(() => { this.setState('error') }).finally(() => { this.running = undefined })
     return this.running
   }
 
