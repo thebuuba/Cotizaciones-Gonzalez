@@ -37,6 +37,30 @@ describe('local quotation repository', () => {
     expect((await quotations.get('quote-1'))?.materialItems.map((item) => item.id)).toEqual(['item-2'])
   })
 
+  it('assigns sequential human-readable numbers to new quotations', async () => {
+    const first = quotationSnapshotFactory()
+    first.quotation.number = ''
+    await quotations.save(first)
+    const second = quotationSnapshotFactory()
+    second.quotation.id = 'quote-2'
+    second.quotation.number = ''
+    second.materialItems = second.materialItems.map((item) => ({ ...item, id: `${item.id}-2`, quotationId: 'quote-2' }))
+    await quotations.save(second)
+
+    expect((await quotations.get('quote-1'))?.quotation.number).toBe('COT-0001')
+    expect((await quotations.get('quote-2'))?.quotation.number).toBe('COT-0002')
+  })
+
+  it('keeps the assigned number when an autosaving editor still sends a blank number', async () => {
+    const snapshot = quotationSnapshotFactory()
+    snapshot.quotation.number = ''
+    await quotations.save(snapshot)
+    snapshot.quotation.observations = 'Segundo guardado'
+    await quotations.save(snapshot)
+
+    expect((await quotations.get('quote-1'))?.quotation.number).toBe('COT-0001')
+  })
+
   it('queues a tombstone when a quotation is deleted', async () => {
     await quotations.save(quotationSnapshotFactory())
     await quotations.softDelete('quote-1', new Date('2026-08-30T12:00:00.000Z'))

@@ -38,12 +38,19 @@ export class DexieQuotationRepository {
     if (invalid) throw new RangeError('Los materiales y la mano de obra no admiten valores negativos.')
 
     await this.db.transaction('rw', [this.db.businessProfiles, this.db.clients, this.db.quotations, this.db.materialItems, this.db.outbox], async () => {
-      await this.db.businessProfiles.put(snapshot.business)
-      await this.db.clients.put(snapshot.client)
-      await this.db.quotations.put(snapshot.quotation)
-      await this.db.materialItems.where('quotationId').equals(snapshot.quotation.id).delete()
-      await this.db.materialItems.bulkPut(snapshot.materialItems)
-      await this.db.outbox.put(operation(snapshot, 'upsert', snapshot.quotation.updatedAt))
+      let savedSnapshot = snapshot
+      if (!snapshot.quotation.number) {
+        const existingNumber = (await this.db.quotations.get(snapshot.quotation.id))?.number
+        const numbers = (await this.db.quotations.toArray()).map((item) => Number(item.number.match(/^COT-(\d+)$/)?.[1] ?? 0))
+        const number = existingNumber || `COT-${String(Math.max(0, ...numbers) + 1).padStart(4, '0')}`
+        savedSnapshot = { ...snapshot, quotation: { ...snapshot.quotation, number } }
+      }
+      await this.db.businessProfiles.put(savedSnapshot.business)
+      await this.db.clients.put(savedSnapshot.client)
+      await this.db.quotations.put(savedSnapshot.quotation)
+      await this.db.materialItems.where('quotationId').equals(savedSnapshot.quotation.id).delete()
+      await this.db.materialItems.bulkPut(savedSnapshot.materialItems)
+      await this.db.outbox.put(operation(savedSnapshot, 'upsert', savedSnapshot.quotation.updatedAt))
     })
   }
 
