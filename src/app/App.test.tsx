@@ -33,4 +33,14 @@ describe('App shell', () => {
     expect(screen.getByRole('heading', { name: 'Ajustes' })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Ajustes' })).toHaveAttribute('aria-current', 'page')
   })
+
+  it('opens the material quotation editor from the central action', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+
+    await user.click(screen.getByRole('link', { name: 'Nueva cotización' }))
+
+    expect(screen.getByRole('heading', { name: 'Datos de la hoja' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Agregar material' })).toBeInTheDocument()
+  })
 })
