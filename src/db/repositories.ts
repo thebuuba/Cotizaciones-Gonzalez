@@ -1,4 +1,4 @@
-import type { BusinessProfile, QuotationSnapshot } from '../domain/types'
+import type { BusinessProfile, Client, ProjectLocation, QuotationSnapshot } from '../domain/types'
 import type { AppDatabase, OutboxOperation } from './database'
 
 function operation(snapshot: QuotationSnapshot, action: OutboxOperation['action'], at: string): OutboxOperation {
@@ -80,6 +80,24 @@ export class DexieBusinessProfileRepository {
     const item: OutboxOperation = { id: `businessProfile:${profile.id}:upsert:${profile.updatedAt}`, entityType: 'businessProfile', entityId: profile.id, action: 'upsert', payload: profile, createdAt: profile.updatedAt, nextAttemptAt: profile.updatedAt, attempt: 0 }
     await this.db.transaction('rw', this.db.businessProfiles, this.db.outbox, async () => {
       await this.db.businessProfiles.put(profile)
+      await this.db.outbox.put(item)
+    })
+  }
+}
+
+export interface ClientRecord { client: Client; locations: ProjectLocation[] }
+export class DexieClientRepository {
+  constructor(private readonly db: AppDatabase) {}
+  async list(): Promise<ClientRecord[]> {
+    const clients = await this.db.clients.filter((client) => !client.deletedAt).sortBy('name')
+    return Promise.all(clients.map(async (client) => ({ client, locations: await this.db.projectLocations.where('clientId').equals(client.id).filter((location) => !location.deletedAt).toArray() })))
+  }
+  async save(record: ClientRecord): Promise<void> {
+    const item: OutboxOperation = { id: `client:${record.client.id}:upsert:${record.client.updatedAt}`, entityType: 'client', entityId: record.client.id, action: 'upsert', payload: record, createdAt: record.client.updatedAt, nextAttemptAt: record.client.updatedAt, attempt: 0 }
+    await this.db.transaction('rw', this.db.clients, this.db.projectLocations, this.db.outbox, async () => {
+      await this.db.clients.put(record.client)
+      await this.db.projectLocations.where('clientId').equals(record.client.id).delete()
+      await this.db.projectLocations.bulkPut(record.locations)
       await this.db.outbox.put(item)
     })
   }

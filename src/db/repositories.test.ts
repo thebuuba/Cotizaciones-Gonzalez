@@ -3,7 +3,7 @@ import 'fake-indexeddb/auto'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import { AppDatabase } from './database'
-import { DexieBusinessProfileRepository, DexieOutboxRepository, DexieQuotationRepository } from './repositories'
+import { DexieBusinessProfileRepository, DexieClientRepository, DexieOutboxRepository, DexieQuotationRepository } from './repositories'
 import { quotationSnapshotFactory } from '../test/factories'
 
 describe('local quotation repository', () => {
@@ -62,5 +62,15 @@ describe('local quotation repository', () => {
 
     expect(await profiles.get()).toEqual(profile)
     expect(await outbox.nextBatch(25)).toContainEqual(expect.objectContaining({ entityType: 'businessProfile', entityId: 'business-1' }))
+  })
+
+  it('saves a client and replaces its project locations atomically', async () => {
+    const clients = new DexieClientRepository(db)
+    const source = quotationSnapshotFactory()
+    await clients.save({ client: source.client, locations: [source.projectLocation] })
+    await clients.save({ client: source.client, locations: [{ ...source.projectLocation, id: 'location-2', label: 'Apartamento' }] })
+
+    expect(await clients.list()).toEqual([{ client: source.client, locations: [expect.objectContaining({ id: 'location-2' })] }])
+    expect(await outbox.nextBatch(25)).toContainEqual(expect.objectContaining({ entityType: 'client', entityId: 'client-1' }))
   })
 })
