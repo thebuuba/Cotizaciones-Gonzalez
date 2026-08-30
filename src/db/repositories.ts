@@ -71,7 +71,11 @@ export class DexieQuotationRepository {
 
 export class DexieOutboxRepository {
   constructor(private readonly db: AppDatabase) {}
-  nextBatch(limit: number): Promise<OutboxOperation[]> { return this.db.outbox.orderBy('[nextAttemptAt+createdAt]').limit(limit).toArray() }
+  nextBatch(limit: number): Promise<OutboxOperation[]> {
+    const now = new Date().toISOString()
+    return this.db.outbox.filter((item) => item.nextAttemptAt <= now).sortBy('createdAt').then((items) => items.slice(0, limit))
+  }
+  pending(limit: number): Promise<OutboxOperation[]> { return this.db.outbox.toCollection().sortBy('createdAt').then((items) => items.slice(0, limit)) }
   async enqueue(item: OutboxOperation): Promise<void> { await this.db.outbox.put(item) }
   async markSucceeded(id: string): Promise<void> { await this.db.outbox.delete(id) }
   async markFailed(id: string, error: string, nextAttemptAt: string): Promise<void> {

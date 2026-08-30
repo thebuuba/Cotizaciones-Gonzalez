@@ -1,6 +1,6 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { BrowserRouter, Route, Routes, useNavigate, useParams, useSearchParams } from 'react-router-dom'
-import { quotationRepository, businessProfileRepository, clientRepository } from './providers'
+import { quotationRepository, businessProfileRepository, clientRepository, useSync } from './providers'
 import { AppShell } from '../components/AppShell'
 import { HomePage } from '../features/home/HomePage'
 import { QuotationsPage } from '../features/quotations/QuotationsPage'
@@ -14,7 +14,8 @@ import { duplicateQuotation } from '../domain/quotation'
 function HomeRoute() {
   const quotations = useLiveQuery(() => quotationRepository.list(), [], [])
   const profile = useLiveQuery(() => businessProfileRepository.get())
-  return <HomePage businessName={profile?.businessName || 'Acabados Modernos Gonzalez'} quotations={quotations} syncState="synced" />
+  const { state } = useSync()
+  return <HomePage businessName={profile?.businessName || 'Acabados Modernos Gonzalez'} quotations={quotations} syncState={state} />
 }
 
 function NewQuotationRoute() {
