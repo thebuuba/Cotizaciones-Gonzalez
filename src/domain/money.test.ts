@@ -1,31 +1,51 @@
 import { describe, expect, it } from 'vitest'
 
-import { calculateTotals, formatMoney } from './money'
-import type { Discount } from './types'
+import {
+  calculateMaterialTotal,
+  calculateQuotationTotals,
+  formatMoney,
+  parseQuantityToMilli,
+} from './money'
 
-describe('calculateTotals', () => {
+describe('parseQuantityToMilli', () => {
   it.each([
-    { name: 'empty quotation', prices: [], discount: { type: 'none', value: 0 } satisfies Discount, expected: { subtotalMinor: 0, discountMinor: 0, totalMinor: 0 } },
-    { name: 'two fixed-price jobs', prices: [125_000, 75_000], discount: { type: 'none', value: 0 } satisfies Discount, expected: { subtotalMinor: 200_000, discountMinor: 0, totalMinor: 200_000 } },
-    { name: 'percentage rounded to nearest cent', prices: [10_005], discount: { type: 'percentage', value: 3333 } satisfies Discount, expected: { subtotalMinor: 10_005, discountMinor: 3_335, totalMinor: 6_670 } },
-    { name: 'fixed discount', prices: [50_000, 25_000], discount: { type: 'fixed', value: 12_500 } satisfies Discount, expected: { subtotalMinor: 75_000, discountMinor: 12_500, totalMinor: 62_500 } },
-    { name: 'discount capped at subtotal', prices: [5_000], discount: { type: 'fixed', value: 8_000 } satisfies Discount, expected: { subtotalMinor: 5_000, discountMinor: 5_000, totalMinor: 0 } },
-  ])('calculates $name using integer minor units', ({ prices, discount, expected }) => {
-    expect(calculateTotals(prices, discount)).toEqual(expected)
+    ['1', 1_000],
+    ['1.5', 1_500],
+    ['1,5', 1_500],
+    ['0.125', 125],
+  ])('parses %s without binary floating point', (value, expected) => {
+    expect(parseQuantityToMilli(value)).toBe(expected)
   })
 
-  it('rejects negative work prices before they corrupt a total', () => {
-    expect(() => calculateTotals([25_000, -1], { type: 'none', value: 0 })).toThrow('negative')
+  it.each(['', '-1', '1.2345', 'texto'])('rejects invalid quantity %s', (value) => {
+    expect(() => parseQuantityToMilli(value)).toThrow('cantidad')
+  })
+})
+
+describe('material and quotation totals', () => {
+  it('rounds a decimal material quantity to the nearest cent', () => {
+    expect(calculateMaterialTotal({ quantityMilli: 1_500, unitPriceMinor: 100_00 })).toBe(150_00)
+  })
+
+  it('adds material rows and one labor amount', () => {
+    expect(calculateQuotationTotals([
+      { quantityMilli: 10_000, unitPriceMinor: 1_000_00 },
+      { quantityMilli: 5_000, unitPriceMinor: 500_00 },
+    ], 8_000_00)).toEqual({
+      materialsMinor: 12_500_00,
+      laborMinor: 8_000_00,
+      totalMinor: 20_500_00,
+    })
+  })
+
+  it('rejects negative or unsafe integer values', () => {
+    expect(() => calculateMaterialTotal({ quantityMilli: -1, unitPriceMinor: 100 })).toThrow('cantidad')
+    expect(() => calculateQuotationTotals([], -1)).toThrow('mano de obra')
   })
 })
 
 describe('formatMoney', () => {
-  it.each([
-    { currency: 'DOP' as const, amountMinor: 19_925_000, symbol: 'RD$', number: '199,250.00' },
-    { currency: 'USD' as const, amountMinor: 123_456, symbol: 'US$', number: '1,234.56' },
-  ])('formats $currency with its visible currency mark', ({ currency, amountMinor, symbol, number }) => {
-    const result = formatMoney({ currency, amountMinor })
-    expect(result).toContain(symbol)
-    expect(result).toContain(number)
+  it('always formats Dominican pesos with the visible RD$ prefix', () => {
+    expect(formatMoney(19_925_000)).toMatch(/RD[$]\s?199,250\.00/)
   })
 })

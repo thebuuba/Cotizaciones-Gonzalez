@@ -16,14 +16,13 @@ export class DexieQuotationRepository {
   async get(id: string, includeDeleted = false): Promise<QuotationSnapshot | undefined> {
     const quotation = await this.db.quotations.get(id)
     if (!quotation || (!includeDeleted && quotation.deletedAt)) return undefined
-    const [business, client, projectLocation, workItems, images] = await Promise.all([
-      this.db.businessProfiles.toCollection().first(), this.db.clients.get(quotation.clientId),
-      this.db.projectLocations.get(quotation.projectLocationId),
-      this.db.workItems.where('quotationId').equals(id).sortBy('position'),
-      this.db.quotationImages.where('quotationId').equals(id).sortBy('position'),
+    const [business, client, materialItems] = await Promise.all([
+      this.db.businessProfiles.toCollection().first(),
+      this.db.clients.get(quotation.clientId),
+      this.db.materialItems.where('quotationId').equals(id).sortBy('position'),
     ])
-    if (!business || !client || !projectLocation) return undefined
-    return { business, client, projectLocation, quotation, workItems, images }
+    if (!business || !client) return undefined
+    return { business, client, quotation, materialItems }
   }
 
   async list(): Promise<QuotationSnapshot[]> {
@@ -32,16 +31,18 @@ export class DexieQuotationRepository {
   }
 
   async save(snapshot: QuotationSnapshot): Promise<void> {
-    if (snapshot.workItems.some((item) => item.priceMinor < 0)) throw new RangeError('Work price cannot be negative.')
-    await this.db.transaction('rw', [this.db.businessProfiles, this.db.clients, this.db.projectLocations, this.db.quotations, this.db.workItems, this.db.quotationImages, this.db.outbox], async () => {
+    const invalid = snapshot.materialItems.some((item) =>
+      !Number.isSafeInteger(item.quantityMilli) || item.quantityMilli < 0
+      || !Number.isSafeInteger(item.unitPriceMinor) || item.unitPriceMinor < 0,
+    ) || !Number.isSafeInteger(snapshot.quotation.laborMinor) || snapshot.quotation.laborMinor < 0
+    if (invalid) throw new RangeError('Los materiales y la mano de obra no admiten valores negativos.')
+
+    await this.db.transaction('rw', [this.db.businessProfiles, this.db.clients, this.db.quotations, this.db.materialItems, this.db.outbox], async () => {
       await this.db.businessProfiles.put(snapshot.business)
       await this.db.clients.put(snapshot.client)
-      await this.db.projectLocations.put(snapshot.projectLocation)
       await this.db.quotations.put(snapshot.quotation)
-      await this.db.workItems.where('quotationId').equals(snapshot.quotation.id).delete()
-      await this.db.quotationImages.where('quotationId').equals(snapshot.quotation.id).delete()
-      await this.db.workItems.bulkPut(snapshot.workItems)
-      await this.db.quotationImages.bulkPut(snapshot.images)
+      await this.db.materialItems.where('quotationId').equals(snapshot.quotation.id).delete()
+      await this.db.materialItems.bulkPut(snapshot.materialItems)
       await this.db.outbox.put(operation(snapshot, 'upsert', snapshot.quotation.updatedAt))
     })
   }
@@ -63,9 +64,7 @@ export class DexieQuotationRepository {
 
 export class DexieOutboxRepository {
   constructor(private readonly db: AppDatabase) {}
-  nextBatch(limit: number): Promise<OutboxOperation[]> {
-    return this.db.outbox.orderBy('[nextAttemptAt+createdAt]').limit(limit).toArray()
-  }
+  nextBatch(limit: number): Promise<OutboxOperation[]> { return this.db.outbox.orderBy('[nextAttemptAt+createdAt]').limit(limit).toArray() }
   async enqueue(item: OutboxOperation): Promise<void> { await this.db.outbox.put(item) }
   async markSucceeded(id: string): Promise<void> { await this.db.outbox.delete(id) }
   async markFailed(id: string, error: string, nextAttemptAt: string): Promise<void> {

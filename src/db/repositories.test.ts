@@ -1,10 +1,11 @@
 import 'fake-indexeddb/auto'
 
+import Dexie from 'dexie'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
+import { quotationSnapshotFactory } from '../test/factories'
 import { AppDatabase } from './database'
 import { DexieBusinessProfileRepository, DexieClientRepository, DexieOutboxRepository, DexieQuotationRepository } from './repositories'
-import { quotationSnapshotFactory } from '../test/factories'
 
 describe('local quotation repository', () => {
   let db: AppDatabase
@@ -19,21 +20,21 @@ describe('local quotation repository', () => {
 
   afterEach(async () => db.delete())
 
-  it('commits a quotation, its children, and one sync operation atomically', async () => {
+  it('commits a quotation, its materials, and one sync operation atomically', async () => {
     const snapshot = quotationSnapshotFactory()
     await quotations.save(snapshot)
 
     expect(await quotations.get(snapshot.quotation.id)).toEqual(snapshot)
-    expect(await db.workItems.where('quotationId').equals(snapshot.quotation.id).count()).toBe(2)
+    expect(await db.materialItems.where('quotationId').equals(snapshot.quotation.id).count()).toBe(2)
     expect(await outbox.nextBatch(25)).toMatchObject([{ entityId: 'quote-1', action: 'upsert' }])
   })
 
-  it('replaces removed work items without leaving stale rows', async () => {
+  it('replaces removed materials without leaving stale rows', async () => {
     const snapshot = quotationSnapshotFactory()
     await quotations.save(snapshot)
-    await quotations.save({ ...snapshot, workItems: [snapshot.workItems[1]!] })
+    await quotations.save({ ...snapshot, materialItems: [snapshot.materialItems[1]!] })
 
-    expect((await quotations.get('quote-1'))?.workItems.map((item) => item.id)).toEqual(['item-2'])
+    expect((await quotations.get('quote-1'))?.materialItems.map((item) => item.id)).toEqual(['item-2'])
   })
 
   it('queues a tombstone when a quotation is deleted', async () => {
@@ -44,13 +45,13 @@ describe('local quotation repository', () => {
     expect(await outbox.nextBatch(25)).toContainEqual(expect.objectContaining({ entityId: 'quote-1', action: 'delete' }))
   })
 
-  it('leaves no partial records when validation aborts a save', async () => {
+  it('leaves no partial records when material validation aborts a save', async () => {
     const invalid = quotationSnapshotFactory()
-    invalid.workItems[0]!.priceMinor = -1
+    invalid.materialItems[0]!.unitPriceMinor = -1
 
-    await expect(quotations.save(invalid)).rejects.toThrow('negative')
+    await expect(quotations.save(invalid)).rejects.toThrow('negativo')
     expect(await db.quotations.count()).toBe(0)
-    expect(await db.workItems.count()).toBe(0)
+    expect(await db.materialItems.count()).toBe(0)
     expect(await db.outbox.count()).toBe(0)
   })
 
@@ -67,10 +68,41 @@ describe('local quotation repository', () => {
   it('saves a client and replaces its project locations atomically', async () => {
     const clients = new DexieClientRepository(db)
     const source = quotationSnapshotFactory()
-    await clients.save({ client: source.client, locations: [source.projectLocation] })
-    await clients.save({ client: source.client, locations: [{ ...source.projectLocation, id: 'location-2', label: 'Apartamento' }] })
+    const location = { id: 'location-1', clientId: source.client.id, label: 'Casa', address: source.client.address, updatedAt: source.client.updatedAt }
+    await clients.save({ client: source.client, locations: [location] })
+    await clients.save({ client: source.client, locations: [{ ...location, id: 'location-2', label: 'Apartamento' }] })
 
     expect(await clients.list()).toEqual([{ client: source.client, locations: [expect.objectContaining({ id: 'location-2' })] }])
     expect(await outbox.nextBatch(25)).toContainEqual(expect.objectContaining({ entityType: 'client', entityId: 'client-1' }))
+  })
+})
+
+describe('database version 2 migration', () => {
+  it('converts each fixed-price work item into one material unit', async () => {
+    const name = `migration-${crypto.randomUUID()}`
+    const legacy = new Dexie(name)
+    legacy.version(1).stores({
+      businessProfiles: 'id, updatedAt, deletedAt',
+      clients: 'id, name, updatedAt, deletedAt',
+      projectLocations: 'id, clientId, updatedAt, deletedAt',
+      quotations: 'id, number, clientId, status, updatedAt, deletedAt',
+      workItems: 'id, quotationId, [quotationId+position]',
+      quotationImages: 'id, quotationId, [quotationId+position]',
+      outbox: 'id, [nextAttemptAt+createdAt], entityId, entityType',
+    })
+    await legacy.open()
+    await legacy.table('workItems').add({
+      id: 'legacy-item', quotationId: 'legacy-quote', description: 'Cerámica',
+      priceMinor: 125_000, position: 0,
+    })
+    legacy.close()
+
+    const migrated = new AppDatabase(name)
+    await migrated.open()
+    expect(await migrated.materialItems.get('legacy-item')).toEqual({
+      id: 'legacy-item', quotationId: 'legacy-quote', description: 'Cerámica',
+      quantityMilli: 1_000, unit: 'unidad', unitPriceMinor: 125_000, position: 0,
+    })
+    await migrated.delete()
   })
 })
