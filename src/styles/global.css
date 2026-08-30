@@ -190,6 +190,7 @@ a { color: inherit; }
 .editor-intro > div > span, .section-heading span { color: var(--color-text-muted); font-size: .75rem; font-weight: 650; text-transform: uppercase; letter-spacing: .04em; }
 .editor-intro h2 { font-size: 1.5rem; letter-spacing: -.03em; }
 .save-state { flex: 0 0 auto; padding: .3rem .55rem; border-radius: var(--radius-pill); background: color-mix(in srgb, var(--color-text-muted) 10%, var(--color-surface)); color: var(--color-text-muted); font-size: .75rem; font-weight: 650; }
+.editor-actions { display: flex; align-items: center; gap: var(--space-2); }
 .save-state--saved { background: color-mix(in srgb, var(--color-success) 13%, var(--color-surface)); color: var(--color-success); }
 .save-state--error { background: color-mix(in srgb, var(--color-danger) 12%, var(--color-surface)); color: var(--color-danger); }
 .editor-section { display: grid; gap: var(--space-3); padding: var(--space-4); border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-surface); box-shadow: var(--shadow-card); }

@@ -1,5 +1,5 @@
-import { ArrowDown, ArrowUp, Plus, Trash2 } from 'lucide-react'
-import { useEffect, useMemo, useRef } from 'react'
+import { ArrowDown, ArrowUp, Plus, Save, Trash2 } from 'lucide-react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useFieldArray, useForm, useWatch } from 'react-hook-form'
 
 import type { ClientRecord } from '../../db/repositories'
@@ -101,6 +101,17 @@ export function QuotationEditor({ business, clients, initialValue, initialClient
     }
   }, [business, clients, draft, initialValue])
   const autosave = useAutosave({ value: snapshot as QuotationSnapshot, canSave: Boolean(snapshot), onSave, revision: JSON.stringify(draft) })
+  const [manualStatus, setManualStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
+  const saveNow = async () => {
+    if (!snapshot) return
+    setManualStatus('saving')
+    try {
+      await onSave(snapshot)
+      setManualStatus('saved')
+    } catch {
+      setManualStatus('error')
+    }
+  }
 
   const rowTotals = draft.materials.map((item) => safeMaterialTotal(item.quantity, item.unitPrice))
   const laborMinor = (() => { try { return draft.labor.trim() ? parseMoneyInput(draft.labor) : 0 } catch { return 0 } })()
@@ -122,7 +133,7 @@ export function QuotationEditor({ business, clients, initialValue, initialClient
   }, [clients, getValues, initialClientId, initialLocationId, initialValue, setValue])
 
   return <form className="quotation-editor" onSubmit={(event) => event.preventDefault()}>
-    <header className="editor-intro"><div><span>Nueva cotización</span><h2>Datos de la hoja</h2></div><span className={`save-state save-state--${autosave.status}`} aria-live="polite">{{ idle: 'Sin guardar', pending: 'Guardando…', saving: 'Guardando…', saved: 'Guardado', error: 'Error al guardar' }[autosave.status]}</span></header>
+    <header className="editor-intro"><div><span>Nueva cotización</span><h2>Datos de la hoja</h2></div><div className="editor-actions"><span className={`save-state save-state--${manualStatus === 'idle' ? autosave.status : manualStatus}`} aria-live="polite">{{ idle: 'Sin guardar', pending: 'Guardando…', saving: 'Guardando…', saved: 'Guardado', error: 'Error al guardar' }[manualStatus === 'idle' ? autosave.status : manualStatus]}</span><button className="button button--primary" type="button" onClick={() => void saveNow()} disabled={!snapshot || manualStatus === 'saving'}><Save aria-hidden="true" />{manualStatus === 'saving' ? 'Guardando…' : 'Guardar'}</button></div></header>
 
     <section className="editor-section"><h3>Datos del cliente</h3>
       <label>Cliente<select {...register('clientId')} onChange={(event) => chooseClient(event.target.value)}><option value="">Seleccionar cliente</option>{clients.map(({ client }) => <option key={client.id} value={client.id}>{client.name}</option>)}</select></label>
