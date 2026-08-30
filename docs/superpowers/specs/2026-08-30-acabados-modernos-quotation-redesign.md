@@ -1,7 +1,7 @@
 # Rediseño de cotizaciones de Acabados Modernos González
 
-Fecha: 2026-08-30  
-Estado: Aprobado  
+Fecha: 2026-08-30
+Estado: Aprobado
 Sustituye las reglas de cotización y exportación de `2026-08-29-construction-quotation-pwa-design.md`.
 
 ## 1. Objetivo

@@ -1,5 +1,7 @@
 # Construction Quotation PWA Implementation Plan
 
+> **Superseded after Task 5:** Tasks 6 onward describe the former fixed-price, discount, multi-currency, and blue-PDF workflow. Continue with `docs/superpowers/plans/2026-08-30-faithful-quotation-workflow.md` instead.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Build an installable, local-first iOS PWA for one construction contractor to create, store, synchronize, and export branded quotations as PDF.
