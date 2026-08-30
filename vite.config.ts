@@ -3,6 +3,9 @@ import { VitePWA } from 'vite-plugin-pwa'
 import { defineConfig } from 'vitest/config'
 
 export default defineConfig({
+  server: {
+    watch: { ignored: ['**/tmp/**'] }
+  },
   plugins: [
     react(),
     VitePWA({
@@ -32,6 +35,7 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
-    css: true
+    css: true,
+    exclude: ['tests/e2e/**', 'node_modules/**', 'dist/**']
   }
 })

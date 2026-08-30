@@ -42,5 +42,6 @@ describe('App shell', () => {
 
     expect(screen.getByRole('heading', { name: 'Datos de la hoja' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Agregar material' })).toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: 'Nueva cotización' })).not.toBeInTheDocument()
   })
 })

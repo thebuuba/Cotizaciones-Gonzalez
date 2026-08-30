@@ -7,3 +7,5 @@ dist/
 graphify-out/
 .worktrees/
 *.tsbuildinfo
+test-results/
+tmp/

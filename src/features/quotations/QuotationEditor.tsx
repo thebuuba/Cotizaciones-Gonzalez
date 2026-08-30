@@ -1,5 +1,5 @@
 import { ArrowDown, ArrowUp, Plus, Trash2 } from 'lucide-react'
-import { useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { useFieldArray, useForm, useWatch } from 'react-hook-form'
 
 import type { ClientRecord } from '../../db/repositories'
@@ -59,7 +59,7 @@ export function QuotationEditor({ business, clients, initialValue, initialClient
     defaults.clientName = preselected.client.name
     defaults.clientAddress = preselected.locations.find((location) => location.id === initialLocationId)?.address ?? preselected.client.address
   }
-  const { control, register, setValue } = useForm<QuotationDraft>({ defaultValues: defaults })
+  const { control, getValues, register, setValue } = useForm<QuotationDraft>({ defaultValues: defaults })
   const { fields, append, remove, swap } = useFieldArray({ control, name: 'materials', keyName: 'fieldKey' })
   const draft = useWatch({ control }) as QuotationDraft
 
@@ -111,6 +111,15 @@ export function QuotationEditor({ business, clients, initialValue, initialClient
     setValue('clientName', record?.client.name ?? '')
     setValue('clientAddress', record?.locations[0]?.address ?? record?.client.address ?? '')
   }
+
+  useEffect(() => {
+    if (initialValue || !initialClientId || getValues('clientId')) return
+    const record = clients.find(({ client }) => client.id === initialClientId)
+    if (!record) return
+    setValue('clientId', record.client.id)
+    setValue('clientName', record.client.name)
+    setValue('clientAddress', record.locations.find((location) => location.id === initialLocationId)?.address ?? record.client.address)
+  }, [clients, getValues, initialClientId, initialLocationId, initialValue, setValue])
 
   return <form className="quotation-editor" onSubmit={(event) => event.preventDefault()}>
     <header className="editor-intro"><div><span>Nueva cotización</span><h2>Datos de la hoja</h2></div><span className={`save-state save-state--${autosave.status}`} aria-live="polite">{{ idle: 'Sin guardar', pending: 'Guardando…', saving: 'Guardando…', saved: 'Guardado', error: 'Error al guardar' }[autosave.status]}</span></header>

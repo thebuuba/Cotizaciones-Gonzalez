@@ -62,6 +62,17 @@ describe('QuotationEditor', () => {
     expect(screen.queryByText(/moneda|dólar|itbis/i)).not.toBeInTheDocument()
   })
 
+  it('applies a route-preselected client after IndexedDB finishes loading', () => {
+    const props = { business: quotationSnapshotFactory().business, onSave: vi.fn(), initialClientId: 'client-1', initialLocationId: 'location-1' }
+    const view = render(<QuotationEditor {...props} clients={[]} />)
+
+    view.rerender(<QuotationEditor {...props} clients={[clientRecord()]} />)
+
+    expect(screen.getByLabelText('Cliente')).toHaveValue('client-1')
+    expect(screen.getByLabelText('Nombre del cliente')).toHaveValue('María Rodríguez')
+    expect(screen.getByLabelText('Dirección')).toHaveValue('Santo Domingo Este')
+  })
+
   it('autosaves a complete quotation after 400 ms and announces success', async () => {
     vi.useFakeTimers()
     const onSave = vi.fn().mockResolvedValue(undefined)

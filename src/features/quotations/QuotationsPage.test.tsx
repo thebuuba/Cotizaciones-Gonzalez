@@ -61,5 +61,8 @@ describe('QuotationDetailPage', () => {
 
     expect(onStatusChange).toHaveBeenCalledWith('sent')
     expect(screen.getByRole('link', { name: 'Editar cotización' })).toHaveAttribute('href', '/cotizaciones/quote-1/editar')
+    expect(screen.getByText('COTIZACIÓN')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Exportar PDF' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Exportar imagen' })).toBeInTheDocument()
   })
 })

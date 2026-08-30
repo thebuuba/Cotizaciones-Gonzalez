@@ -14,6 +14,9 @@ export function useAutosave<T>({ value, canSave, onSave, delay = 400, revision: 
   const canSaveRef = useRef(canSave)
   const onSaveRef = useRef(onSave)
   const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  const revisionNumberRef = useRef(0)
+  const savedRevisionRef = useRef(0)
+  const inFlightRef = useRef<Promise<void> | undefined>(undefined)
 
   valueRef.current = value
   canSaveRef.current = canSave
@@ -23,21 +26,41 @@ export function useAutosave<T>({ value, canSave, onSave, delay = 400, revision: 
     if (!canSaveRef.current) return
     if (timerRef.current) clearTimeout(timerRef.current)
     timerRef.current = undefined
-    setStatus('saving')
+    if (inFlightRef.current) return inFlightRef.current
+
+    const saveLatest = async () => {
+      try {
+        while (canSaveRef.current && savedRevisionRef.current < revisionNumberRef.current) {
+          const targetRevision = revisionNumberRef.current
+          const targetValue = valueRef.current
+          setStatus('saving')
+          await onSaveRef.current(targetValue)
+          savedRevisionRef.current = targetRevision
+        }
+        setStatus(canSaveRef.current ? 'saved' : 'idle')
+      } catch {
+        setStatus('error')
+      }
+    }
+    inFlightRef.current = saveLatest()
     try {
-      await onSaveRef.current(valueRef.current)
-      setStatus('saved')
-    } catch {
-      setStatus('error')
+      await inFlightRef.current
+    } finally {
+      inFlightRef.current = undefined
     }
   }, [])
 
   const revision = suppliedRevision ?? value
 
   useEffect(() => {
-    if (!canSave) return
-    setStatus('pending')
     if (timerRef.current) clearTimeout(timerRef.current)
+    timerRef.current = undefined
+    if (!canSave) {
+      if (!inFlightRef.current) setStatus('idle')
+      return
+    }
+    revisionNumberRef.current += 1
+    setStatus('pending')
     timerRef.current = setTimeout(() => { void flush() }, delay)
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current)
