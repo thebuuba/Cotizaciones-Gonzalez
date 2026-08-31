@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { act, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 
@@ -31,5 +31,47 @@ describe('AuthGate', () => {
     await user.click(screen.getByRole('button', { name: 'Entrar' }))
 
     expect(signInWithPassword).toHaveBeenCalledWith({ email: 'dueno@example.com', password: 'secreto123' })
+  })
+
+  it('offers a retry when Supabase cannot restore the session', async () => {
+    const client = {
+      auth: {
+        getSession: vi.fn().mockRejectedValue(new Error('sin red')),
+        onAuthStateChange: vi.fn().mockReturnValue({ data: { subscription: { unsubscribe: vi.fn() } } }),
+      },
+    } as unknown as AuthClient
+
+    render(<AuthGate client={client}><p>Privado</p></AuthGate>)
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('No pudimos conectar')
+    expect(screen.getByRole('button', { name: 'Reintentar' })).toBeEnabled()
+    expect(screen.queryByText('Privado')).not.toBeInTheDocument()
+  })
+
+  it('lets the owner choose a new password during recovery', async () => {
+    let authChange!: (event: string, session: unknown) => void
+    const updateUser = vi.fn().mockResolvedValue({ error: null })
+    const session = { user: { id: 'owner-1' } }
+    const client = {
+      auth: {
+        getSession: vi.fn().mockResolvedValue({ data: { session: null } }),
+        onAuthStateChange: vi.fn().mockImplementation((callback) => {
+          authChange = callback
+          return { data: { subscription: { unsubscribe: vi.fn() } } }
+        }),
+        updateUser,
+      },
+    } as unknown as AuthClient
+    const user = userEvent.setup()
+    render(<AuthGate client={client}><p>Privado</p></AuthGate>)
+    await screen.findByRole('heading', { name: 'Bienvenido' })
+
+    act(() => authChange('PASSWORD_RECOVERY', session))
+    await user.type(screen.getByLabelText('Nueva contraseña'), 'Nueva-Clave-123!')
+    await user.type(screen.getByLabelText('Confirmar contraseña'), 'Nueva-Clave-123!')
+    await user.click(screen.getByRole('button', { name: 'Guardar contraseña' }))
+
+    expect(updateUser).toHaveBeenCalledWith({ password: 'Nueva-Clave-123!' })
+    expect(await screen.findByText('Privado')).toBeInTheDocument()
   })
 })
