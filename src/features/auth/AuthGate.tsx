@@ -28,7 +28,7 @@ export function AuthGate({ children, client }: { children: ReactNode; client?: S
   }, [client])
 
   const value = useMemo(() => ({ client, session }), [client, session])
-  if (!client) return <CloudSessionContext.Provider value={value}>{children}</CloudSessionContext.Provider>
+  if (!client) return <main className="auth-screen"><section className="auth-card" role="alert"><h1>Configuración incompleta</h1><p>La conexión segura no está disponible. Configura Supabase durante la compilación antes de usar la aplicación.</p></section></main>
   if (loading) return <main className="loading-state">Preparando respaldo…</main>
   if (!session) return <AuthScreen client={client} />
   return <CloudSessionContext.Provider value={value}>{children}</CloudSessionContext.Provider>

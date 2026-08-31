@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Cotizaciones">
+  <rect width="512" height="512" fill="#14213d"/>
+  <path d="M156 112h148l64 64v224H156z" fill="#fff"/>
+  <path d="M304 112v64h64" fill="#fca311"/>
+  <path d="M204 240h116M204 288h116M204 336h76" fill="none" stroke="#14213d" stroke-linecap="round" stroke-width="24"/>
+</svg>

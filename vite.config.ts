@@ -1,6 +1,20 @@
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
+import { loadEnv, type Plugin } from 'vite'
 import { defineConfig } from 'vitest/config'
+
+function requirePrivateCloudConfiguration(): Plugin {
+  return {
+    name: 'require-private-cloud-configuration',
+    config: (_config, { command, mode }) => {
+      if (command !== 'build' || mode === 'test') return
+      const environment = { ...loadEnv(mode, process.cwd(), ''), ...process.env }
+      const required = ['VITE_SUPABASE_URL', 'VITE_SUPABASE_PUBLISHABLE_KEY']
+      const missing = required.filter((name) => !environment[name]?.trim())
+      if (missing.length) throw new Error(`Faltan variables de compilación obligatorias: ${missing.join(', ')}`)
+    },
+  }
+}
 
 export default defineConfig({
   build: {
@@ -37,10 +51,11 @@ export default defineConfig({
     watch: { ignored: ['**/tmp/**'] }
   },
   plugins: [
+    requirePrivateCloudConfiguration(),
     react(),
     VitePWA({
-      registerType: 'prompt',
-      includeAssets: ['icons/app-icon.svg'],
+      registerType: 'autoUpdate',
+      includeAssets: ['icons/app-icon.svg', 'icons/app-icon-180.png', 'icons/app-icon-192.png', 'icons/app-icon-512.png', 'icons/app-icon-maskable-512.png'],
       manifest: {
         name: 'Cotizaciones de Construcción',
         short_name: 'Cotizaciones',
@@ -52,8 +67,9 @@ export default defineConfig({
         background_color: '#e5e5e5',
         lang: 'es',
         icons: [
-          { src: '/icons/app-icon.svg', sizes: '192x192', type: 'image/svg+xml', purpose: 'any' },
-          { src: '/icons/app-icon.svg', sizes: '512x512', type: 'image/svg+xml', purpose: 'any maskable' }
+          { src: '/icons/app-icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+          { src: '/icons/app-icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+          { src: '/icons/app-icon-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' }
         ]
       },
       workbox: {

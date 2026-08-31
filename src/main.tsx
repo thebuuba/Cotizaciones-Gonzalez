@@ -6,6 +6,7 @@ import { SyncProvider } from './app/providers'
 import { AuthGate } from './features/auth/AuthGate'
 import { supabase } from './lib/supabase'
 import { registerPwa } from './pwa/register'
+import { PwaInstallProvider } from './pwa/PwaInstallProvider'
 import './styles/tokens.css'
 import './styles/global.css'
 
@@ -13,8 +14,10 @@ registerPwa()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <AuthGate client={supabase}>
-      <SyncProvider><App /></SyncProvider>
-    </AuthGate>
+    <PwaInstallProvider>
+      <AuthGate client={supabase}>
+        <SyncProvider><App /></SyncProvider>
+      </AuthGate>
+    </PwaInstallProvider>
   </StrictMode>,
 )

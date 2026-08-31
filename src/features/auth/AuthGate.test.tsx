@@ -5,9 +5,10 @@ import { describe, expect, it, vi } from 'vitest'
 import { AuthGate, type AuthClient } from './AuthGate'
 
 describe('AuthGate', () => {
-  it('keeps the PWA available in local-only mode when Supabase is not configured', () => {
+  it('blocks private data when Supabase is not configured', () => {
     render(<AuthGate client={undefined}><p>Aplicación local</p></AuthGate>)
-    expect(screen.getByText('Aplicación local')).toBeInTheDocument()
+    expect(screen.getByRole('alert')).toHaveTextContent('Configuración incompleta')
+    expect(screen.queryByText('Aplicación local')).not.toBeInTheDocument()
   })
 
   it('restores a session and otherwise signs the private owner in with email and password', async () => {
