@@ -1,5 +1,4 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { Cloud, KeyRound } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
 
 export function AuthScreen({ client }: { client: SupabaseClient }) {
@@ -24,5 +23,5 @@ export function AuthScreen({ client }: { client: SupabaseClient }) {
     setLoading(false)
   }
 
-  return <main className="auth-screen"><section className="auth-card"><span className="auth-icon"><Cloud aria-hidden="true" /></span><h1>Tu respaldo privado</h1><p>Inicia sesión para recuperar y proteger clientes, cotizaciones y ajustes.</p><form onSubmit={(event) => void submit(event)}><label>Correo electrónico<input type="email" autoComplete="username" value={email} onChange={(event) => setEmail(event.target.value)} required /></label><label>Contraseña<input type="password" autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} required /></label><button className="button button--primary" type="submit" disabled={loading}><KeyRound aria-hidden="true" />{loading ? 'Entrando…' : 'Entrar'}</button><button className="button button--quiet" type="button" onClick={() => void recover()} disabled={loading}>Olvidé mi contraseña</button></form><span className="form-message" aria-live="polite">{message}</span></section></main>
+  return <main className="auth-screen"><section className="auth-card"><header className="auth-header"><span className="auth-eyebrow">Acabados Modernos</span><h1>Bienvenido</h1><p>Accede a tus cotizaciones y respaldos.</p></header><form onSubmit={(event) => void submit(event)}><label><span>Correo electrónico</span><input type="email" inputMode="email" autoComplete="username" spellCheck="false" value={email} onChange={(event) => setEmail(event.target.value)} required /></label><label><span>Contraseña</span><input type="password" autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} required /></label><button className="button button--primary" type="submit" disabled={loading}>{loading ? 'Entrando…' : 'Entrar'}</button><button className="button auth-recovery" type="button" onClick={() => void recover()} disabled={loading}>Olvidé mi contraseña</button></form>{message && <span className="form-message" role="status">{message}</span>}</section></main>
 }

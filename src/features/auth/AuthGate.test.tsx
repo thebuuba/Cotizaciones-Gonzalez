@@ -25,7 +25,7 @@ describe('AuthGate', () => {
     const user = userEvent.setup()
     render(<AuthGate client={client}><p>Privado</p></AuthGate>)
 
-    await screen.findByRole('heading', { name: 'Tu respaldo privado' })
+    await screen.findByRole('heading', { name: 'Bienvenido' })
     await user.type(screen.getByLabelText('Correo electrónico'), 'dueno@example.com')
     await user.type(screen.getByLabelText('Contraseña'), 'secreto123')
     await user.click(screen.getByRole('button', { name: 'Entrar' }))
