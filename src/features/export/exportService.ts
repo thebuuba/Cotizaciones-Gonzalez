@@ -1,6 +1,3 @@
-import { toBlob } from 'html-to-image'
-import { jsPDF } from 'jspdf'
-
 export function sanitizeExportName(value: string): string {
   return value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9]+/g, '-').replace(/^-|-$/g, '') || 'cotizacion'
 }
@@ -14,6 +11,7 @@ async function waitForAssets(element: HTMLElement): Promise<void> {
 
 export async function renderPagePng(element: HTMLElement): Promise<Blob> {
   await waitForAssets(element)
+  const { toBlob } = await import('html-to-image')
   const blob = await toBlob(element, { pixelRatio: 3, backgroundColor: '#ffffff', cacheBust: true })
   if (!blob) throw new Error('No se pudo crear la imagen de la cotización.')
   return blob
@@ -59,6 +57,7 @@ function blobToDataUrl(blob: Blob): Promise<string> {
 
 export async function exportQuotationPdf(elements: readonly HTMLElement[], baseName: string): Promise<File> {
   if (!elements.length) throw new Error('No hay páginas para exportar.')
+  const { jsPDF } = await import('jspdf')
   return withStableViewport(async () => {
     const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
     for (const [index, element] of elements.entries()) {

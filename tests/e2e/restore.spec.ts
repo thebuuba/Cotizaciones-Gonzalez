@@ -1,10 +1,10 @@
 import { expect, test } from '@playwright/test'
 
-import { E2E_OWNER_EMAIL, E2E_OWNER_PASSWORD, signIn } from './helpers'
+import { E2E_OWNER_EMAIL, E2E_OWNER_PASSWORD, signIn, uniqueE2eName } from './helpers'
 
 test('restores owner data in a fresh authenticated browser context', async ({ browser }) => {
   test.skip(!process.env.VITE_SUPABASE_URL || !process.env.VITE_SUPABASE_PUBLISHABLE_KEY || !E2E_OWNER_EMAIL || !E2E_OWNER_PASSWORD, 'Requiere proyecto y cuenta E2E de Supabase')
-  const uniqueClient = `Restaurado ${Date.now()}`
+  const uniqueClient = uniqueE2eName('Restaurado')
   const firstContext = await browser.newContext()
   const firstPage = await firstContext.newPage()
   await firstPage.goto('/')

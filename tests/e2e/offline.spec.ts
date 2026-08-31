@@ -1,15 +1,16 @@
 import { expect, test } from '@playwright/test'
 
-import { signIn } from './helpers'
+import { signIn, uniqueE2eName } from './helpers'
 
 test('reloads and edits a saved quotation without internet', async ({ context, page }) => {
+  const clientName = uniqueE2eName('Cliente Sin Internet')
   await signIn(page)
   await page.goto('/clientes')
   await page.getByRole('button', { name: 'Nuevo cliente' }).click()
-  await page.getByLabel('Nombre del cliente').fill('Cliente Sin Internet')
+  await page.getByLabel('Nombre del cliente').fill(clientName)
   await page.getByLabel('Dirección de contacto').fill('Santiago')
   await page.getByRole('button', { name: 'Guardar cliente' }).click()
-  await page.getByRole('button', { name: 'Cotizar para Cliente Sin Internet' }).click()
+  await page.getByRole('button', { name: `Cotizar para ${clientName}` }).click()
   await page.getByLabel('Descripción 1').fill('Porcelanato')
   await page.getByLabel('Cantidad 1').fill('4')
   await page.getByLabel('Precio unitario 1').fill('250')
@@ -20,11 +21,12 @@ test('reloads and edits a saved quotation without internet', async ({ context, p
   await page.evaluate(async () => { await navigator.serviceWorker.ready })
   await page.reload()
   await expect.poll(() => page.evaluate(() => Boolean(navigator.serviceWorker.controller))).toBe(true)
-  await expect(page.getByRole('link', { name: /COT-0001.*Cliente Sin Internet/ })).toBeVisible()
+  const quotationLink = page.getByRole('link', { name: new RegExp(`COT-\\d+.*${clientName}`) })
+  await expect(quotationLink).toBeVisible()
 
   await context.setOffline(true)
   await page.goto('/cotizaciones', { waitUntil: 'domcontentloaded' })
-  await page.getByRole('link', { name: /COT-0001.*Cliente Sin Internet/ }).click()
+  await quotationLink.click()
   await page.getByRole('link', { name: 'Editar cotización' }).click()
   await page.getByLabel('Observaciones').fill('Cambio guardado sin conexión')
   await expect(page.getByText('Guardando…')).toBeVisible()

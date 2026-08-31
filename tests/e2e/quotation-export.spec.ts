@@ -2,21 +2,22 @@ import { expect, test } from '@playwright/test'
 import { mkdir } from 'node:fs/promises'
 import path from 'node:path'
 
-import { signIn } from './helpers'
+import { signIn, uniqueE2eName } from './helpers'
 
 test('creates and exports the approved quotation sheet', async ({ page }) => {
   test.setTimeout(120_000)
+  const clientName = uniqueE2eName('María Rodríguez')
   const outputDirectory = path.resolve('tmp/pdfs')
   await mkdir(outputDirectory, { recursive: true })
   await signIn(page)
   await page.goto('/clientes')
   await page.getByRole('button', { name: 'Nuevo cliente' }).click()
-  await page.getByLabel('Nombre del cliente').fill('María Rodríguez')
+  await page.getByLabel('Nombre del cliente').fill(clientName)
   await page.getByLabel('Dirección de contacto').fill('Santo Domingo Este')
   await page.getByLabel('Nombre de ubicación 1').fill('Casa')
   await page.getByLabel('Dirección de ubicación 1').fill('Santo Domingo Este')
   await page.getByRole('button', { name: 'Guardar cliente' }).click()
-  await page.getByRole('button', { name: 'Cotizar en Casa para María Rodríguez' }).click()
+  await page.getByRole('button', { name: `Cotizar en Casa para ${clientName}` }).click()
 
   await page.getByLabel('Descripción 1').fill('Cerámica de piso formato grande')
   await page.getByLabel('Cantidad 1').fill('10')
@@ -33,7 +34,7 @@ test('creates and exports the approved quotation sheet', async ({ page }) => {
   await expect(page.getByText('Guardado')).toBeVisible()
 
   await page.goto('/cotizaciones')
-  await page.getByRole('link', { name: /COT-0001.*María Rodríguez/ }).click()
+  await page.getByRole('link', { name: new RegExp(`COT-\\d+.*${clientName}`) }).click()
   await expect(page.getByText('COTIZACIÓN')).toBeVisible()
   await page.locator('[data-export-page]').screenshot({ path: 'tmp/pdfs/quotation-preview.png' })
 

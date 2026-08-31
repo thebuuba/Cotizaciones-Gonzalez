@@ -6,10 +6,10 @@ import { App } from './App'
 
 describe('App shell', () => {
   beforeEach(() => window.history.replaceState({}, '', '/'))
-  it('shows the product identity and the four primary destinations', () => {
+  it('shows the primary destinations without a redundant top banner', () => {
     render(<App />)
 
-    expect(screen.getByRole('heading', { name: 'Inicio' })).toBeInTheDocument()
+    expect(screen.queryByRole('banner')).not.toBeInTheDocument()
     expect(screen.getByRole('navigation', { name: 'Navegación principal' })).toBeInTheDocument()
 
     for (const destination of ['Inicio', 'Cotizaciones', 'Clientes', 'Ajustes']) {
@@ -30,7 +30,6 @@ describe('App shell', () => {
 
     expect(screen.getByRole('link', { name: 'Inicio' })).toHaveAttribute('aria-current', 'page')
     await user.click(screen.getByRole('link', { name: 'Ajustes' }))
-    expect(screen.getByRole('heading', { name: 'Ajustes' })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Ajustes' })).toHaveAttribute('aria-current', 'page')
   })
 

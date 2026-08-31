@@ -1,15 +1,16 @@
 import { expect, test } from '@playwright/test'
 
-import { signIn } from './helpers'
+import { signIn, uniqueE2eName } from './helpers'
 
 test('creates three materials, calculates the sheet, reopens it and exports one image', async ({ page }) => {
+  const clientName = uniqueE2eName('Cliente Flujo Completo')
   await signIn(page)
   await page.goto('/clientes')
   await page.getByRole('button', { name: 'Nuevo cliente' }).click()
-  await page.getByLabel('Nombre del cliente').fill('Cliente Flujo Completo')
+  await page.getByLabel('Nombre del cliente').fill(clientName)
   await page.getByLabel('Dirección de contacto').fill('Santo Domingo')
   await page.getByRole('button', { name: 'Guardar cliente' }).click()
-  await page.getByRole('button', { name: 'Cotizar para Cliente Flujo Completo' }).click()
+  await page.getByRole('button', { name: `Cotizar para ${clientName}` }).click()
 
   await page.getByLabel('Descripción 1').fill('Cerámica')
   await page.getByLabel('Cantidad 1').fill('2')
@@ -32,12 +33,12 @@ test('creates three materials, calculates the sheet, reopens it and exports one 
   await expect(page.getByText('Guardado')).toBeVisible()
 
   await page.goto('/cotizaciones')
-  await page.getByRole('link', { name: /COT-0001.*Cliente Flujo Completo/ }).click()
+  await page.getByRole('link', { name: new RegExp(`COT-\\d+.*${clientName}`) }).click()
   await expect(page.getByText('TOTAL GENERAL')).toBeVisible()
   await expect(page.getByText('RD$ 1,000.00').first()).toBeVisible()
 
   const downloadPromise = page.waitForEvent('download')
   await page.getByRole('button', { name: 'Exportar imagen' }).click()
   const download = await downloadPromise
-  expect(download.suggestedFilename()).toMatch(/COT-0001-Cliente-Flujo-Completo\.png$/)
+  expect(download.suggestedFilename()).toMatch(/^COT-\d+-Cliente-Flujo-Completo-[a-f0-9]+\.png$/)
 })

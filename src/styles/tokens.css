@@ -1,31 +1,44 @@
 :root {
   color-scheme: light;
-  --color-primary: #1c59a3;
-  --color-primary-strong: #144582;
-  --color-accent: #2e73c7;
-  --color-success: #2e995c;
-  --color-warning: #f2ab1a;
-  --color-danger: #db3838;
-  --color-bg: #f2f2f7;
-  --color-surface: #ffffff;
-  --color-surface-raised: #ffffff;
-  --color-text: #111114;
-  --color-text-muted: #64646c;
-  --color-border: #dedee5;
-  --color-focus: #2e73c7;
+  /* Brand primitives: Black and Gold Elegance */
+  --palette-white: #ffffff;
+  --palette-gray: #e5e5e5;
+  --palette-gold: #fca311;
+  --palette-navy: #14213d;
+  --palette-black: #000000;
+
+  /* Semantic colors */
+  --color-primary: var(--palette-navy);
+  --color-primary-strong: var(--palette-black);
+  --color-accent: var(--palette-gold);
+  --color-on-accent: var(--palette-black);
+  --color-success: #248a52;
+  --color-warning: var(--palette-gold);
+  --color-danger: #d92d3a;
+  --color-bg: color-mix(in srgb, var(--palette-gray) 72%, var(--palette-white));
+  --color-surface: var(--palette-white);
+  --color-surface-raised: var(--palette-white);
+  --color-text: var(--palette-navy);
+  --color-text-strong: var(--palette-black);
+  --color-text-muted: color-mix(in srgb, var(--palette-navy) 70%, var(--palette-white));
+  --color-border: var(--palette-gray);
+  --color-focus: var(--palette-navy);
   --space-1: 0.25rem;
   --space-2: 0.5rem;
   --space-3: 0.75rem;
   --space-4: 1rem;
+  --space-5: 1.25rem;
   --space-6: 1.5rem;
   --space-8: 2rem;
-  --radius-sm: 0.75rem;
-  --radius-md: 1rem;
+  --radius-sm: 0.875rem;
+  --radius-md: 1.25rem;
+  --radius-lg: 1.75rem;
   --radius-pill: 999px;
-  --shadow-card: 0 1px 2px rgb(0 0 0 / 4%), 0 8px 24px rgb(15 23 42 / 5%);
-  --shadow-fab: 0 8px 24px rgb(20 69 130 / 35%);
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 3%), 0 12px 32px rgb(20 33 61 / 9%);
+  --shadow-elevated: 0 24px 70px rgb(20 33 61 / 18%), 0 2px 8px rgb(0 0 0 / 6%);
+  --shadow-fab: 0 14px 34px rgb(20 33 61 / 30%), inset 0 1px 0 rgb(255 255 255 / 38%);
   --tap-target: 2.75rem;
-  --duration-fast: 140ms;
-  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --duration-fast: 180ms;
+  --ease-standard: cubic-bezier(0.22, 1, 0.36, 1);
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
 }

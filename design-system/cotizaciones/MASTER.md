@@ -2,7 +2,7 @@
 
 **Status:** Approved  
 **Platform:** iOS-first progressive web app  
-**Direction:** Modern native-feeling utility, minimal, calm, trustworthy
+**Direction:** Modern native-feeling utility with Black and Gold Elegance
 
 ## Product pattern
 
@@ -14,21 +14,20 @@
 
 ## Brand palette
 
-| Role | Light | Dark | Usage |
-|---|---|---|---|
-| Primary | `#1C59A3` | `#4D91E1` | Primary controls, totals, active navigation, FAB |
-| Primary strong | `#144582` | `#78AFF0` | Pressed states, high-emphasis text |
-| Accent | `#2E73C7` | `#66A6ED` | Links and secondary actions |
-| Success | `#2E995C` | `#54C982` | Approved/synchronized; use dark text on pale fills |
-| Warning | `#F2AB1A` | `#FFC34D` | Sent/pending; use dark text on pale fills |
-| Danger | `#DB3838` | `#FF6961` | Rejected, destructive actions, errors |
-| Background | `#F2F2F7` | `#000000` | Grouped app background |
-| Surface | `#FFFFFF` | `#1C1C1E` | Cards and bars |
-| Text | `#111114` | `#F5F5F7` | Primary text |
-| Muted text | `#64646C` | `#B4B4BD` | Secondary text, minimum 4.5:1 |
-| Border | `#DEDEE5` | `#3A3A3C` | Dividers and boundaries |
+Use the 60â€“30â€“10 rule: about 60% white/gray surfaces, 30% navy structure and typography, and 10% gold emphasis.
 
-Do not use orange as a brand accent, purple/pink gradients, or raw hex values inside components. Map all colors through semantic tokens.
+| Token | Value | Usage |
+|---|---|---|
+| White | `#FFFFFF` | Cards, bars, document paper, breathing room |
+| Gray | `#E5E5E5` | Grouped background, borders, disabled and secondary surfaces |
+| Gold | `#FCA311` | Primary actions, active state, highlights, pending/warning |
+| Navy | `#14213D` | Structural panels, navigation, totals, headings, focus |
+| Black | `#000000` | Strong text and all content placed on gold |
+
+- Never place white text on gold. Gold always uses black text; the contrast is about 10.4:1.
+- Use white on navy and navy/black on white or gray. Do not use gray text on white for normal body copy.
+- Green (`#248A52`) and red (`#D92D3A`) are reserved semantic exceptions for success and error/destructive states. They are not brand accents.
+- Do not introduce unrelated accent colors or raw hex values inside components. Map colors through primitive and semantic tokens.
 
 ## Typography
 
@@ -57,7 +56,7 @@ Do not use orange as a brand accent, purple/pink gradients, or raw hex values in
 
 - Motion is subtle and functional; avoid entrance choreography in normal workflows.
 - Under `prefers-reduced-motion: reduce`, remove nonessential animation and smooth scrolling.
-- Test light and dark surfaces independently, including borders, focus, pressed, disabled, and status states.
+- This release is light-first. Test white, gray, navy, gold, disabled, focus, pressed, and semantic status states independently.
 
 ## Delivery checks
 
