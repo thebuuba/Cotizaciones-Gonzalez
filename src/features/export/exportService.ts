@@ -4,9 +4,19 @@ export function sanitizeExportName(value: string): string {
 
 async function waitForAssets(element: HTMLElement): Promise<void> {
   if (document.fonts) await document.fonts.ready
-  await Promise.all(Array.from(element.querySelectorAll('img')).map(async (image) => {
-    if (!image.complete && image.decode) await image.decode()
+  const images = Array.from(element.querySelectorAll('img'))
+  await Promise.all(images.map(async (image) => {
+    if (image.complete) return
+    if (image.decode) {
+      try { await image.decode() } catch { /* ignore */ }
+    }
+    await new Promise<void>((resolve) => {
+      if (image.complete) { resolve(); return }
+      image.onload = () => resolve()
+      image.onerror = () => resolve()
+    })
   }))
+  await new Promise<void>((r) => setTimeout(r, 150))
 }
 
 export async function renderPagePng(element: HTMLElement): Promise<Blob> {
