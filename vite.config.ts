@@ -55,7 +55,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['icons/app-icon.svg', 'icons/app-icon-180.png', 'icons/app-icon-192.png', 'icons/app-icon-512.png', 'icons/app-icon-maskable-512.png'],
+      includeAssets: ['icons/app-icon.svg', 'icons/app-icon-180.png', 'icons/app-icon-192.png', 'icons/app-icon-512.png', 'icons/app-icon-maskable-512.png', 'bank-logos/*.png'],
       manifest: {
         name: 'Cotizaciones de Construcción',
         short_name: 'Cotizaciones',

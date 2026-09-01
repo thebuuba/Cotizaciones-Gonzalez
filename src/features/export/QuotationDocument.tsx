@@ -1,5 +1,8 @@
 import { Award, Building2, CheckCircle2, ClipboardList, Grid2X2, Hammer, Heart, MessageCircle, Phone, ShieldCheck, UserRound } from 'lucide-react'
 
+import banreservasLogo from '../../assets/bank-logos/banreservas.png'
+import santacruzLogo from '../../assets/bank-logos/santacruz.png'
+import scotiabankLogo from '../../assets/bank-logos/scotiabank.png'
 import { calculateMaterialTotal, calculateQuotationTotals, formatMoney } from '../../domain/money'
 import type { MaterialItem, QuotationSnapshot } from '../../domain/types'
 import { paginateDocument } from './documentPagination'
@@ -26,13 +29,29 @@ function MaterialTable({ items, startIndex }: { items: MaterialItem[]; startInde
   return <div className="document-table" role="table"><div role="rowgroup"><div className="document-table-row document-table-heading" role="row"><div role="columnheader">#</div><div role="columnheader">DESCRIPCIÓN</div><div role="columnheader">CANTIDAD</div><div role="columnheader">UNIDAD</div><div role="columnheader">PRECIO UNITARIO</div><div role="columnheader">TOTAL</div></div></div><div role="rowgroup">{items.map((item, index) => <div className="document-table-row" role="row" key={item.id}><div role="cell">{startIndex + index + 1}</div><div role="cell">{item.description}</div><div role="cell">{formatQuantity(item.quantityMilli)}</div><div role="cell">{item.unit}</div><div role="cell">{formatMoney(item.unitPriceMinor)}</div><div role="cell">{formatMoney(calculateMaterialTotal(item))}</div></div>)}</div></div>
 }
 
+const bankLogos: Record<string, string> = {
+  'banreservas': banreservasLogo,
+  'reservas': banreservasLogo,
+  'santa cruz': santacruzLogo,
+  'banco santa cruz': santacruzLogo,
+  'scotiabank': scotiabankLogo,
+}
+
+function getBankLogo(bankName: string): string | null {
+  const lower = bankName.toLowerCase()
+  for (const [key, logo] of Object.entries(bankLogos)) {
+    if (lower.includes(key)) return logo
+  }
+  return null
+}
+
 function ClosingBlocks({ snapshot }: { snapshot: QuotationSnapshot }) {
   const { business, quotation, materialItems } = snapshot
   const totals = calculateQuotationTotals(materialItems, quotation.laborMinor)
   return <div className="document-closing">
     <section className="document-totals"><div><span>TOTAL DE MATERIALES</span><strong>{formatMoney(totals.materialsMinor)}</strong></div><div><span>MANO DE OBRA INSTALACIÓN</span><strong>{formatMoney(totals.laborMinor)}</strong></div><div className="document-grand-total"><span>TOTAL GENERAL</span><strong>{formatMoney(totals.totalMinor)}</strong></div></section>
     <div className="document-two-column"><section className="document-box"><h3><ClipboardList aria-hidden="true" />TÉRMINOS &amp; CONDICIONES</h3>{business.terms.map((term) => <p key={term}><CheckCircle2 aria-hidden="true" />{term}</p>)}</section><section className="document-box document-observations"><h3>OBSERVACIONES</h3><p>{quotation.observations || ' '}</p></section></div>
-    <div className="document-contact-row"><section className="document-accounts"><h3><Building2 aria-hidden="true" />CUENTAS BANCARIAS</h3>{business.bankAccounts.map((account) => <p key={account.id}><strong>{account.bank}</strong><span>{account.type} {account.number}</span></p>)}</section><section className="document-manager"><div className="manager-signature" /><strong>{business.managerName}</strong><span>{business.managerTitle}</span><div className="manager-phones"><p><Phone aria-hidden="true" /><strong>{business.directPhone}</strong><small>PARA LLAMADAS DIRECTAS</small></p><p><MessageCircle aria-hidden="true" /><strong>{business.whatsappPhone}</strong><small>LLAMADA Y MENSAJE WHATSAPP</small></p></div></section><aside className="document-seal" aria-label="Sello Acabados Modernos Gonzalez"><span>ACABADOS MODERNOS</span><div><Grid2X2 aria-hidden="true" /><Hammer aria-hidden="true" /></div><strong>GONZALEZ</strong></aside></div>
+    <div className="document-contact-row"><section className="document-accounts"><h3><Building2 aria-hidden="true" />CUENTAS BANCARIAS</h3>{business.bankAccounts.map((account) => { const logo = getBankLogo(account.bank); return <div className="document-bank-row" key={account.id}>{logo && <img className="document-bank-logo" src={logo} alt={account.bank} />}<div className="document-bank-info"><strong>{account.bank}</strong><span>{account.type} {account.number}</span></div></div> })}</section><section className="document-manager"><div className="manager-signature" /><strong>{business.managerName}</strong><span>{business.managerTitle}</span><div className="manager-phones"><p><Phone aria-hidden="true" /><strong>{business.directPhone}</strong><small>PARA LLAMADAS DIRECTAS</small></p><p><MessageCircle aria-hidden="true" /><strong>{business.whatsappPhone}</strong><small>LLAMADA Y MENSAJE WHATSAPP</small></p></div></section><aside className="document-seal" aria-label="Sello Acabados Modernos Gonzalez"><span>ACABADOS MODERNOS</span><div><Grid2X2 aria-hidden="true" /><Hammer aria-hidden="true" /></div><strong>GONZALEZ</strong></aside></div>
     <footer className="document-footer"><p><ShieldCheck aria-hidden="true" />{business.footerQuality}</p><p><Award aria-hidden="true" />{business.footerCommitment}</p><strong>{business.footerFaith} <Heart aria-hidden="true" /></strong></footer>
   </div>
 }
