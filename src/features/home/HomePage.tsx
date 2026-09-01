@@ -1,15 +1,14 @@
-import { FileText, Send, ShieldCheck } from 'lucide-react'
+import { ChartNoAxesColumnIncreasing, FileText, Send, ShieldCheck } from 'lucide-react'
 
 import { StatusBadge } from '../../components/StatusBadge'
-import { SyncBadge } from '../../components/SyncBadge'
 import { calculateQuotationTotals, formatMoney } from '../../domain/money'
-import type { QuotationSnapshot, SyncState } from '../../domain/types'
+import type { QuotationSnapshot } from '../../domain/types'
 
 function totalOf(snapshot: QuotationSnapshot): number {
   return calculateQuotationTotals(snapshot.materialItems, snapshot.quotation.laborMinor).totalMinor
 }
 
-export function HomePage({ businessName, quotations, syncState }: { businessName: string; quotations: QuotationSnapshot[]; syncState: SyncState }) {
+export function HomePage({ businessName, quotations }: { businessName: string; quotations: QuotationSnapshot[] }) {
   const currentMonth = new Date().toISOString().slice(0, 7)
   const visible = quotations.filter(({ quotation }) => quotation.issueDate.startsWith(currentMonth))
   const total = visible.reduce((sum, item) => sum + totalOf(item), 0)
@@ -20,12 +19,14 @@ export function HomePage({ businessName, quotations, syncState }: { businessName
     { status: 'approved' as const, label: 'aprobada', Icon: ShieldCheck },
   ]
   return <div className="dashboard">
-    <section className="welcome"><span>Bienvenido</span><h2>{businessName}</h2><p>Resumen del mes</p></section>
-    <section className="total-card"><span>Total cotizado este mes</span><strong>{formatMoney(total)}</strong></section>
+    <div className="page-header welcome"><h1>{businessName}</h1><p>Resumen del mes</p></div>
+    <section className="total-card"><div><span>Total cotizado este mes</span><ChartNoAxesColumnIncreasing aria-hidden="true" /></div><strong>{formatMoney(total)}</strong></section>
     <section className="stats-grid" aria-label="Estados de cotizaciones">
       {stats.map(({ status, label, Icon }) => <article className={`stat-card stat-card--${status}`} aria-label={`${count(status)} ${label}`} key={status}><Icon aria-hidden="true" /><strong>{count(status)}</strong><span>{label[0]!.toUpperCase() + label.slice(1)}{count(status) === 1 ? '' : 's'}</span></article>)}
     </section>
-    <SyncBadge state={syncState} />
-    <section className="recent"><h3>Cotizaciones recientes</h3>{quotations.slice(0, 3).map((item) => <article className="quote-card" key={item.quotation.id}><div><small>{item.quotation.number}</small><h4>{item.quotation.clientName}</h4><span>{item.quotation.clientAddress}</span></div><div className="quote-card__aside"><StatusBadge status={item.quotation.status} /><strong>{formatMoney(totalOf(item))}</strong></div></article>)}</section>
+    <section className="recent"><h2>Cotizaciones recientes</h2>{quotations.slice(0, 3).map((item) => {
+      const QuoteIcon = item.quotation.status === 'approved' ? ShieldCheck : item.quotation.status === 'sent' ? Send : FileText
+      return <article className={`quote-card quote-card--${item.quotation.status}`} key={item.quotation.id}><span className="quote-card__icon"><QuoteIcon aria-hidden="true" /></span><div className="quote-card__content"><h3>{item.quotation.clientName}</h3><span>{item.quotation.clientAddress}</span></div><div className="quote-card__aside"><strong>{formatMoney(totalOf(item))}</strong><StatusBadge status={item.quotation.status} /></div></article>
+    })}</section>
   </div>
 }

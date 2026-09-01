@@ -23,6 +23,14 @@
   --color-text-muted: color-mix(in srgb, var(--palette-navy) 70%, var(--palette-white));
   --color-border: var(--palette-gray);
   --color-focus: var(--palette-navy);
+
+  /* Native iOS semantic surfaces */
+  --color-grouped-bg: color-mix(in srgb, var(--palette-gray) 58%, var(--palette-white));
+  --color-secondary-grouped-bg: var(--palette-white);
+  --color-fill: color-mix(in srgb, var(--palette-navy) 7%, var(--palette-white));
+  --color-fill-strong: color-mix(in srgb, var(--palette-navy) 12%, var(--palette-white));
+  --color-separator: color-mix(in srgb, var(--palette-navy) 13%, transparent);
+  --color-label-secondary: color-mix(in srgb, var(--palette-navy) 68%, var(--palette-white));
   --space-1: 0.25rem;
   --space-2: 0.5rem;
   --space-3: 0.75rem;
@@ -40,5 +48,15 @@
   --tap-target: 2.75rem;
   --duration-fast: 180ms;
   --ease-standard: cubic-bezier(0.22, 1, 0.36, 1);
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+
+  /* Native iOS component tokens */
+  --page-gutter: 1rem;
+  --section-gap: 1.5rem;
+  --group-radius: 0.875rem;
+  --control-radius: 0.75rem;
+  --row-min-height: 3.25rem;
+  --tab-bar-height: 4.25rem;
+  --press-overlay: color-mix(in srgb, var(--palette-navy) 7%, transparent);
+  --surface-shadow: 0 1px 2px rgb(20 33 61 / 4%);
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "SF Pro", system-ui, "Segoe UI", sans-serif;
 }

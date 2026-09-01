@@ -23,7 +23,7 @@ export function startSyncSchedule(run: () => void): () => void {
   const foreground = () => { if (document.visibilityState === 'visible') run() }
   const periodic = window.setInterval(() => {
     if (navigator.onLine && document.visibilityState === 'visible') run()
-  }, 60_000)
+  }, 10_000)
   window.addEventListener('online', run)
   window.addEventListener('focus', run)
   document.addEventListener('visibilitychange', foreground)

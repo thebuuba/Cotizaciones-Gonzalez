@@ -18,10 +18,37 @@ const clientRecord = (): ClientRecord => {
 }
 
 describe('QuotationEditor', () => {
+  it('saves a new quotation even when there are no previously registered clients', async () => {
+    const user = userEvent.setup()
+    const onSave = vi.fn().mockResolvedValue(undefined)
+    render(<QuotationEditor business={quotationSnapshotFactory().business} clients={[]} onSave={onSave} />)
+
+    await user.type(screen.getByLabelText('Nombre del cliente'), 'Juan Peralta')
+    await user.type(screen.getByLabelText('Dirección'), 'Santo Domingo')
+    await user.type(screen.getByLabelText('Descripción 1'), 'Pintura interior')
+    await user.type(screen.getByLabelText('Cantidad 1'), '2')
+    await user.type(screen.getByLabelText('Precio unitario 1'), '1500')
+    await user.click(screen.getByRole('button', { name: 'Guardar cotización' }))
+
+    expect(onSave).toHaveBeenCalledWith(expect.objectContaining({
+      client: expect.objectContaining({ name: 'Juan Peralta', address: 'Santo Domingo' }),
+      quotation: expect.objectContaining({ clientName: 'Juan Peralta', clientAddress: 'Santo Domingo' }),
+    }))
+  })
+
+  it('places the main save action after the observations field', () => {
+    render(<QuotationEditor business={quotationSnapshotFactory().business} clients={[]} onSave={vi.fn()} />)
+
+    const observations = screen.getByLabelText('Observaciones')
+    const save = screen.getByRole('button', { name: 'Guardar cotización' })
+    expect(observations.compareDocumentPosition(save) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  })
+
   it('calculates dynamic material rows and the one labor amount', async () => {
     const user = userEvent.setup()
     render(<QuotationEditor business={quotationSnapshotFactory().business} clients={[clientRecord()]} onSave={vi.fn()} />)
 
+    expect(screen.getByRole('heading', { level: 1, name: 'Nueva cotización' })).toBeInTheDocument()
     await user.selectOptions(screen.getByLabelText('Cliente'), 'client-1')
     expect(screen.getByLabelText('Nombre del cliente')).toHaveValue('María Rodríguez')
     expect(screen.getByLabelText('Dirección')).toHaveValue('Santo Domingo Este')
@@ -76,7 +103,7 @@ describe('QuotationEditor', () => {
   it('autosaves a complete quotation after 400 ms and announces success', async () => {
     vi.useFakeTimers()
     const onSave = vi.fn().mockResolvedValue(undefined)
-    render(<QuotationEditor business={quotationSnapshotFactory().business} clients={[clientRecord()]} onSave={onSave} />)
+    render(<QuotationEditor business={quotationSnapshotFactory().business} clients={[clientRecord()]} initialValue={quotationSnapshotFactory()} onSave={onSave} />)
 
     fireEvent.change(screen.getByLabelText('Cliente'), { target: { value: 'client-1' } })
     fireEvent.change(screen.getByLabelText('Descripción 1'), { target: { value: 'Cerámica' } })

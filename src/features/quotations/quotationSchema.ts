@@ -9,7 +9,7 @@ export const materialDraftSchema = z.object({
 })
 
 export const quotationDraftSchema = z.object({
-  clientId: z.string().min(1),
+  clientId: z.string(),
   clientName: z.string().trim().min(1),
   clientAddress: z.string().trim().min(1),
   issueDate: z.string().min(1),

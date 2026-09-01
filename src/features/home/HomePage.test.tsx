@@ -20,14 +20,15 @@ describe('HomePage', () => {
     sent.quotation.laborMinor = 0
     sent.materialItems = [{ id: 'item-3', quotationId: 'quote-2', description: 'Cerámica exterior', quantityMilli: 1_000, unit: 'unidad', unitPriceMinor: 50_000_00, position: 0 }]
 
-    render(<HomePage businessName="Acabados Modernos Gonzalez" quotations={[approved, sent]} syncState="synced" />)
+    render(<HomePage businessName="Acabados Modernos Gonzalez" quotations={[approved, sent]} />)
 
     expect(screen.getByRole('heading', { name: 'Acabados Modernos Gonzalez' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { level: 2, name: 'Cotizaciones recientes' })).toBeInTheDocument()
     expect(screen.getByText(/RD[$]\s?70,500\.00/)).toBeInTheDocument()
     expect(screen.getByLabelText('1 aprobada')).toBeInTheDocument()
     expect(screen.getByLabelText('1 enviada')).toBeInTheDocument()
     expect(screen.getByText('María Rodríguez')).toBeInTheDocument()
     expect(screen.getByText('María García')).toBeInTheDocument()
-    expect(screen.getByText('Sincronizado')).toBeInTheDocument()
+    expect(screen.queryByText('Sincronizado')).not.toBeInTheDocument()
   })
 })

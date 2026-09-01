@@ -37,7 +37,7 @@ export class DexieQuotationRepository {
     ) || !Number.isSafeInteger(snapshot.quotation.laborMinor) || snapshot.quotation.laborMinor < 0
     if (invalid) throw new RangeError('Los materiales y la mano de obra no admiten valores negativos.')
 
-    await this.db.transaction('rw', [this.db.businessProfiles, this.db.clients, this.db.quotations, this.db.materialItems, this.db.outbox], async () => {
+    await this.db.transaction('rw', [this.db.businessProfiles, this.db.clients, this.db.projectLocations, this.db.quotations, this.db.materialItems, this.db.outbox], async () => {
       let savedSnapshot = snapshot
       if (!snapshot.quotation.number) {
         const existingNumber = (await this.db.quotations.get(snapshot.quotation.id))?.number
@@ -50,6 +50,13 @@ export class DexieQuotationRepository {
       await this.db.quotations.put(savedSnapshot.quotation)
       await this.db.materialItems.where('quotationId').equals(savedSnapshot.quotation.id).delete()
       await this.db.materialItems.bulkPut(savedSnapshot.materialItems)
+      const locations = await this.db.projectLocations.where('clientId').equals(savedSnapshot.client.id).filter((location) => !location.deletedAt).toArray()
+      await this.db.outbox.put({
+        id: `client:${savedSnapshot.client.id}:upsert:${savedSnapshot.quotation.updatedAt}`,
+        entityType: 'client', entityId: savedSnapshot.client.id, action: 'upsert',
+        payload: { client: savedSnapshot.client, locations }, createdAt: savedSnapshot.quotation.updatedAt,
+        nextAttemptAt: savedSnapshot.quotation.updatedAt, attempt: 0,
+      })
       await this.db.outbox.put(operation(savedSnapshot, 'upsert', savedSnapshot.quotation.updatedAt))
       await this.db.outbox.put({
         id: `businessProfile:${savedSnapshot.business.id}:upsert:${savedSnapshot.quotation.updatedAt}`,

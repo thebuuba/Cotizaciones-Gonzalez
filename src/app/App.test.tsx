@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it } from 'vitest'
 
@@ -17,10 +17,12 @@ describe('App shell', () => {
     }
   })
 
-  it('offers exactly one prominently labelled quotation action', () => {
+  it('keeps creation inside the quotations panel instead of the bottom navigation', () => {
     render(<App />)
 
-    expect(screen.getAllByRole('link', { name: 'Nueva cotización' })).toHaveLength(1)
+    const navigation = screen.getByRole('navigation', { name: 'Navegación principal' })
+    expect(within(navigation).getAllByRole('link')).toHaveLength(4)
+    expect(within(navigation).queryByRole('link', { name: 'Nueva cotización' })).not.toBeInTheDocument()
     expect(screen.queryByTestId('header-create-action')).not.toBeInTheDocument()
   })
 
@@ -33,13 +35,25 @@ describe('App shell', () => {
     expect(screen.getByRole('link', { name: 'Ajustes' })).toHaveAttribute('aria-current', 'page')
   })
 
-  it('opens the material quotation editor from the central action', async () => {
+  it('gives every primary destination a large accessible page title', async () => {
     const user = userEvent.setup()
     render(<App />)
 
+    expect(screen.getByRole('heading', { level: 1, name: 'Acabados Modernos Gonzalez' })).toBeInTheDocument()
+    for (const destination of ['Cotizaciones', 'Clientes', 'Ajustes']) {
+      await user.click(screen.getByRole('link', { name: destination }))
+      expect(screen.getByRole('heading', { level: 1, name: destination })).toBeInTheDocument()
+    }
+  })
+
+  it('opens the material quotation editor from the quotations panel', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+
+    await user.click(screen.getByRole('link', { name: 'Cotizaciones' }))
     await user.click(screen.getByRole('link', { name: 'Nueva cotización' }))
 
-    expect(screen.getByRole('heading', { name: 'Datos de la hoja' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Nueva cotización' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Agregar material' })).toBeInTheDocument()
     expect(screen.queryByRole('link', { name: 'Nueva cotización' })).not.toBeInTheDocument()
   })

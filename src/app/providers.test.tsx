@@ -5,7 +5,7 @@ import * as providers from './providers'
 describe('automatic sync schedule', () => {
   afterEach(() => { vi.useRealTimers(); vi.restoreAllMocks() })
 
-  it('syncs on focus and every visible online minute, then cleans up', async () => {
+  it('syncs on focus and every ten visible online seconds, then cleans up', async () => {
     vi.useFakeTimers()
     vi.spyOn(document, 'visibilityState', 'get').mockReturnValue('visible')
     vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(true)
@@ -15,12 +15,12 @@ describe('automatic sync schedule', () => {
     expect(start).toBeTypeOf('function')
     const stop = start!(run)
     window.dispatchEvent(new Event('focus'))
-    await vi.advanceTimersByTimeAsync(60_000)
+    await vi.advanceTimersByTimeAsync(10_000)
     expect(run).toHaveBeenCalledTimes(2)
 
     stop()
     window.dispatchEvent(new Event('focus'))
-    await vi.advanceTimersByTimeAsync(60_000)
+    await vi.advanceTimersByTimeAsync(10_000)
     expect(run).toHaveBeenCalledTimes(2)
   })
 })

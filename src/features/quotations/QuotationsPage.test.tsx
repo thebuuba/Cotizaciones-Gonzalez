@@ -21,33 +21,16 @@ function quotations() {
 describe('QuotationsPage', () => {
   afterEach(() => vi.restoreAllMocks())
 
-  it('searches by client and filters by status', async () => {
-    const user = userEvent.setup()
-    render(<MemoryRouter><QuotationsPage quotations={quotations()} onDuplicate={vi.fn()} onDelete={vi.fn()} /></MemoryRouter>)
+  it('shows the compact quotation list from the approved mobile design', () => {
+    render(<MemoryRouter><QuotationsPage quotations={quotations()} /></MemoryRouter>)
 
     expect(screen.getByText('María Rodríguez')).toBeInTheDocument()
     expect(screen.getByText('Ana García')).toBeInTheDocument()
-    await user.type(screen.getByLabelText('Buscar cotizaciones'), 'Ana')
-    expect(screen.queryByText('María Rodríguez')).not.toBeInTheDocument()
-    await user.clear(screen.getByLabelText('Buscar cotizaciones'))
-    await user.selectOptions(screen.getByLabelText('Filtrar por estado'), 'approved')
-    expect(screen.getByText('María Rodríguez')).toBeInTheDocument()
-    expect(screen.queryByText('Ana García')).not.toBeInTheDocument()
-  })
-
-  it('duplicates directly and requires confirmation before deletion', async () => {
-    const user = userEvent.setup()
-    const onDuplicate = vi.fn()
-    const onDelete = vi.fn()
-    vi.spyOn(window, 'confirm').mockReturnValueOnce(false).mockReturnValueOnce(true)
-    render(<MemoryRouter><QuotationsPage quotations={[quotations()[0]!]} onDuplicate={onDuplicate} onDelete={onDelete} /></MemoryRouter>)
-
-    await user.click(screen.getByRole('button', { name: 'Duplicar COT-0001' }))
-    expect(onDuplicate).toHaveBeenCalledWith('quote-1')
-    await user.click(screen.getByRole('button', { name: 'Eliminar COT-0001' }))
-    expect(onDelete).not.toHaveBeenCalled()
-    await user.click(screen.getByRole('button', { name: 'Eliminar COT-0001' }))
-    expect(onDelete).toHaveBeenCalledWith('quote-1')
+    expect(screen.getByRole('link', { name: 'Nueva cotización' })).toHaveAttribute('href', '/cotizaciones/nueva')
+    expect(screen.getByRole('link', { name: /María Rodríguez/ })).toHaveAttribute('href', '/cotizaciones/quote-1')
+    expect(screen.queryByLabelText('Buscar cotizaciones')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('Filtrar por estado')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /Duplicar|Eliminar/ })).not.toBeInTheDocument()
   })
 })
 
@@ -57,6 +40,8 @@ describe('QuotationDetailPage', () => {
     const onStatusChange = vi.fn()
     render(<MemoryRouter><QuotationDetailPage snapshot={quotationSnapshotFactory()} onStatusChange={onStatusChange} /></MemoryRouter>)
 
+    expect(screen.getByRole('heading', { level: 2, name: 'Materiales' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { level: 2, name: 'Vista previa' })).toBeInTheDocument()
     await user.selectOptions(screen.getByLabelText('Estado de la cotización'), 'sent')
 
     expect(onStatusChange).toHaveBeenCalledWith('sent')

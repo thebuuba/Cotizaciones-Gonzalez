@@ -27,6 +27,7 @@ describe('local quotation repository', () => {
     expect(await quotations.get(snapshot.quotation.id)).toEqual(snapshot)
     expect(await db.materialItems.where('quotationId').equals(snapshot.quotation.id).count()).toBe(2)
     expect(await outbox.nextBatch(25)).toContainEqual(expect.objectContaining({ entityId: 'quote-1', action: 'upsert' }))
+    expect(await outbox.nextBatch(25)).toContainEqual(expect.objectContaining({ entityType: 'client', entityId: snapshot.client.id, action: 'upsert' }))
     expect(await outbox.pending(25)).toContainEqual(expect.objectContaining({ entityType: 'businessProfile', entityId: snapshot.business.id }))
   })
 
