@@ -1,11 +1,15 @@
 import { render, screen } from '@testing-library/react'
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { quotationSnapshotFactory } from '../../test/factories'
 import { HomePage } from './HomePage'
 
 describe('HomePage', () => {
+  afterEach(() => vi.useRealTimers())
+
   it('summarizes materials plus labor in Dominican pesos', () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-08-31T12:00:00.000Z'))
     const approved = quotationSnapshotFactory()
     const sent = quotationSnapshotFactory()
     sent.quotation.id = 'quote-2'
