@@ -21,6 +21,27 @@ export const quotationDraftSchema = z.object({
 
 export type QuotationDraft = z.infer<typeof quotationDraftSchema>
 
+const DR_PHONE_PREFIXES = ['809', '829', '849']
+
+export function formatPhone(raw: string): string {
+  const digits = raw.replace(/\D/g, '')
+  if (digits.length === 0) return ''
+  const isDR = DR_PHONE_PREFIXES.some((prefix) => digits.startsWith(prefix))
+  if (isDR) {
+    const d = digits.slice(0, 10)
+    if (d.length <= 3) return d
+    if (d.length <= 6) return `(${d.slice(0, 3)}) ${d.slice(3)}`
+    return `(${d.slice(0, 3)}) ${d.slice(3, 6)}-${d.slice(6)}`
+  }
+  const d = digits.startsWith('1') ? digits.slice(0, 11) : digits.slice(0, 10)
+  if (d.length === 0) return ''
+  const withPrefix = d.startsWith('1') ? d : `1${d}`
+  if (withPrefix.length <= 1) return withPrefix
+  if (withPrefix.length <= 4) return `+${withPrefix.slice(0, 1)} (${withPrefix.slice(1)}`
+  if (withPrefix.length <= 7) return `+${withPrefix.slice(0, 1)} (${withPrefix.slice(1, 4)}) ${withPrefix.slice(4)}`
+  return `+${withPrefix.slice(0, 1)} (${withPrefix.slice(1, 4)}) ${withPrefix.slice(4, 7)}-${withPrefix.slice(7)}`
+}
+
 export function parseMoneyInput(value: string): number {
   const normalized = value.trim().replace(',', '.')
   if (!/^\d+(?:\.\d{1,2})?$/.test(normalized)) throw new RangeError('El monto debe tener hasta dos decimales.')

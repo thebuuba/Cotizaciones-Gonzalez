@@ -45,9 +45,10 @@ function EditQuotationRoute() {
 
 function QuotationDetailRoute() {
   const { id } = useParams()
+  const navigate = useNavigate()
   const snapshot = useLiveQuery(() => id ? quotationRepository.get(id) : undefined, [id])
   if (!snapshot) return <p className="loading-state">Cargando cotización…</p>
-  return <QuotationDetailPage snapshot={snapshot} onStatusChange={(status) => quotationRepository.save({ ...snapshot, quotation: { ...snapshot.quotation, status, updatedAt: new Date().toISOString() } })} />
+  return <QuotationDetailPage snapshot={snapshot} onStatusChange={(status) => quotationRepository.save({ ...snapshot, quotation: { ...snapshot.quotation, status, updatedAt: new Date().toISOString() } })} onDelete={async () => { await quotationRepository.softDelete(snapshot.quotation.id, new Date()); navigate('/cotizaciones', { replace: true }) }} />
 }
 
 function ClientsRoute() {

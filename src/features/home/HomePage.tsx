@@ -1,4 +1,5 @@
 import { ChartNoAxesColumnIncreasing, FileText, Send, ShieldCheck } from 'lucide-react'
+import { Link } from 'react-router-dom'
 
 import { StatusBadge } from '../../components/StatusBadge'
 import { calculateQuotationTotals, formatMoney } from '../../domain/money'
@@ -26,7 +27,7 @@ export function HomePage({ businessName, quotations }: { businessName: string; q
     </section>
     <section className="recent"><h2>Cotizaciones recientes</h2>{quotations.slice(0, 3).map((item) => {
       const QuoteIcon = item.quotation.status === 'approved' ? ShieldCheck : item.quotation.status === 'sent' ? Send : FileText
-      return <article className={`quote-card quote-card--${item.quotation.status}`} key={item.quotation.id}><span className="quote-card__icon"><QuoteIcon aria-hidden="true" /></span><div className="quote-card__content"><h3>{item.quotation.clientName}</h3><span>{item.quotation.clientAddress}</span></div><div className="quote-card__aside"><strong>{formatMoney(totalOf(item))}</strong><StatusBadge status={item.quotation.status} /></div></article>
+      return <Link to={`/cotizaciones/${item.quotation.id}`} key={item.quotation.id} className={`quote-card quote-card--${item.quotation.status}`}><span className="quote-card__icon"><QuoteIcon aria-hidden="true" /></span><div className="quote-card__content"><h3>{item.quotation.clientName}</h3><span>{item.quotation.clientAddress}</span></div><div className="quote-card__aside"><strong>{formatMoney(totalOf(item))}</strong><StatusBadge status={item.quotation.status} /></div></Link>
     })}</section>
   </div>
 }

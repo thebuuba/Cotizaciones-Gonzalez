@@ -5,7 +5,7 @@ import { useFieldArray, useForm, useWatch } from 'react-hook-form'
 import type { ClientRecord } from '../../db/repositories'
 import { calculateMaterialTotal, calculateQuotationTotals, formatMoney, parseQuantityToMilli } from '../../domain/money'
 import type { BusinessProfile, Client, MaterialItem, QuotationSnapshot } from '../../domain/types'
-import { parseMoneyInput, quotationDraftSchema, type QuotationDraft } from './quotationSchema'
+import { formatPhone, parseMoneyInput, quotationDraftSchema, type QuotationDraft } from './quotationSchema'
 import { useAutosave } from './useAutosave'
 
 const units = ['Metro', 'Fundas', 'Galón', 'm²', 'pie', 'caja', 'libra', 'kilogramo', 'tonelada', 'litro', 'bulto', 'rollo', 'varilla', 'placa', 'tabla', 'lote', 'par', 'docena', 'global']
@@ -162,7 +162,7 @@ export function QuotationEditor({ business, clients, initialValue, initialClient
     <section className="editor-section"><h2>Datos del cliente</h2>
       {clients.length > 0 && <label>Cliente<select {...register('clientId')} onChange={(event) => chooseClient(event.target.value)}><option value="">Nuevo cliente</option>{clients.map(({ client }) => <option key={client.id} value={client.id}>{client.name}</option>)}</select></label>}
       <label>Nombre del cliente<input {...register('clientName')} /></label>
-      <label>Teléfono<input type="tel" {...register('clientPhone')} /></label>
+      <label>Teléfono<input type="tel" {...register('clientPhone')} onChange={(e) => { const formatted = formatPhone(e.target.value); setValue('clientPhone', formatted) }} /></label>
       <label>Dirección<input {...register('clientAddress')} /></label>
       <label>Fecha<input type="date" {...register('issueDate')} /></label>
     </section>

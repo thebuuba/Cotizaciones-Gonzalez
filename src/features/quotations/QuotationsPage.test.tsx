@@ -38,14 +38,15 @@ describe('QuotationDetailPage', () => {
   it('changes internal status without adding it to the sheet data', async () => {
     const user = userEvent.setup()
     const onStatusChange = vi.fn()
-    render(<MemoryRouter><QuotationDetailPage snapshot={quotationSnapshotFactory()} onStatusChange={onStatusChange} /></MemoryRouter>)
+    render(<MemoryRouter><QuotationDetailPage snapshot={quotationSnapshotFactory()} onStatusChange={onStatusChange} onDelete={vi.fn()} /></MemoryRouter>)
 
     expect(screen.getByRole('heading', { level: 2, name: 'Materiales' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { level: 2, name: 'Vista previa' })).toBeInTheDocument()
     await user.selectOptions(screen.getByLabelText('Estado de la cotización'), 'sent')
 
     expect(onStatusChange).toHaveBeenCalledWith('sent')
-    expect(screen.getByRole('link', { name: 'Editar cotización' })).toHaveAttribute('href', '/cotizaciones/quote-1/editar')
+    await user.click(screen.getByRole('button', { name: 'Acciones' }))
+    expect(screen.getByRole('link', { name: 'Editar' })).toHaveAttribute('href', '/cotizaciones/quote-1/editar')
     expect(screen.getByText('COTIZACIÓN')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Exportar PDF' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Exportar imagen' })).toBeInTheDocument()
