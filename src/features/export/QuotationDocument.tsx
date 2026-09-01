@@ -21,7 +21,8 @@ function formatDate(value: string): string {
   return year && month && day ? `${day}/${month}/${year}` : value
 }
 
-function Brand({ compact = false }: { compact?: boolean }) {
+function Brand({ compact = false, mini = false }: { compact?: boolean; mini?: boolean }) {
+  if (mini) return <div className="document-brand document-brand--mini"><div className="document-mark"><Grid2X2 aria-hidden="true" /><Hammer aria-hidden="true" /></div><div><span className="brand-name">Acabados Modernos Gonzalez</span><strong>ACABADOS <b>MODERNOS</b> <em>GONZALEZ</em></strong></div></div>
   return <div className={`document-brand${compact ? ' document-brand--compact' : ''}`}><div className="document-mark"><Grid2X2 aria-hidden="true" /><Hammer aria-hidden="true" /></div><div><span className="brand-name">Acabados Modernos Gonzalez</span>{!compact && <strong>ACABADOS<br /><b>MODERNOS</b><br /><em>GONZALEZ</em></strong>}</div></div>
 }
 
@@ -57,7 +58,7 @@ function ClosingBlocks({ snapshot }: { snapshot: QuotationSnapshot }) {
         {business.bankAccounts.map((account) => { const logo = getBankLogo(account.bank); return <div className="document-bank-row" key={account.id}>{logo && <img className="document-bank-logo" src={logo} alt={account.bank} />}<div className="document-bank-info"><strong>{account.bank}</strong><span>{account.type} {account.number}</span></div></div> })}
       </div>
       <div className="document-contact-col document-contact-col--identity">
-        <Brand />
+        <Brand mini />
         <div className="manager-name">{business.managerName}</div>
         <div className="manager-title">{business.managerTitle}</div>
       </div>
