@@ -12,7 +12,7 @@ async function waitForAssets(element: HTMLElement): Promise<void> {
 export async function renderPagePng(element: HTMLElement): Promise<Blob> {
   await waitForAssets(element)
   const { toBlob } = await import('html-to-image')
-  const blob = await toBlob(element, { pixelRatio: 3, backgroundColor: '#ffffff', cacheBust: true })
+  const blob = await toBlob(element, { pixelRatio: 4, backgroundColor: '#ffffff', cacheBust: true })
   if (!blob) throw new Error('No se pudo crear la imagen de la cotización.')
   return blob
 }
@@ -59,11 +59,12 @@ export async function exportQuotationPdf(elements: readonly HTMLElement[], baseN
   if (!elements.length) throw new Error('No hay páginas para exportar.')
   const { jsPDF } = await import('jspdf')
   return withStableViewport(async () => {
-    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
+    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4', compress: true })
     for (const [index, element] of elements.entries()) {
       if (index > 0) pdf.addPage('a4', 'portrait')
-      const dataUrl = await blobToDataUrl(await renderPagePng(element))
-      pdf.addImage(dataUrl, 'PNG', 0, 0, 210, 297)
+      const blob = await renderPagePng(element)
+      const dataUrl = await blobToDataUrl(blob)
+      pdf.addImage(dataUrl, 'PNG', 0, 0, 210, 297, undefined, 'MEDIUM')
     }
     return new File([pdf.output('blob')], `${sanitizeExportName(baseName)}.pdf`, { type: 'application/pdf' })
   })
