@@ -13,13 +13,14 @@ const newMaterial = () => ({ id: crypto.randomUUID(), description: '', quantity:
 
 function initialDraft(initialValue?: QuotationSnapshot): QuotationDraft {
   if (!initialValue) return {
-    clientId: '', clientName: '', clientAddress: '',
+    clientId: '', clientName: '', clientPhone: '', clientAddress: '',
     issueDate: new Date().toISOString().slice(0, 10), labor: '', observations: '',
     materials: [newMaterial()],
   }
   return {
     clientId: initialValue.quotation.clientId,
     clientName: initialValue.quotation.clientName,
+    clientPhone: initialValue.client.phone ?? '',
     clientAddress: initialValue.quotation.clientAddress,
     issueDate: initialValue.quotation.issueDate,
     labor: String(initialValue.quotation.laborMinor / 100),
@@ -72,7 +73,7 @@ export function QuotationEditor({ business, clients, initialValue, initialClient
     const client: Client = clientRecord?.client ?? {
       id: inlineClientId.current,
       name: parsed.data.clientName,
-      phone: '',
+      phone: parsed.data.clientPhone,
       email: '',
       address: parsed.data.clientAddress,
       updatedAt: now,
@@ -138,6 +139,7 @@ export function QuotationEditor({ business, clients, initialValue, initialClient
     const record = clients.find(({ client }) => client.id === clientId)
     setValue('clientId', clientId)
     setValue('clientName', record?.client.name ?? '')
+    setValue('clientPhone', record?.client.phone ?? '')
     setValue('clientAddress', record?.locations[0]?.address ?? record?.client.address ?? '')
   }
 
@@ -147,6 +149,7 @@ export function QuotationEditor({ business, clients, initialValue, initialClient
     if (!record) return
     setValue('clientId', record.client.id)
     setValue('clientName', record.client.name)
+    setValue('clientPhone', record.client.phone ?? '')
     setValue('clientAddress', record.locations.find((location) => location.id === initialLocationId)?.address ?? record.client.address)
   }, [clients, getValues, initialClientId, initialLocationId, initialValue, setValue])
 
@@ -159,6 +162,7 @@ export function QuotationEditor({ business, clients, initialValue, initialClient
     <section className="editor-section"><h2>Datos del cliente</h2>
       {clients.length > 0 && <label>Cliente<select {...register('clientId')} onChange={(event) => chooseClient(event.target.value)}><option value="">Nuevo cliente</option>{clients.map(({ client }) => <option key={client.id} value={client.id}>{client.name}</option>)}</select></label>}
       <label>Nombre del cliente<input {...register('clientName')} /></label>
+      <label>Teléfono<input type="tel" {...register('clientPhone')} /></label>
       <label>Dirección<input {...register('clientAddress')} /></label>
       <label>Fecha<input type="date" {...register('issueDate')} /></label>
     </section>

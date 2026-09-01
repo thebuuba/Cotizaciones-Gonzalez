@@ -11,6 +11,7 @@ export const materialDraftSchema = z.object({
 export const quotationDraftSchema = z.object({
   clientId: z.string(),
   clientName: z.string().trim().min(1),
+  clientPhone: z.string().trim(),
   clientAddress: z.string().trim().min(1),
   issueDate: z.string().min(1),
   labor: z.string(),
