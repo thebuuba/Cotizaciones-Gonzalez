@@ -1,8 +1,8 @@
-import { Award, Building2, CheckCircle2, ClipboardList, Grid2X2, Hammer, Heart, MessageCircle, Phone, ShieldCheck, UserRound } from 'lucide-react'
+import { Award, CheckCircle2, ClipboardList, Grid2X2, Hammer, Heart, MessageCircle, Phone, ShieldCheck, UserRound } from 'lucide-react'
 
-import banreservasLogo from '../../assets/bank-logos/banreservas.png'
+import banreservasLogo from '../../assets/bank-logos/banreservas.svg'
 import santacruzLogo from '../../assets/bank-logos/santacruz.png'
-import scotiabankLogo from '../../assets/bank-logos/scotiabank.png'
+import scotiabankLogo from '../../assets/bank-logos/scotiabank.svg'
 import { calculateMaterialTotal, calculateQuotationTotals, formatMoney } from '../../domain/money'
 import type { MaterialItem, QuotationSnapshot } from '../../domain/types'
 import { paginateDocument } from './documentPagination'
@@ -51,7 +51,22 @@ function ClosingBlocks({ snapshot }: { snapshot: QuotationSnapshot }) {
   return <div className="document-closing">
     <section className="document-totals"><div><span>TOTAL DE MATERIALES</span><strong>{formatMoney(totals.materialsMinor)}</strong></div><div><span>MANO DE OBRA INSTALACIÓN</span><strong>{formatMoney(totals.laborMinor)}</strong></div><div className="document-grand-total"><span>TOTAL GENERAL</span><strong>{formatMoney(totals.totalMinor)}</strong></div></section>
     <div className="document-two-column"><section className="document-box"><h3><ClipboardList aria-hidden="true" />TÉRMINOS &amp; CONDICIONES</h3>{business.terms.map((term) => <p key={term}><CheckCircle2 aria-hidden="true" />{term}</p>)}</section><section className="document-box document-observations"><h3>OBSERVACIONES</h3><p>{quotation.observations || ' '}</p></section></div>
-    <div className="document-contact-row"><section className="document-accounts"><h3><Building2 aria-hidden="true" />CUENTAS BANCARIAS</h3>{business.bankAccounts.map((account) => { const logo = getBankLogo(account.bank); return <div className="document-bank-row" key={account.id}>{logo && <img className="document-bank-logo" src={logo} alt={account.bank} />}<div className="document-bank-info"><strong>{account.bank}</strong><span>{account.type} {account.number}</span></div></div> })}</section><section className="document-manager"><div className="manager-signature" /><strong>{business.managerName}</strong><span>{business.managerTitle}</span><div className="manager-phones"><p><Phone aria-hidden="true" /><strong>{business.directPhone}</strong><small>PARA LLAMADAS DIRECTAS</small></p><p><MessageCircle aria-hidden="true" /><strong>{business.whatsappPhone}</strong><small>LLAMADA Y MENSAJE WHATSAPP</small></p></div></section><aside className="document-seal" aria-label="Sello Acabados Modernos Gonzalez"><span>ACABADOS MODERNOS</span><div><Grid2X2 aria-hidden="true" /><Hammer aria-hidden="true" /></div><strong>GONZALEZ</strong></aside></div>
+    <div className="document-contact-row">
+      <div className="document-contact-col document-contact-col--accounts">
+        <span className="document-contact-label">CUENTAS PARA DEPÓSITO / TRANSFERENCIA</span>
+        {business.bankAccounts.map((account) => { const logo = getBankLogo(account.bank); return <div className="document-bank-row" key={account.id}>{logo && <img className="document-bank-logo" src={logo} alt={account.bank} />}<div className="document-bank-info"><strong>{account.bank}</strong><span>{account.type} {account.number}</span></div></div> })}
+      </div>
+      <div className="document-contact-col document-contact-col--identity">
+        <Brand />
+        <div className="manager-name">{business.managerName}</div>
+        <div className="manager-title">{business.managerTitle}</div>
+      </div>
+      <div className="document-contact-col document-contact-col--contact">
+        <span className="document-contact-label">CONTACTO</span>
+        <div className="document-phone-row"><Phone aria-hidden="true" /><div><strong>{business.directPhone}</strong><small>LLAMADAS DIRECTAS</small></div></div>
+        <div className="document-phone-row"><MessageCircle aria-hidden="true" /><div><strong>{business.whatsappPhone}</strong><small>WHATSAPP</small></div></div>
+      </div>
+    </div>
     <footer className="document-footer"><p><ShieldCheck aria-hidden="true" />{business.footerQuality}</p><p><Award aria-hidden="true" />{business.footerCommitment}</p><strong>{business.footerFaith} <Heart aria-hidden="true" /></strong></footer>
   </div>
 }

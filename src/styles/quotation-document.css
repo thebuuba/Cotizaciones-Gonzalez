@@ -72,30 +72,23 @@
 .document-box p { display: flex; margin: .5cqw 0; align-items: flex-start; gap: .6cqw; font-size: 1.05em; line-height: 1.4; }
 .document-box p svg { width: 1.8cqw; height: 1.8cqw; flex: 0 0 auto; fill: var(--paper-gold); color: var(--paper-gold); }
 .document-observations p { min-height: 8cqw; padding-top: .5cqw; white-space: pre-wrap; background: repeating-linear-gradient(to bottom, transparent 0, transparent 2.25cqw, var(--paper-gray) 2.3cqw, transparent 2.4cqw); }
-.document-contact-row { display: grid; grid-template-columns: 42% 43% 13%; gap: 1%; margin: 1% 3% 0; }
-.document-accounts h3 { margin-bottom: .7cqw; }
-.document-bank-row { display: flex; align-items: center; gap: .5cqw; margin: .4cqw 0; }
-.document-bank-logo { width: 14cqw; object-fit: contain; }
-.document-bank-info { display: grid; flex: 1; }
-.document-bank-info strong { color: var(--paper-navy); font-size: 1.1em; }
-.document-bank-info span { border-bottom: .1cqw solid var(--paper-navy); font-weight: 650; font-size: 1.05em; }
-.document-accounts p { display: grid; grid-template-columns: 12cqw 1fr; margin: .35cqw 0; gap: .7cqw; font-size: 1em; }
-.document-accounts p strong { color: var(--paper-navy); }
-.document-accounts p span { border-bottom: .1cqw solid var(--paper-navy); font-weight: 650; }
-.document-manager { display: grid; align-content: end; justify-items: center; }
-.manager-signature { width: 68%; margin-bottom: .6cqw; border-top: .1cqw solid var(--paper-black); }
-.document-manager > strong { font-size: 1.2em; font-weight: 700; }
-.document-manager > span { color: var(--paper-gold); font-weight: 800; letter-spacing: .03em; }
-.manager-phones { display: grid; grid-template-columns: 1fr 1fr; width: 100%; gap: .7cqw; margin-top: .7cqw; }
-.manager-phones p { display: grid; grid-template-columns: auto 1fr; margin: 0; padding: .5cqw; border: .12cqw solid var(--paper-gold); border-radius: .7cqw; }
-.manager-phones svg { grid-row: 1 / 3; width: 2.5cqw; height: 2.5cqw; margin-right: .5cqw; padding: .4cqw; border-radius: 50%; background: var(--paper-gold); color: var(--paper-black); }
-.manager-phones strong { font-size: 1.2em; line-height: 1; font-weight: 700; }
-.manager-phones small { font-size: .6em; font-weight: 800; letter-spacing: .04em; }
-.document-seal { display: flex; aspect-ratio: 1; align-self: center; align-items: center; justify-content: center; border: .18cqw solid var(--paper-gold); border-radius: 50%; color: var(--paper-black); flex-direction: column; text-align: center; }
-.document-seal > span, .document-seal > strong { max-width: 9cqw; font-size: .65em; line-height: 1; letter-spacing: .02em; }
-.document-seal > div { display: flex; width: 6cqw; align-items: center; justify-content: center; color: var(--paper-gold); }
-.document-seal svg { width: 3.3cqw; height: 3.3cqw; }
-.document-seal svg:first-child { color: var(--paper-black); }
+.document-contact-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0; margin: 1.5% 3% 0; }
+.document-contact-col { padding: 0 1.5cqw; }
+.document-contact-col + .document-contact-col { border-left: .12cqw solid var(--paper-gray); }
+.document-contact-label { display: block; margin-bottom: 1cqw; color: #999; font-size: .85em; font-weight: 600; letter-spacing: .06em; }
+.document-contact-col--identity { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+.document-contact-col--identity .document-brand { justify-content: center; margin-bottom: 1cqw; }
+.manager-name { margin-top: .8cqw; color: var(--paper-navy); font-size: 1.6em; font-weight: 800; letter-spacing: -.01em; }
+.manager-title { color: var(--paper-gold); font-size: 1.1em; font-weight: 700; letter-spacing: .03em; }
+.document-phone-row { display: flex; align-items: center; gap: .6cqw; margin: .5cqw 0; }
+.document-phone-row svg { width: 2.8cqw; height: 2.8cqw; padding: .5cqw; border-radius: 50%; background: var(--paper-gold); color: var(--paper-black); flex-shrink: 0; }
+.document-phone-row strong { display: block; font-size: 1.2em; line-height: 1.1; font-weight: 700; }
+.document-phone-row small { display: block; color: #888; font-size: .6em; font-weight: 600; letter-spacing: .04em; }
+.document-bank-row { display: flex; align-items: center; gap: .6cqw; margin: .6cqw 0; }
+.document-bank-logo { width: 3.5cqw; object-fit: contain; flex-shrink: 0; }
+.document-bank-info { display: grid; flex: 1; min-width: 0; }
+.document-bank-info strong { color: var(--paper-navy); font-size: 1em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.document-bank-info span { font-weight: 600; font-size: .9em; color: #555; }
 .document-footer { display: grid; grid-template-columns: 1fr 1fr; min-height: 7.5%; margin-top: auto; padding: 1.2% 3%; align-items: center; background: var(--paper-black); color: var(--paper-white); }
 .document-footer p { display: flex; margin: 0; align-items: center; gap: .7cqw; font-size: .9em; }
 .document-footer p svg { width: 2.8cqw; color: var(--paper-gold); }
