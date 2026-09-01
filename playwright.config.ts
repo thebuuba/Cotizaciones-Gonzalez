@@ -1,4 +1,9 @@
 import { defineConfig, devices } from '@playwright/test'
+import { loadEnv } from 'vite'
+
+const e2eEnv = loadEnv('e2e', process.cwd(), '')
+process.env.E2E_OWNER_EMAIL ||= e2eEnv.E2E_OWNER_EMAIL
+process.env.E2E_OWNER_PASSWORD ||= e2eEnv.E2E_OWNER_PASSWORD
 
 export default defineConfig({
   testDir: './tests/e2e',

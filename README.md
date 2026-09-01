@@ -1,42 +1,42 @@
 # Cotizaciones González
 
-PWA local-first para crear cotizaciones de Acabados Modernos González, trabajar sin conexión y exportar la hoja aprobada como PDF o imagen.
+PWA privada para una sola persona. Guarda primero en IndexedDB, sincroniza inmediatamente con Supabase cuando hay internet y conserva una cola local cuando no hay conexión.
 
 ## Desarrollo local
 
 ```bash
 npm install
+copy .env.example .env.local
 npm run dev
 ```
 
-## Respaldo privado con Supabase
+Completa `VITE_SUPABASE_URL` y `VITE_SUPABASE_PUBLISHABLE_KEY`. La aplicación bloquea el acceso si Supabase no está configurado. Nunca uses una clave `service_role` o `sb_secret_` en la PWA.
 
-La app funciona sin Supabase. Para activar el respaldo:
-
-1. Crea un proyecto y un usuario privado en Supabase.
-2. Copia `.env.example` a `.env.local` y completa la URL y la clave publicable. Nunca uses una clave `service_role` en la PWA.
-3. Vincula el proyecto y aplica la migración:
+## Supabase
 
 ```bash
-npx supabase login
-npx supabase link --project-ref TU_PROJECT_REF
-npx supabase db push
+supabase login
+supabase link --project-ref yyfrfptxzaokmfcsfoxf
+supabase migration list --linked
+supabase db push --linked --dry-run
+supabase db push --linked
 ```
 
-La migración habilita RLS por propietario y crea el bucket privado `business-assets`. Las pruebas SQL locales requieren Docker Desktop o Podman:
+RLS limita las filas al propietario y `business-assets` es privado. La sincronización ocurre al iniciar, guardar, recuperar internet, volver a la app, cada 60 segundos mientras está visible y desde el botón manual.
+
+## Pruebas E2E privadas
+
+Copia `.env.e2e.example` a `.env.e2e.local` y completa las credenciales del único propietario. Este archivo está ignorado por Git.
 
 ```bash
-npx supabase start
-npx supabase db reset
-npx supabase test db
+npm run test:e2e
 ```
 
-## Verificación
+## Verificación esencial
 
 ```bash
 npm run lint
 npm run typecheck
-npm test -- --run
+npm test -- --run --exclude .worktrees/**
 npm run build
-npm run test:e2e
 ```
