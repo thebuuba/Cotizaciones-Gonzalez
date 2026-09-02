@@ -1,28 +1,28 @@
-/* Movimiento tipo iOS: navegación con dirección, respuesta táctil y continuidad visual. */
+/* Movimiento tipo iOS: navegación direccional sin desvanecidos que provoquen destellos. */
 .route-transition,
 .local-transition {
   min-width: 0;
   transform: translateZ(0);
   backface-visibility: hidden;
-  will-change: transform, opacity;
+  will-change: transform;
 }
 
 .route-transition--initial {
-  animation: ios-initial-enter 220ms var(--ease-ios) both;
+  animation: ios-initial-enter 180ms var(--ease-ios) both;
 }
 
 .route-transition--forward,
 .local-transition--forward {
-  animation: ios-push-enter 360ms cubic-bezier(.22, .74, .18, 1) both;
+  animation: ios-push-enter 340ms cubic-bezier(.22, .74, .18, 1) both;
 }
 
 .route-transition--back,
 .local-transition--back {
-  animation: ios-pop-enter 340ms cubic-bezier(.22, .74, .18, 1) both;
+  animation: ios-pop-enter 320ms cubic-bezier(.22, .74, .18, 1) both;
 }
 
 .route-transition--tab {
-  animation: ios-tab-enter 240ms var(--ease-ios) both;
+  animation: ios-tab-enter 190ms var(--ease-ios) both;
 }
 
 :is(
@@ -38,6 +38,9 @@
   .client-detail-nav-back,
   .client-detail-text-action,
   .client-location-card-header button,
+  .quotation-detail-nav-back,
+  .quotation-detail-menu-button,
+  .quotation-detail-action,
   .location-row button,
   .quotation-new-button,
   .actions-menu__item
@@ -66,6 +69,9 @@
   .client-detail-nav-back,
   .client-detail-text-action,
   .client-location-card-header button,
+  .quotation-detail-nav-back,
+  .quotation-detail-menu-button,
+  .quotation-detail-action,
   .location-row button,
   .quotation-new-button,
   .actions-menu__item
@@ -85,57 +91,32 @@
 
 .actions-menu__dropdown {
   transform-origin: top right;
-  animation: ios-menu-enter 220ms cubic-bezier(.2, .8, .2, 1) both;
+  animation: ios-menu-enter 200ms cubic-bezier(.2, .8, .2, 1) both;
 }
-
-.client-location-card-reference,
-.quote-card,
-.quotation-list-card,
-.client-panel-card,
-.stat-card {
-  animation: ios-item-enter 300ms var(--ease-ios) both;
-}
-
-.client-location-card-reference:nth-child(2),
-.recent-list > li:nth-child(2),
-.quotation-list > li:nth-child(2),
-.client-panel-list > li:nth-child(2) { animation-delay: 24ms; }
-
-.client-location-card-reference:nth-child(3),
-.recent-list > li:nth-child(3),
-.quotation-list > li:nth-child(3),
-.client-panel-list > li:nth-child(3) { animation-delay: 48ms; }
 
 @keyframes ios-initial-enter {
-  from { opacity: 0; transform: translate3d(0, 5px, 0) scale(.997); }
-  to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+  from { transform: translate3d(0, 4px, 0) scale(.998); }
+  to { transform: translate3d(0, 0, 0) scale(1); }
 }
 
 @keyframes ios-push-enter {
-  0% { opacity: .72; transform: translate3d(30px, 0, 0) scale(.995); }
-  70% { opacity: 1; }
-  100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+  from { transform: translate3d(26px, 0, 0) scale(.997); }
+  to { transform: translate3d(0, 0, 0) scale(1); }
 }
 
 @keyframes ios-pop-enter {
-  0% { opacity: .76; transform: translate3d(-22px, 0, 0) scale(.997); }
-  72% { opacity: 1; }
-  100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+  from { transform: translate3d(-20px, 0, 0) scale(.998); }
+  to { transform: translate3d(0, 0, 0) scale(1); }
 }
 
 @keyframes ios-tab-enter {
-  from { opacity: .6; transform: scale(.992); }
-  to { opacity: 1; transform: scale(1); }
+  from { transform: translate3d(0, 2px, 0); }
+  to { transform: translate3d(0, 0, 0); }
 }
 
 @keyframes ios-menu-enter {
   from { opacity: 0; transform: translateY(-4px) scale(.96); }
   to { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-@keyframes ios-item-enter {
-  from { opacity: 0; transform: translate3d(0, 7px, 0); }
-  to { opacity: 1; transform: translate3d(0, 0, 0); }
 }
 
 .is-spinning { animation: settings-spin .8s linear infinite; }
