@@ -14,10 +14,23 @@ function initials(name: string): string {
 export function ClientsPage({ clients, onSave, onStartQuotation: _onStartQuotation }: { clients: ClientRecord[]; onSave: (record: ClientRecord) => void | Promise<void>; onStartQuotation: (clientId: string, locationId?: string) => void }) {
   const [search, setSearch] = useState('')
   const [editing, setEditing] = useState<ClientRecord | 'new' | null>(null)
+  const [transitionDirection, setTransitionDirection] = useState<'forward' | 'back'>('forward')
   const deferred = useDeferredValue(search)
   const filtered = useMemo(() => clients.filter(({ client }) => client.name.toLocaleLowerCase('es').includes(deferred.trim().toLocaleLowerCase('es'))), [clients, deferred])
-  if (editing) return <ClientForm initialValue={editing === 'new' ? undefined : editing} onCancel={() => setEditing(null)} onSave={async (record) => { await onSave(record); setEditing(null) }}/>
-  return <div className="clients-page clients-panel">
+
+  const openClient = (record: ClientRecord | 'new') => {
+    setTransitionDirection('forward')
+    setEditing(record)
+  }
+
+  const closeClient = () => {
+    setTransitionDirection('back')
+    setEditing(null)
+  }
+
+  if (editing) return <div className={`local-transition local-transition--${transitionDirection}`}><ClientForm initialValue={editing === 'new' ? undefined : editing} onCancel={closeClient} onSave={async (record) => { await onSave(record); closeClient() }}/></div>
+
+  return <div className={`clients-page clients-panel local-transition local-transition--${transitionDirection}`}>
     <PageHeader title="Clientes" subtitle="Contactos y ubicaciones"/>
     <div className="clients-toolbar">
       <label className="clients-search">
@@ -25,14 +38,14 @@ export function ClientsPage({ clients, onSave, onStartQuotation: _onStartQuotati
         <span className="sr-only">Buscar clientes</span>
         <input type="search" aria-label="Buscar clientes" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar"/>
       </label>
-      <button className="clients-add" type="button" onClick={() => setEditing('new')} aria-label="Nuevo cliente"><Plus aria-hidden="true"/></button>
+      <button className="clients-add" type="button" onClick={() => openClient('new')} aria-label="Nuevo cliente"><Plus aria-hidden="true"/></button>
     </div>
     {filtered.length ? <ul className="client-list client-panel-list" aria-label="Lista de clientes">{filtered.map((record, index) => { const { client, locations } = record; const address = locations[0]?.address || client.address || 'Sin ubicación'; return <li key={client.id}>
-      <button className="client-panel-card" type="button" onClick={() => setEditing(record)} aria-label={`Abrir ${client.name}`}>
+      <button className="client-panel-card" type="button" onClick={() => openClient(record)} aria-label={`Abrir ${client.name}`}>
         <span className={`client-panel-avatar ${avatarColors[index % avatarColors.length]}`}>{initials(client.name)}</span>
         <span className="client-panel-info"><strong>{client.name}</strong><small><MapPin aria-hidden="true"/>{address}</small></span>
         <ChevronRight className="client-panel-chevron" aria-hidden="true"/>
       </button>
-    </li> })}</ul> : <EmptyState Icon={UserRound} title="Sin clientes" description="Agrega tu primer cliente para comenzar." action={<button className="button button--primary" type="button" onClick={() => setEditing('new')}>Agregar cliente</button>} />}
+    </li> })}</ul> : <EmptyState Icon={UserRound} title="Sin clientes" description="Agrega tu primer cliente para comenzar." action={<button className="button button--primary" type="button" onClick={() => openClient('new')}>Agregar cliente</button>} />}
   </div>
 }
