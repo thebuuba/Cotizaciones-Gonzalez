@@ -1,9 +1,9 @@
-/* Quotations reference: native compact list */
+/* Cotizaciones: lista compacta coherente con el sistema visual de la app */
 .quotations-page {
   width: 100%;
   max-width: 34rem;
   margin: 0 auto;
-  gap: .7rem;
+  gap: .95rem;
 }
 
 .quotations-page .page-header {
@@ -15,6 +15,7 @@
   align-items: flex-end;
   justify-content: space-between;
   gap: .75rem;
+  margin-bottom: .15rem;
 }
 
 .quotation-page-heading .page-header {
@@ -57,46 +58,46 @@
 }
 
 .quotations-page .quotation-list {
-  gap: .6rem;
+  gap: .65rem;
 }
 
 .quotations-page .quotation-list-card {
   overflow: hidden;
-  border: 0;
-  border-radius: .9rem;
+  border: 1px solid #e4e4e8;
+  border-radius: 1.1rem;
   background: var(--palette-white);
-  box-shadow: none;
+  box-shadow: 0 1px 2px rgb(20 33 61 / 10%);
 }
 
 .quotations-page .quotation-card-main {
-  grid-template-columns: 2.35rem minmax(0, 1fr) auto;
-  min-height: 3.75rem;
-  gap: .7rem;
-  padding: .55rem .65rem;
+  grid-template-columns: 2.5rem minmax(0, 1fr) auto;
+  min-height: 4.05rem;
+  gap: .75rem;
+  padding: .62rem .75rem;
 }
 
 .quotations-page .quotation-card-icon {
-  width: 2.35rem;
-  height: 2.35rem;
-  border-radius: .7rem;
-  background: var(--color-fill);
-  color: var(--palette-black);
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: .75rem;
+  background: #eef0f4;
+  color: #727783;
 }
 
 .quotations-page .quotation-card-icon svg {
-  width: 1.05rem;
-  height: 1.05rem;
+  width: 1.08rem;
+  height: 1.08rem;
   stroke-width: 2.2;
 }
 
 .quotation-list-card--sent .quotation-card-icon {
-  background: color-mix(in srgb, var(--palette-gold) 16%, var(--palette-white));
-  color: var(--palette-gold);
+  background: #fff3dd;
+  color: #f59a00;
 }
 
 .quotation-list-card--approved .quotation-card-icon {
-  background: color-mix(in srgb, var(--color-success) 14%, var(--palette-white));
-  color: var(--color-success);
+  background: #dff8ed;
+  color: #13a872;
 }
 
 .quotation-list-card--rejected .quotation-card-icon {
@@ -112,39 +113,41 @@
 
 .quotations-page .quotation-card-copy strong {
   color: var(--palette-black);
-  font-size: var(--font-size-label);
+  font-size: .9rem;
   font-weight: var(--font-weight-bold);
-  line-height: 1.25;
+  line-height: 1.22;
   overflow-wrap: anywhere;
 }
 
 .quotations-page .quotation-card-copy small {
-  margin-top: .12rem;
-  font-size: var(--font-size-auxiliary);
-  line-height: 1.2;
+  margin-top: .16rem;
+  color: var(--color-label-secondary);
+  font-size: .78rem;
+  font-weight: var(--font-weight-regular);
+  line-height: 1.25;
   overflow-wrap: anywhere;
 }
 
 .quotations-page .quotation-card-total {
   align-content: center;
   justify-items: end;
-  gap: .2rem;
+  gap: .22rem;
 }
 
 .quotations-page .quotation-card-total > strong {
   color: var(--palette-black);
-  font-size: var(--font-size-label);
+  font-size: .8rem;
   font-weight: var(--font-weight-heavy);
   line-height: 1.2;
   white-space: nowrap;
 }
 
 .quotations-page .quotation-card-total .status-badge {
-  min-height: 1rem;
-  padding: .08rem .38rem;
+  min-height: 1.05rem;
+  padding: .1rem .4rem;
   border: 0;
   box-shadow: none;
-  font-size: var(--font-size-auxiliary);
+  font-size: .68rem;
 }
 
 @media (min-width: 48rem) {
@@ -235,5 +238,3 @@
     font-size: var(--font-size-page-title);
   }
 }
-
-
