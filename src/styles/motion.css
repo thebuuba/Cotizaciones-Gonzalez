@@ -49,6 +49,12 @@
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
+.is-spinning { animation: settings-spin .8s linear infinite; }
+
+@keyframes settings-spin {
+  to { transform: rotate(360deg); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

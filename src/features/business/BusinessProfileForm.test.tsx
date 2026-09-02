@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 
@@ -72,5 +72,33 @@ describe('BusinessProfileForm', () => {
       logoBlob: logo,
       stampBlob: stamp,
     }))
+  })
+
+  it('shows progress and confirms when settings are saved', async () => {
+    const user = userEvent.setup()
+    let finishSave: (() => void) | undefined
+    const onSave = vi.fn(() => new Promise<void>((resolve) => { finishSave = resolve }))
+    render(<BusinessProfileForm initialValue={initialValue()} onSave={onSave} />)
+
+    await user.click(screen.getByRole('button', { name: 'Guardar ajustes' }))
+
+    expect(screen.getByRole('button', { name: 'Guardando ajustes' })).toBeDisabled()
+    expect(screen.getByRole('status')).toHaveTextContent('Guardando cambios')
+
+    finishSave?.()
+
+    await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('Ajustes guardados'))
+    expect(screen.getByRole('button', { name: 'Guardar ajustes' })).toBeEnabled()
+  })
+
+  it('announces a save failure and allows retrying', async () => {
+    const user = userEvent.setup()
+    const onSave = vi.fn().mockRejectedValue(new Error('network'))
+    render(<BusinessProfileForm initialValue={initialValue()} onSave={onSave} />)
+
+    await user.click(screen.getByRole('button', { name: 'Guardar ajustes' }))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('No se pudieron guardar los ajustes')
+    expect(screen.getByRole('button', { name: 'Guardar ajustes' })).toBeEnabled()
   })
 })

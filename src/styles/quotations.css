@@ -180,17 +180,16 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .business-profile-form > h2,
-  .business-profile-form > p,
-  .business-profile-form > button {
+  .business-profile-form__intro,
+  .business-profile-form > .form-error-summary,
+  .settings-save-bar {
     grid-column: 1 / -1;
   }
 }
 
 @media (max-width: 30rem) {
   .settings-row {
-    align-items: flex-start;
-    flex-direction: column;
+    grid-template-columns: 1fr;
   }
 
   .settings-actions {
@@ -200,6 +199,16 @@
 
   .settings-actions .button {
     flex: 1;
+  }
+
+  .install-card > .button,
+  .settings-save-bar .button {
+    width: 100%;
+  }
+
+  .settings-save-bar {
+    align-items: stretch;
+    flex-direction: column;
   }
 
   .editor-intro {

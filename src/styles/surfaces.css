@@ -583,14 +583,124 @@ h4 {
   box-shadow: none;
 }
 
-.business-profile-form > h2,
-.business-profile-form > p {
+.business-profile-form__intro {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: .75rem;
   padding-inline: .2rem;
 }
 
-.business-profile-form > h2 {
+.business-profile-form__intro > div,
+.form-section__header > div {
+  min-width: 0;
+}
+
+.business-profile-form__intro h2,
+.business-profile-form__intro p,
+.form-section__header h3,
+.form-section__header small {
+  margin: 0;
+}
+
+.business-profile-form__intro h2 {
   font-size: var(--font-size-section-title);
 }
+
+.business-profile-form__intro p,
+.form-section__header small {
+  color: var(--color-label-secondary);
+  font-size: var(--font-size-label);
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.business-profile-form__icon,
+.form-section__icon,
+.settings-section__icon,
+.settings-row__icon {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  background: var(--palette-navy);
+  color: var(--palette-white);
+}
+
+.business-profile-form__icon,
+.settings-section__icon {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: .8rem;
+}
+
+.business-profile-form__icon svg,
+.settings-section__icon svg {
+  width: 1.3rem;
+  height: 1.3rem;
+}
+
+.form-section__header {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: .65rem;
+  padding-bottom: .15rem;
+}
+
+.form-section__icon,
+.settings-row__icon {
+  width: 2rem;
+  height: 2rem;
+  border-radius: .6rem;
+}
+
+.form-section__icon svg,
+.settings-row__icon svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.settings-save-bar {
+  display: flex;
+  min-height: var(--tap-target);
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: .8rem 1rem;
+  border: 1px solid var(--color-separator);
+  border-radius: var(--group-radius);
+  background: var(--color-secondary-grouped-bg);
+}
+
+.settings-save-bar .button {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  gap: .45rem;
+}
+
+.settings-save-bar .button svg,
+.settings-save-feedback svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.settings-save-feedback {
+  min-width: 0;
+  color: var(--color-label-secondary);
+  font-size: var(--font-size-label);
+}
+
+.settings-save-feedback > span {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+}
+
+.settings-save-feedback--saving { color: var(--color-primary); }
+.settings-save-feedback--saved { color: var(--color-success); }
+.settings-save-feedback--error { color: var(--color-danger); }
 
 .bank-account,
 .location-fields,
@@ -669,10 +779,35 @@ h4 {
 
 .settings-page {
   align-content: start;
+  gap: 1.25rem;
 }
 
 .settings-section {
   display: grid;
+  gap: .65rem;
+}
+
+.settings-section__header {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: .75rem;
+  padding-inline: .2rem;
+}
+
+.settings-section__header h2,
+.settings-section__header p {
+  margin: 0;
+}
+
+.settings-section__header h2 {
+  color: var(--color-text-strong);
+  font-size: var(--font-size-section-title);
+}
+
+.settings-section__header p {
+  color: var(--color-label-secondary);
+  font-size: var(--font-size-label);
 }
 
 .settings-group {
@@ -681,7 +816,11 @@ h4 {
 }
 
 .settings-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   min-height: 4rem;
+  align-items: center;
+  gap: .75rem;
   padding: .8rem 1rem;
   border: 0;
   border-radius: 0;
@@ -693,13 +832,17 @@ h4 {
   border-top: 1px solid var(--color-separator);
 }
 
-.settings-row > div:first-child > svg {
-  box-sizing: content-box;
-  width: 1.15rem;
-  padding: .42rem;
-  border-radius: .55rem;
-  background: var(--palette-navy);
-  color: var(--palette-white);
+.settings-row__content {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: .75rem;
+}
+
+.settings-row__content > span:last-child {
+  display: grid;
+  min-width: 0;
+  gap: .25rem;
 }
 
 .settings-row strong {
@@ -708,12 +851,41 @@ h4 {
 }
 
 .settings-actions {
+  display: flex;
+  align-items: center;
+  gap: .35rem;
   flex-wrap: wrap;
   justify-content: flex-end;
 }
 
+.settings-actions .button,
+.install-card > .button {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+}
+
+.settings-actions .button svg,
+.install-card > .button svg {
+  width: 1rem;
+  height: 1rem;
+}
+
 .install-card small {
   color: var(--color-label-secondary);
+  overflow-wrap: anywhere;
+}
+
+.install-card small b {
+  display: inline-flex;
+  align-items: baseline;
+  gap: .2rem;
+  color: var(--color-text);
+}
+
+.install-card small b svg {
+  width: .8rem;
+  height: .8rem;
 }
 
 .detail-toolbar {
