@@ -226,7 +226,22 @@ a { color: inherit; }
 .form-title { display: flex; justify-content: space-between; gap: var(--space-3); }.form-card fieldset { display: grid; gap: var(--space-3); margin: 0; padding: 0; border: 0; }.form-card legend { margin-bottom: var(--space-2); font-weight: 700; }.location-fields { display: grid; grid-template-columns: auto 1fr; gap: var(--space-2); padding: var(--space-3); border-radius: var(--radius-sm); background: var(--color-bg); }.location-fields > svg { width: 1.2rem; margin-top: 1.7rem; color: var(--color-primary); }.location-fields label:last-child { grid-column: 2; }.form-card .button svg { width: 1rem; vertical-align: middle; margin-right: .3rem; }
 .form-section { display: grid; gap: var(--space-3); padding-top: var(--space-2); border-top: 1px solid var(--color-border); }
 .form-section h3 { margin: 0; font-size: var(--font-size-body); }
-.bank-account { padding: var(--space-3) !important; border: 1px solid var(--color-border) !important; border-radius: var(--radius-sm); }
+.bank-account {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-4) !important;
+  border: 1px solid var(--color-separator) !important;
+  border-radius: var(--group-radius);
+  background: var(--color-secondary-grouped-bg);
+  box-shadow: none;
+}
+.bank-account legend {
+  padding: 0 var(--space-2);
+  color: var(--color-label-secondary);
+  font-size: var(--font-size-label);
+  font-weight: 600;
+  letter-spacing: .02em;
+}
 
 .quotation-editor { display: grid; gap: var(--space-4); padding-bottom: var(--space-8); }
 .editor-intro, .section-heading, .material-card__heading, .row-total, .totals-section > div { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }

@@ -1,5 +1,5 @@
 import { useLiveQuery } from 'dexie-react-hooks'
-import { Cloud, LogOut, RefreshCw, Settings2 } from 'lucide-react'
+import { Cloud, LogOut, RefreshCw } from 'lucide-react'
 
 import { businessProfileRepository, useSync } from '../../app/providers'
 import { PageHeader } from '../../components/PageHeader'
@@ -19,28 +19,22 @@ export function SettingsPage() {
   })
 
   return <div className="settings-page">
-    <PageHeader title="Ajustes" subtitle="Aplicación, respaldo y datos del negocio" />
-    <section className="settings-section" aria-labelledby="settings-app-title">
-      <div className="settings-section__header">
-        <span className="settings-section__icon"><Settings2 aria-hidden="true" /></span>
-        <div><h2 id="settings-app-title">Aplicación</h2><p>Instalación y respaldo de tu información.</p></div>
-      </div>
-      <div className="settings-group">
-        <PwaInstallCard />
-        <div className="settings-row">
-          <div className="settings-row__content">
-            <span className="settings-row__icon"><Cloud aria-hidden="true" /></span>
-            <span><strong>Respaldo en la nube</strong><SyncBadge state={sync.state} /></span>
-          </div>
-          <div className="settings-actions">
-            <button className="button button--quiet" type="button" onClick={() => void sync.syncNow()}>
-              <RefreshCw aria-hidden="true" />Sincronizar
-            </button>
-            {sync.signOut && <button className="icon-button icon-button--danger" type="button" aria-label="Cerrar sesión" onClick={() => void sync.signOut?.()}><LogOut aria-hidden="true" /></button>}
-          </div>
+    <PageHeader title="Ajustes" subtitle="Respaldo y datos del negocio" />
+    <div className="settings-group">
+      <PwaInstallCard />
+      <div className="settings-row">
+        <div className="settings-row__content">
+          <span className="settings-row__icon"><Cloud aria-hidden="true" /></span>
+          <span><strong>Respaldo en la nube</strong><SyncBadge state={sync.state} /></span>
+        </div>
+        <div className="settings-actions">
+          <button className="button button--quiet" type="button" onClick={() => void sync.syncNow()}>
+            <RefreshCw aria-hidden="true" />Sincronizar
+          </button>
         </div>
       </div>
-    </section>
+    </div>
     <BusinessProfileForm key={storedProfile?.updatedAt ?? 'default'} initialValue={profile} onSave={save} />
+    {sync.signOut && <button className="button button--quiet" type="button" style={{ width: '100%', justifyContent: 'center', gap: '.45rem', color: 'var(--color-danger)' }} onClick={() => { if (window.confirm('¿Seguro que deseas cerrar sesión?')) { void sync.signOut?.() } }}><LogOut aria-hidden="true" />Cerrar sesión</button>}
   </div>
 }

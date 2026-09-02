@@ -702,7 +702,6 @@ h4 {
 .settings-save-feedback--saved { color: var(--color-success); }
 .settings-save-feedback--error { color: var(--color-danger); }
 
-.bank-account,
 .location-fields,
 .material-card {
   border: 1px solid var(--color-separator) !important;
