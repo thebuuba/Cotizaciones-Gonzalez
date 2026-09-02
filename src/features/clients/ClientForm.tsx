@@ -1,20 +1,25 @@
 import { useState, type FormEvent } from 'react'
-import { ArrowLeft, MapPin, Plus, Save, UserRound, X } from 'lucide-react'
+import { ArrowLeft, MapPin, Plus, Save, UserRound } from 'lucide-react'
 import type { ClientRecord } from '../../db/repositories'
 import { FormErrorSummary } from '../../components/FormErrorSummary'
 import { clientSchema, type ClientDraft } from './clientSchema'
 
-const empty: ClientDraft = { name: '', phone: '', email: '', address: '', locations: [{ label: '', address: '' }] }
+const emptyLocation = { label: '', address: '' }
+const empty: ClientDraft = { name: '', phone: '', email: '', address: '', locations: [emptyLocation] }
 
 function initials(name: string): string {
   return name.trim().split(/\s+/).slice(0, 2).map((part) => part[0]?.toUpperCase() ?? '').join('') || 'C'
 }
 
 export function ClientForm({ initialValue, onSave, onCancel }: { initialValue?: ClientRecord; onSave: (value: ClientRecord) => void | Promise<void>; onCancel: () => void }) {
-  const [value, setValue] = useState<ClientDraft>(initialValue ? { ...initialValue.client, locations: initialValue.locations.map(({ label, address }) => ({ label, address })) } : empty)
+  const [value, setValue] = useState<ClientDraft>(initialValue ? {
+    ...initialValue.client,
+    locations: initialValue.locations.length ? initialValue.locations.map(({ label, address }) => ({ label, address })) : [emptyLocation],
+  } : empty)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const input = (name: keyof Omit<ClientDraft, 'locations'>) => ({ value: value[name], onChange: (event: React.ChangeEvent<HTMLInputElement>) => setValue((current) => ({ ...current, [name]: event.target.value })) })
   const setLocation = (index: number, name: 'label' | 'address', text: string) => setValue((current) => ({ ...current, locations: current.locations.map((item, itemIndex) => itemIndex === index ? { ...item, [name]: text } : item) }))
+
   const submit = async (event: FormEvent) => {
     event.preventDefault()
     const result = clientSchema.safeParse(value)
@@ -22,6 +27,7 @@ export function ClientForm({ initialValue, onSave, onCancel }: { initialValue?: 
       setErrors(Object.fromEntries(result.error.issues.map((issue) => [String(issue.path[0]), issue.message])))
       return
     }
+
     setErrors({})
     const now = new Date().toISOString()
     const clientId = initialValue?.client.id ?? crypto.randomUUID()
@@ -32,13 +38,16 @@ export function ClientForm({ initialValue, onSave, onCancel }: { initialValue?: 
   }
 
   return <form className="client-detail-form" onSubmit={submit} noValidate>
-    <header className="client-detail-header">
+    <header className="client-detail-header client-detail-header--simple">
       <button className="client-detail-back" type="button" onClick={onCancel} aria-label="Volver a clientes"><ArrowLeft aria-hidden="true" /></button>
-      <div className="client-detail-heading">
+      <div className="client-detail-heading client-detail-heading--simple">
         <span className="client-detail-avatar">{initialValue ? initials(value.name) : <UserRound aria-hidden="true" />}</span>
-        <div><span>{initialValue ? 'Cliente' : 'Nuevo cliente'}</span><h1>{initialValue ? value.name || 'Cliente' : 'Nuevo cliente'}</h1><p>Contacto y ubicaciones de proyectos</p></div>
+        <div>
+          <span>{initialValue ? 'Cliente' : 'Nuevo cliente'}</span>
+          <h1>{initialValue ? value.name || 'Cliente' : 'Nuevo cliente'}</h1>
+          <p>Contacto y ubicaciones de proyectos</p>
+        </div>
       </div>
-      <button className="client-detail-close" type="button" onClick={onCancel} aria-label="Cerrar formulario"><X aria-hidden="true" /></button>
     </header>
 
     <FormErrorSummary errors={errors} />
@@ -56,7 +65,7 @@ export function ClientForm({ initialValue, onSave, onCancel }: { initialValue?: 
     <section className="client-detail-section" aria-labelledby="client-locations-title">
       <div className="client-detail-section-heading client-detail-section-heading--action">
         <div><span>Proyectos</span><h2 id="client-locations-title">Ubicaciones</h2></div>
-        <button className="client-detail-add-location" type="button" onClick={() => setValue((current) => ({ ...current, locations: [...current.locations, { label: '', address: '' }] }))}><Plus aria-hidden="true" />Agregar</button>
+        <button className="client-detail-add-location" type="button" onClick={() => setValue((current) => ({ ...current, locations: [...current.locations, { ...emptyLocation }] }))}><Plus aria-hidden="true" />Agregar</button>
       </div>
       <div className="client-location-list">
         {value.locations.map((item, index) => <div className="client-location-card" key={index}>
@@ -69,7 +78,7 @@ export function ClientForm({ initialValue, onSave, onCancel }: { initialValue?: 
       </div>
     </section>
 
-    <footer className="client-detail-savebar">
+    <footer className="client-detail-savebar client-detail-savebar--simple">
       <button className="button button--primary client-detail-save" type="submit"><Save aria-hidden="true" />Guardar cliente</button>
     </footer>
   </form>
