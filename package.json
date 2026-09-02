@@ -10,6 +10,8 @@
     "lint": "eslint . --max-warnings 0",
     "test": "vitest",
     "test:watch": "vitest",
+    "test:style-audit": "node --test scripts/interface-style-audit.test.mjs",
+    "check:ui": "node scripts/interface-style-audit.mjs",
     "test:e2e": "playwright test",
     "typecheck": "tsc -b --pretty false"
   },

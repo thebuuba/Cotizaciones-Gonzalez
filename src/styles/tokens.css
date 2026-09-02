@@ -31,6 +31,20 @@
   --color-fill-strong: color-mix(in srgb, var(--palette-navy) 12%, var(--palette-white));
   --color-separator: color-mix(in srgb, var(--palette-navy) 13%, transparent);
   --color-label-secondary: color-mix(in srgb, var(--palette-navy) 68%, var(--palette-white));
+
+  /* Semantic type scale */
+  --font-size-auxiliary: 0.75rem;
+  --font-size-label: 0.8125rem;
+  --font-size-secondary: 0.875rem;
+  --font-size-body: 1rem;
+  --font-size-subtitle: 1.125rem;
+  --font-size-section-title: 1.25rem;
+  --font-size-page-title: clamp(1.75rem, 7vw, 2rem);
+  --font-size-featured-total: clamp(2rem, 9vw, 2.25rem);
+  --line-height-tight: 1.15;
+  --line-height-heading: 1.25;
+  --line-height-body: 1.5;
+
   --space-1: 0.25rem;
   --space-2: 0.5rem;
   --space-3: 0.75rem;
