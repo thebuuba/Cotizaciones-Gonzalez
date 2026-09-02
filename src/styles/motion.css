@@ -1,28 +1,30 @@
-/* Movimiento tipo iOS: navegación direccional sin desvanecidos que provoquen destellos. */
+/* Movimiento tipo iOS: pestañas instantáneas y pantallas secundarias direccionales. */
 .route-transition,
 .local-transition {
   min-width: 0;
-  transform: translateZ(0);
   backface-visibility: hidden;
-  will-change: transform;
 }
 
 .route-transition--initial {
-  animation: ios-initial-enter 180ms var(--ease-ios) both;
+  animation: ios-initial-enter 160ms var(--ease-ios) both;
 }
 
 .route-transition--forward,
 .local-transition--forward {
-  animation: ios-push-enter 340ms cubic-bezier(.22, .74, .18, 1) both;
+  will-change: transform;
+  animation: ios-push-enter 320ms cubic-bezier(.22, .74, .18, 1) both;
 }
 
 .route-transition--back,
 .local-transition--back {
-  animation: ios-pop-enter 320ms cubic-bezier(.22, .74, .18, 1) both;
+  will-change: transform;
+  animation: ios-pop-enter 300ms cubic-bezier(.22, .74, .18, 1) both;
 }
 
+/* iOS no desliza una pantalla completa al cambiar de pestaña inferior. */
 .route-transition--tab {
-  animation: ios-tab-enter 190ms var(--ease-ios) both;
+  animation: none;
+  transform: none;
 }
 
 :is(
@@ -82,7 +84,7 @@
 }
 
 .bottom-nav__item svg {
-  transition: transform 260ms cubic-bezier(.2, .8, .2, 1), stroke-width 220ms var(--ease-ios);
+  transition: transform 220ms cubic-bezier(.2, .8, .2, 1), stroke-width 200ms var(--ease-ios);
 }
 
 .bottom-nav__item.is-active svg {
@@ -91,26 +93,21 @@
 
 .actions-menu__dropdown {
   transform-origin: top right;
-  animation: ios-menu-enter 200ms cubic-bezier(.2, .8, .2, 1) both;
+  animation: ios-menu-enter 190ms cubic-bezier(.2, .8, .2, 1) both;
 }
 
 @keyframes ios-initial-enter {
-  from { transform: translate3d(0, 4px, 0) scale(.998); }
-  to { transform: translate3d(0, 0, 0) scale(1); }
+  from { transform: translate3d(0, 3px, 0); }
+  to { transform: translate3d(0, 0, 0); }
 }
 
 @keyframes ios-push-enter {
-  from { transform: translate3d(26px, 0, 0) scale(.997); }
-  to { transform: translate3d(0, 0, 0) scale(1); }
+  from { transform: translate3d(24px, 0, 0); }
+  to { transform: translate3d(0, 0, 0); }
 }
 
 @keyframes ios-pop-enter {
-  from { transform: translate3d(-20px, 0, 0) scale(.998); }
-  to { transform: translate3d(0, 0, 0) scale(1); }
-}
-
-@keyframes ios-tab-enter {
-  from { transform: translate3d(0, 2px, 0); }
+  from { transform: translate3d(-18px, 0, 0); }
   to { transform: translate3d(0, 0, 0); }
 }
 
@@ -134,12 +131,5 @@
     animation-delay: 0s !important;
     animation-iteration-count: 1 !important;
     transition-duration: .01ms !important;
-  }
-
-  ::view-transition-old(*),
-  ::view-transition-new(*),
-  ::view-transition-group(*) {
-    animation-duration: 0s !important;
-    animation-delay: 0s !important;
   }
 }
