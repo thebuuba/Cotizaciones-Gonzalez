@@ -35,6 +35,20 @@ describe('App shell', () => {
     expect(screen.getByRole('link', { name: 'Ajustes' })).toHaveAttribute('aria-current', 'page')
   })
 
+  it('restarts the subtle page entrance when the route changes', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+
+    const initialPage = screen.getByRole('main').querySelector('.route-transition')
+    expect(initialPage).toBeInTheDocument()
+
+    await user.click(screen.getByRole('link', { name: 'Ajustes' }))
+
+    const nextPage = screen.getByRole('main').querySelector('.route-transition')
+    expect(screen.getByRole('heading', { level: 1, name: 'Ajustes' })).toBeInTheDocument()
+    expect(nextPage).not.toBe(initialPage)
+  })
+
   it('gives every primary destination a large accessible page title', async () => {
     const user = userEvent.setup()
     render(<App />)

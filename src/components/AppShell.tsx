@@ -1,6 +1,9 @@
-import { Outlet } from 'react-router-dom'
+import { Outlet, useLocation } from 'react-router-dom'
 import { BottomNav } from './BottomNav'
 
 export function AppShell() {
-  return <div className="app-frame"><main className="app-content"><Outlet/></main><BottomNav/></div>
+  const location = useLocation()
+  const routeKey = `${location.pathname}${location.search}`
+
+  return <div className="app-frame"><main className="app-content"><div className="route-transition" key={routeKey}><Outlet/></div></main><BottomNav/></div>
 }

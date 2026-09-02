@@ -265,10 +265,6 @@ a { color: inherit; }
   .bottom-nav { right: calc((100vw - 48rem) / 2); left: calc((100vw - 48rem) / 2); }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
-}
-
 /* Premium iOS surface system */
 html { min-height: 100%; background: var(--palette-gray); }
 body {
@@ -1213,6 +1209,90 @@ h4 {
   .bottom-nav__item:hover {
     background: var(--color-fill);
     color: var(--color-primary);
+  }
+}
+
+/* Movimiento iOS sutil: continuidad de ruta, respuesta táctil y listas ligeras. */
+.route-transition {
+  min-width: 0;
+  animation: ios-route-enter var(--duration-route) var(--ease-ios) both;
+}
+
+.route-transition :is(.quote-card, .quotation-list-card, .client-card, .settings-row) {
+  animation: ios-item-enter var(--duration-item) var(--ease-ios) both;
+}
+
+.route-transition :is(.quote-card, .quotation-list-card, .client-card, .settings-row):nth-child(2) { animation-delay: 24ms; }
+.route-transition :is(.quote-card, .quotation-list-card, .client-card, .settings-row):nth-child(3) { animation-delay: 48ms; }
+.route-transition :is(.quote-card, .quotation-list-card, .client-card, .settings-row):nth-child(4) { animation-delay: 72ms; }
+.route-transition :is(.quote-card, .quotation-list-card, .client-card, .settings-row):nth-child(n + 5) { animation-delay: 96ms; }
+
+:is(
+  .button:not(:disabled),
+  .icon-button:not(:disabled),
+  .fab,
+  .bottom-nav__item,
+  .quote-card,
+  .quotation-card-main,
+  .client-card__edit,
+  .location-row button,
+  .quotation-new-button,
+  .actions-menu__item
+) {
+  transition-duration: var(--duration-press);
+  transition-property: transform, opacity, filter, color, background-color, box-shadow;
+  transition-timing-function: var(--ease-ios);
+}
+
+:is(
+  .button:not(:disabled),
+  .icon-button:not(:disabled),
+  .fab,
+  .bottom-nav__item,
+  .quote-card,
+  .quotation-card-main,
+  .client-card__edit,
+  .location-row button,
+  .quotation-new-button,
+  .actions-menu__item
+):active {
+  transform: scale(.975);
+}
+
+.bottom-nav__item svg {
+  transition: transform var(--duration-fast) var(--ease-ios), stroke-width var(--duration-fast) var(--ease-ios);
+}
+
+.bottom-nav__item.is-active svg {
+  transform: translateY(-1px) scale(1.06);
+}
+
+@keyframes ios-route-enter {
+  from { opacity: 0; transform: translateY(6px) scale(.995); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes ios-item-enter {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-delay: 0s !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+
+  ::view-transition-old(*),
+  ::view-transition-new(*),
+  ::view-transition-group(*) {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
   }
 }
 
