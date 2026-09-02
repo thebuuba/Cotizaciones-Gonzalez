@@ -11,7 +11,7 @@ function initials(name: string): string {
   return name.trim().split(/\s+/).slice(0, 2).map((part) => part[0]?.toUpperCase() ?? '').join('') || 'C'
 }
 
-export function ClientsPage({ clients, onSave, onStartQuotation: _onStartQuotation }: { clients: ClientRecord[]; onSave: (record: ClientRecord) => void | Promise<void>; onStartQuotation: (clientId: string, locationId?: string) => void }) {
+export function ClientsPage({ clients, onSave }: { clients: ClientRecord[]; onSave: (record: ClientRecord) => void | Promise<void>; onStartQuotation: (clientId: string, locationId?: string) => void }) {
   const [search, setSearch] = useState('')
   const [editing, setEditing] = useState<ClientRecord | 'new' | null>(null)
   const [transitionDirection, setTransitionDirection] = useState<'none' | 'forward' | 'back'>('none')
