@@ -223,7 +223,6 @@ a { color: inherit; }
 .icon-button { display: grid; width: var(--tap-target); height: var(--tap-target); padding: 0; place-items: center; border: 0; border-radius: var(--radius-pill); background: color-mix(in srgb, var(--color-text-muted) 10%, transparent); color: var(--color-text); cursor: pointer; }.icon-button svg { width: 1.25rem; }.icon-button--primary { background: var(--color-primary); color: #fff; }
 .client-list, .clients-page { display: grid; gap: var(--space-3); }
 .clients-page { gap: var(--space-4); }
-.clients-page .page-actions { position: sticky; top: 0; z-index: 5; }
 .client-card {
   display: flex;
   align-items: center;

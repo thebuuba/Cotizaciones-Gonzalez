@@ -13,16 +13,14 @@ export function ClientsPage({ clients, onSave, onStartQuotation }: { clients: Cl
   if (editing) return <ClientForm initialValue={editing === 'new' ? undefined : editing} onCancel={() => setEditing(null)} onSave={async (record) => { await onSave(record); setEditing(null) }}/>
   return <div className="clients-page">
     <PageHeader title="Clientes" subtitle="Contactos y ubicaciones"/>
-    <div className="page-actions">
-      <label className="search-field">
-        <Search aria-hidden="true"/>
-        <input type="search" aria-label="Buscar clientes" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar"/>
-      </label>
-      <button className="icon-button icon-button--primary" type="button" onClick={() => setEditing('new')} aria-label="Nuevo cliente"><Plus aria-hidden="true"/></button>
+    <div className="search-field">
+      <Search aria-hidden="true"/>
+      <input type="search" aria-label="Buscar clientes" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar"/>
     </div>
     {filtered.length ? <ul className="client-list" aria-label="Lista de clientes">{filtered.map((record) => { const { client } = record; return <li className="client-card" key={client.id} onClick={() => setEditing(record)}>
       <span className="client-card__avatar"><UserRound aria-hidden="true"/></span>
       <h2>{client.name}</h2>
     </li> })}</ul> : <EmptyState Icon={UserRound} title="Sin clientes" description="Agrega tu primer cliente para comenzar." action={<button className="button button--primary" type="button" onClick={() => setEditing('new')}>Agregar cliente</button>} />}
+    <button className="fab" type="button" onClick={() => setEditing('new')} aria-label="Nuevo cliente"><Plus aria-hidden="true"/></button>
   </div>
 }
