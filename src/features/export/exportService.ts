@@ -6,7 +6,7 @@ async function waitForAssets(element: HTMLElement): Promise<void> {
   if (document.fonts) await document.fonts.ready
   const images = Array.from(element.querySelectorAll('img'))
   await Promise.all(images.map(async (image) => {
-    if (image.complete) return
+    if (image.complete && image.naturalWidth > 0) return
     if (image.decode) {
       try { await image.decode() } catch { /* ignore */ }
     }
@@ -16,13 +16,19 @@ async function waitForAssets(element: HTMLElement): Promise<void> {
       image.onerror = () => resolve()
     })
   }))
-  await new Promise<void>((r) => setTimeout(r, 150))
+  await new Promise<void>((resolve) => setTimeout(resolve, 100))
 }
 
 export async function renderPagePng(element: HTMLElement): Promise<Blob> {
   await waitForAssets(element)
+  if (element.offsetWidth < 100 || element.offsetHeight < 100) throw new Error('La página de la cotización no tiene un tamaño válido para exportar.')
+
   const { toBlob } = await import('html-to-image')
-  const blob = await toBlob(element, { pixelRatio: 4, backgroundColor: '#ffffff', cacheBust: true })
+  const blob = await toBlob(element, {
+    pixelRatio: 2.5,
+    backgroundColor: '#ffffff',
+    cacheBust: true,
+  })
   if (!blob) throw new Error('No se pudo crear la imagen de la cotización.')
   return blob
 }
@@ -42,6 +48,7 @@ async function withStableViewport<T>(work: () => Promise<T>): Promise<T> {
 }
 
 export async function exportQuotationImages(elements: readonly HTMLElement[], baseName: string): Promise<File[]> {
+  if (!elements.length) throw new Error('No hay páginas para exportar.')
   const safeName = sanitizeExportName(baseName)
   return withStableViewport(async () => {
     const files: File[] = []
@@ -85,8 +92,10 @@ function downloadFile(file: File): void {
   const anchor = document.createElement('a')
   anchor.href = url
   anchor.download = file.name
+  document.body.appendChild(anchor)
   anchor.click()
-  URL.revokeObjectURL(url)
+  anchor.remove()
+  window.setTimeout(() => URL.revokeObjectURL(url), 1000)
 }
 
 export async function shareOrDownload(files: File[]): Promise<'shared' | 'downloaded'> {
