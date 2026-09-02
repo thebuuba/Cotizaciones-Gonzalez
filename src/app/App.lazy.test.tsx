@@ -1,6 +1,6 @@
 import { expect, it, vi } from 'vitest'
 
-it('defers route-only screens until their route is opened', async () => {
+it('loads route screens eagerly so primary tab changes do not flash the previous panel', async () => {
   vi.resetModules()
   let loadedRouteScreens = 0
 
@@ -19,5 +19,5 @@ it('defers route-only screens until their route is opened', async () => {
 
   await import('./App')
 
-  expect(loadedRouteScreens).toBe(0)
+  expect(loadedRouteScreens).toBe(5)
 })
