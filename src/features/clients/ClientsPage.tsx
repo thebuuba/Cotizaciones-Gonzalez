@@ -14,7 +14,7 @@ function initials(name: string): string {
 export function ClientsPage({ clients, onSave, onStartQuotation: _onStartQuotation }: { clients: ClientRecord[]; onSave: (record: ClientRecord) => void | Promise<void>; onStartQuotation: (clientId: string, locationId?: string) => void }) {
   const [search, setSearch] = useState('')
   const [editing, setEditing] = useState<ClientRecord | 'new' | null>(null)
-  const [transitionDirection, setTransitionDirection] = useState<'forward' | 'back'>('forward')
+  const [transitionDirection, setTransitionDirection] = useState<'none' | 'forward' | 'back'>('none')
   const deferred = useDeferredValue(search)
   const filtered = useMemo(() => clients.filter(({ client }) => client.name.toLocaleLowerCase('es').includes(deferred.trim().toLocaleLowerCase('es'))), [clients, deferred])
 
@@ -28,9 +28,11 @@ export function ClientsPage({ clients, onSave, onStartQuotation: _onStartQuotati
     setEditing(null)
   }
 
-  if (editing) return <div className={`local-transition local-transition--${transitionDirection}`}><ClientForm initialValue={editing === 'new' ? undefined : editing} onCancel={closeClient} onSave={async (record) => { await onSave(record); closeClient() }}/></div>
+  const transitionClass = transitionDirection === 'none' ? 'local-transition' : `local-transition local-transition--${transitionDirection}`
 
-  return <div className={`clients-page clients-panel local-transition local-transition--${transitionDirection}`}>
+  if (editing) return <div className={transitionClass}><ClientForm initialValue={editing === 'new' ? undefined : editing} onCancel={closeClient} onSave={async (record) => { await onSave(record); closeClient() }}/></div>
+
+  return <div className={`clients-page clients-panel ${transitionClass}`}>
     <PageHeader title="Clientes" subtitle="Contactos y ubicaciones"/>
     <div className="clients-toolbar">
       <label className="clients-search">
