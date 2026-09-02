@@ -42,9 +42,7 @@
   stroke-width: 2.25;
 }
 
-.quotation-detail-nav .actions-menu {
-  justify-self: end;
-}
+.quotation-detail-nav .actions-menu { justify-self: end; }
 
 .quotation-detail-menu-button {
   display: grid;
@@ -59,18 +57,9 @@
   cursor: pointer;
 }
 
-.quotation-detail-menu-button svg {
-  width: 1.35rem;
-  height: 1.35rem;
-}
-
-.quotation-detail-menu {
-  top: calc(100% - .25rem);
-}
-
-.quotation-detail-menu a {
-  text-decoration: none;
-}
+.quotation-detail-menu-button svg { width: 1.35rem; height: 1.35rem; }
+.quotation-detail-menu { top: calc(100% - .25rem); }
+.quotation-detail-menu a { text-decoration: none; }
 
 .quotation-detail-hero {
   display: grid;
@@ -107,11 +96,7 @@
   line-height: 1.3;
 }
 
-.quotation-detail-hero p svg {
-  flex: 0 0 auto;
-  width: .85rem;
-  height: .85rem;
-}
+.quotation-detail-hero p svg { flex: 0 0 auto; width: .85rem; height: .85rem; }
 
 .quotation-detail-hero > strong {
   margin-top: .8rem;
@@ -144,30 +129,12 @@
   appearance: auto;
 }
 
-.quotation-status-control--draft {
-  background: #e9ebef;
-  color: #6f7380;
-}
+.quotation-status-control--draft { background: #e9ebef; color: #6f7380; }
+.quotation-status-control--sent { background: #fff3dd; color: #d98700; }
+.quotation-status-control--approved { background: #dff8ed; color: #0d9464; }
+.quotation-status-control--rejected { background: color-mix(in srgb, var(--color-danger) 12%, white); color: var(--color-danger); }
 
-.quotation-status-control--sent {
-  background: #fff3dd;
-  color: #d98700;
-}
-
-.quotation-status-control--approved {
-  background: #dff8ed;
-  color: #0d9464;
-}
-
-.quotation-status-control--rejected {
-  background: color-mix(in srgb, var(--color-danger) 12%, white);
-  color: var(--color-danger);
-}
-
-.quotation-detail-group {
-  display: grid;
-  gap: .45rem;
-}
+.quotation-detail-group { display: grid; gap: .45rem; }
 
 .quotation-detail-group > h2 {
   margin: 0;
@@ -199,24 +166,11 @@
   font-size: var(--font-size-secondary);
 }
 
-.quotation-detail-row + .quotation-detail-row {
-  border-top: 1px solid var(--color-separator);
-}
-
-.quotation-detail-row > span {
-  color: var(--color-text-strong);
-}
-
-.quotation-detail-row > strong {
-  font-weight: var(--font-weight-medium);
-  font-variant-numeric: tabular-nums;
-  text-align: right;
-}
-
+.quotation-detail-row + .quotation-detail-row { border-top: 1px solid var(--color-separator); }
+.quotation-detail-row > span { color: var(--color-text-strong); }
+.quotation-detail-row > strong { font-weight: var(--font-weight-medium); font-variant-numeric: tabular-nums; text-align: right; }
 .quotation-detail-row--total > span,
-.quotation-detail-row--total > strong {
-  font-weight: var(--font-weight-bold);
-}
+.quotation-detail-row--total > strong { font-weight: var(--font-weight-bold); }
 
 .quotation-material-row {
   display: grid;
@@ -227,15 +181,8 @@
   padding: .7rem .85rem;
 }
 
-.quotation-material-row + .quotation-material-row {
-  border-top: 1px solid var(--color-separator);
-}
-
-.quotation-material-row > div {
-  display: grid;
-  min-width: 0;
-  gap: .15rem;
-}
+.quotation-material-row + .quotation-material-row { border-top: 1px solid var(--color-separator); }
+.quotation-material-row > div { display: grid; min-width: 0; gap: .15rem; }
 
 .quotation-material-row > div > strong {
   overflow: hidden;
@@ -247,10 +194,7 @@
   white-space: nowrap;
 }
 
-.quotation-material-row small {
-  color: var(--color-label-secondary);
-  font-size: var(--font-size-auxiliary);
-}
+.quotation-material-row small { color: var(--color-label-secondary); font-size: var(--font-size-auxiliary); }
 
 .quotation-material-row > strong {
   color: var(--color-text-strong);
@@ -268,9 +212,7 @@
   line-height: 1.45;
 }
 
-.quotation-detail-actions {
-  display: grid;
-}
+.quotation-detail-actions { display: grid; }
 
 .quotation-detail-action {
   display: grid;
@@ -287,14 +229,8 @@
   cursor: pointer;
 }
 
-.quotation-detail-action + .quotation-detail-action {
-  border-top: 1px solid var(--color-separator);
-}
-
-.quotation-detail-action:disabled {
-  cursor: wait;
-  opacity: .55;
-}
+.quotation-detail-action + .quotation-detail-action { border-top: 1px solid var(--color-separator); }
+.quotation-detail-action:disabled { cursor: wait; opacity: .55; }
 
 .quotation-detail-action-icon {
   display: grid;
@@ -306,26 +242,10 @@
   color: #e89000;
 }
 
-.quotation-detail-action-icon svg {
-  width: 1.05rem;
-  height: 1.05rem;
-}
-
-.quotation-detail-action > span:last-child {
-  display: grid;
-  min-width: 0;
-  gap: .12rem;
-}
-
-.quotation-detail-action strong {
-  font-size: var(--font-size-secondary);
-  font-weight: var(--font-weight-bold);
-}
-
-.quotation-detail-action small {
-  color: var(--color-label-secondary);
-  font-size: var(--font-size-auxiliary);
-}
+.quotation-detail-action-icon svg { width: 1.05rem; height: 1.05rem; }
+.quotation-detail-action > span:last-child { display: grid; min-width: 0; gap: .12rem; }
+.quotation-detail-action strong { font-size: var(--font-size-secondary); font-weight: var(--font-weight-bold); }
+.quotation-detail-action small { color: var(--color-label-secondary); font-size: var(--font-size-auxiliary); }
 
 .quotation-detail-export-message {
   min-height: 1rem;
@@ -336,30 +256,45 @@
 }
 
 .quotation-detail-preview-frame {
-  overflow-x: auto;
-  padding: .5rem;
+  width: 100%;
+  overflow: hidden;
+  padding: .55rem;
   border: 1px solid #e4e4e8;
   border-radius: 1rem;
   background: #e9eaed;
   box-shadow: inset 0 1px 2px rgb(20 33 61 / 5%);
-  overscroll-behavior-x: contain;
 }
 
 .quotation-detail-preview-frame .document-preview {
-  width: max-content;
+  width: 100%;
   margin: 0 auto;
 }
 
+.quotation-detail-preview-frame .quotation-page {
+  width: 100%;
+  max-width: 794px;
+}
+
+/* Render de exportación a tamaño A4 fijo. Está fuera de pantalla, pero sigue renderizado. */
+.quotation-export-stage {
+  position: fixed;
+  top: 0;
+  left: -10000px;
+  z-index: -1;
+  width: 794px;
+  pointer-events: none;
+}
+
+.quotation-export-stage .document-preview,
+.quotation-export-stage .quotation-page {
+  width: 794px;
+  max-width: none;
+}
+
+.quotation-export-stage .quotation-page { box-shadow: none; }
+
 @media (max-width: 23rem) {
-  .quotation-detail-hero h1 {
-    font-size: 1.3rem;
-  }
-
-  .quotation-detail-hero > strong {
-    font-size: 1.75rem;
-  }
-
-  .quotation-detail-nav-back {
-    font-size: var(--font-size-label);
-  }
+  .quotation-detail-hero h1 { font-size: 1.3rem; }
+  .quotation-detail-hero > strong { font-size: 1.75rem; }
+  .quotation-detail-nav-back { font-size: var(--font-size-label); }
 }
