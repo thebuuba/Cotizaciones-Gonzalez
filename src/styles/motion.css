@@ -36,8 +36,8 @@
   .client-panel-card,
   .clients-add,
   .client-detail-nav-back,
-  .client-detail-add-location,
-  .client-location-remove,
+  .client-detail-text-action,
+  .client-location-card-header button,
   .location-row button,
   .quotation-new-button,
   .actions-menu__item
@@ -64,8 +64,8 @@
   .client-panel-card,
   .clients-add,
   .client-detail-nav-back,
-  .client-detail-add-location,
-  .client-location-remove,
+  .client-detail-text-action,
+  .client-location-card-header button,
   .location-row button,
   .quotation-new-button,
   .actions-menu__item
@@ -88,7 +88,7 @@
   animation: ios-menu-enter 220ms cubic-bezier(.2, .8, .2, 1) both;
 }
 
-.client-location-card,
+.client-location-card-reference,
 .quote-card,
 .quotation-list-card,
 .client-panel-card,
@@ -96,12 +96,12 @@
   animation: ios-item-enter 300ms var(--ease-ios) both;
 }
 
-.client-location-card:nth-child(2),
+.client-location-card-reference:nth-child(2),
 .recent-list > li:nth-child(2),
 .quotation-list > li:nth-child(2),
 .client-panel-list > li:nth-child(2) { animation-delay: 24ms; }
 
-.client-location-card:nth-child(3),
+.client-location-card-reference:nth-child(3),
 .recent-list > li:nth-child(3),
 .quotation-list > li:nth-child(3),
 .client-panel-list > li:nth-child(3) { animation-delay: 48ms; }
