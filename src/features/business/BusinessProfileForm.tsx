@@ -1,16 +1,5 @@
 import { useState, type ChangeEvent, type FormEvent } from 'react'
-import {
-  Building2,
-  Check,
-  FileText,
-  Images,
-  Landmark,
-  LoaderCircle,
-  ScrollText,
-  TriangleAlert,
-  UserRoundCog,
-  type LucideIcon,
-} from 'lucide-react'
+import { Check, LoaderCircle, TriangleAlert } from 'lucide-react'
 
 import { createDefaultBusinessProfile } from '../../db/defaults'
 import { FormErrorSummary } from '../../components/FormErrorSummary'
@@ -35,18 +24,6 @@ const empty: BusinessProfileDraft = {
 export type BusinessProfileFormValue = BusinessProfileDraft & { logoBlob?: Blob; stampBlob?: Blob }
 type SaveState = 'idle' | 'saving' | 'saved' | 'error'
 
-function FormSectionHeading({ id, Icon, title, description }: {
-  id: string
-  Icon: LucideIcon
-  title: string
-  description: string
-}) {
-  return <div className="form-section__header">
-    <span className="form-section__icon"><Icon aria-hidden="true" /></span>
-    <div><h3 id={id}>{title}</h3><small>{description}</small></div>
-  </div>
-}
-
 export function BusinessProfileForm({ initialValue = empty, onSave }: {
   initialValue?: BusinessProfileFormValue
   onSave: (value: BusinessProfileFormValue) => void | Promise<void>
@@ -56,36 +33,27 @@ export function BusinessProfileForm({ initialValue = empty, onSave }: {
   const [stampBlob, setStampBlob] = useState<Blob | undefined>(initialValue.stampBlob)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [saveState, setSaveState] = useState<SaveState>('idle')
+  const [dirty, setDirty] = useState(false)
 
+  const markDirty = () => { setDirty(true); setSaveState('idle') }
   const textField = (name: keyof BusinessProfileDraft) => ({
     value: String(value[name]),
     onChange: (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      setSaveState('idle')
+      markDirty()
       setValue((current) => ({ ...current, [name]: event.target.value }))
     },
   })
   const updateTerm = (index: number, term: string) => {
-    setSaveState('idle')
-    setValue((current) => ({
-      ...current,
-      terms: current.terms.map((item, itemIndex) => itemIndex === index ? term : item),
-    }))
+    markDirty()
+    setValue((current) => ({ ...current, terms: current.terms.map((item, itemIndex) => itemIndex === index ? term : item) }))
   }
   const updateAccount = (index: number, field: 'bank' | 'type' | 'number', nextValue: string) => {
-    setSaveState('idle')
-    setValue((current) => ({
-      ...current,
-      bankAccounts: current.bankAccounts.map((account, accountIndex) => accountIndex === index ? { ...account, [field]: nextValue } : account),
-    }))
+    markDirty()
+    setValue((current) => ({ ...current, bankAccounts: current.bankAccounts.map((account, accountIndex) => accountIndex === index ? { ...account, [field]: nextValue } : account) }))
   }
-  const selectLogo = (event: ChangeEvent<HTMLInputElement>) => {
-    setSaveState('idle')
-    setLogoBlob(event.target.files?.[0])
-  }
-  const selectStamp = (event: ChangeEvent<HTMLInputElement>) => {
-    setSaveState('idle')
-    setStampBlob(event.target.files?.[0])
-  }
+  const selectLogo = (event: ChangeEvent<HTMLInputElement>) => { markDirty(); setLogoBlob(event.target.files?.[0]) }
+  const selectStamp = (event: ChangeEvent<HTMLInputElement>) => { markDirty(); setStampBlob(event.target.files?.[0]) }
+
   const submit = async (event: FormEvent) => {
     event.preventDefault()
     const parsed = businessProfileSchema.safeParse(value)
@@ -98,65 +66,83 @@ export function BusinessProfileForm({ initialValue = empty, onSave }: {
     setSaveState('saving')
     try {
       await onSave({ ...parsed.data, logoBlob, stampBlob })
+      setDirty(false)
       setSaveState('saved')
     } catch {
       setSaveState('error')
     }
   }
 
-  return <form className="form-card business-profile-form" onSubmit={submit} noValidate>
-    <div className="business-profile-form__intro">
-      <span className="business-profile-form__icon"><Building2 aria-hidden="true" /></span>
-      <div><h2>Perfil del negocio</h2><p>Estos datos se colocarán automáticamente en cada cotización.</p></div>
+  return <form className="settings-business-form" onSubmit={submit} noValidate>
+    <div className="settings-business-heading">
+      <h2>Datos del negocio</h2>
+      <p>Esta información aparece automáticamente en tus cotizaciones.</p>
     </div>
+
     <FormErrorSummary errors={errors} />
 
-    <section className="form-section" aria-labelledby="business-brand-title">
-      <FormSectionHeading id="business-brand-title" Icon={Images} title="Marca" description="Identidad visible en el encabezado de tus documentos." />
-      <label>Nombre del negocio<input {...textField('businessName')} aria-invalid={Boolean(errors.businessName)} />{errors.businessName && <span className="field-error">{errors.businessName}</span>}</label>
-      <label>Lema principal<textarea {...textField('tagline')} /></label>
-      <label>Teléfono del encabezado<input type="tel" {...textField('headerPhone')} /></label>
-      <div className="form-grid"><label>Logo<input type="file" accept="image/*" onChange={selectLogo} /></label><label>Sello<input type="file" accept="image/*" onChange={selectStamp} /></label></div>
+    <section className="settings-form-section" aria-labelledby="business-brand-title">
+      <h3 id="business-brand-title">Marca</h3>
+      <div className="settings-form-group">
+        <label className="settings-form-row"><span>Nombre</span><input {...textField('businessName')} aria-invalid={Boolean(errors.businessName)} /></label>
+        {errors.businessName && <span className="field-error settings-form-error">{errors.businessName}</span>}
+        <label className="settings-form-block"><span>Lema principal</span><textarea {...textField('tagline')} /></label>
+        <label className="settings-form-row"><span>Teléfono</span><input type="tel" {...textField('headerPhone')} /></label>
+        <label className="settings-form-file"><span>Logo</span><input type="file" accept="image/*" onChange={selectLogo} /></label>
+        <label className="settings-form-file"><span>Sello</span><input type="file" accept="image/*" onChange={selectStamp} /></label>
+      </div>
+      <p className="settings-ios-help">Identidad visible en el encabezado de cada documento.</p>
     </section>
 
-    <section className="form-section" aria-labelledby="business-terms-title">
-      <FormSectionHeading id="business-terms-title" Icon={ScrollText} title="Términos y condiciones" description="Condiciones que acompañan cada propuesta comercial." />
-      {value.terms.map((term, index) => <label key={index}>Término {index + 1}<textarea value={term} onChange={(event) => updateTerm(index, event.target.value)} /></label>)}
+    <section className="settings-form-section" aria-labelledby="business-manager-title">
+      <h3 id="business-manager-title">Contacto</h3>
+      <div className="settings-form-group">
+        <label className="settings-form-row"><span>Gerente</span><input {...textField('managerName')} aria-invalid={Boolean(errors.managerName)} /></label>
+        {errors.managerName && <span className="field-error settings-form-error">{errors.managerName}</span>}
+        <label className="settings-form-row"><span>Cargo</span><input {...textField('managerTitle')} /></label>
+        <label className="settings-form-row"><span>Llamadas</span><input type="tel" {...textField('directPhone')} /></label>
+        <label className="settings-form-row"><span>WhatsApp</span><input type="tel" {...textField('whatsappPhone')} /></label>
+      </div>
     </section>
 
-    <section className="form-section" aria-labelledby="business-accounts-title">
-      <FormSectionHeading id="business-accounts-title" Icon={Landmark} title="Cuentas bancarias" description="Datos de pago incluidos al final de la cotización." />
-      {value.bankAccounts.map((account, index) => <fieldset className="bank-account" key={account.id}><legend>Cuenta {index + 1}</legend>
-        <label>Banco {index + 1}<input value={account.bank} onChange={(event) => updateAccount(index, 'bank', event.target.value)} /></label>
-        <label>Tipo de cuenta {index + 1}<input value={account.type} onChange={(event) => updateAccount(index, 'type', event.target.value)} /></label>
-        <label>Número de cuenta {index + 1}<input value={account.number} onChange={(event) => updateAccount(index, 'number', event.target.value)} /></label>
-      </fieldset>)}
+    <section className="settings-form-section" aria-labelledby="business-accounts-title">
+      <h3 id="business-accounts-title">Cuentas bancarias</h3>
+      <div className="settings-bank-list">
+        {value.bankAccounts.map((account, index) => <fieldset className="settings-bank-card" key={account.id}>
+          <legend>Cuenta {index + 1}</legend>
+          <label className="settings-form-row"><span>Banco</span><input aria-label={`Banco ${index + 1}`} value={account.bank} onChange={(event) => updateAccount(index, 'bank', event.target.value)} /></label>
+          <label className="settings-form-row"><span>Tipo</span><input aria-label={`Tipo de cuenta ${index + 1}`} value={account.type} onChange={(event) => updateAccount(index, 'type', event.target.value)} /></label>
+          <label className="settings-form-row"><span>Número</span><input aria-label={`Número de cuenta ${index + 1}`} value={account.number} onChange={(event) => updateAccount(index, 'number', event.target.value)} /></label>
+        </fieldset>)}
+      </div>
+      <p className="settings-ios-help">Datos de pago incluidos al final de la cotización.</p>
     </section>
 
-    <section className="form-section" aria-labelledby="business-manager-title">
-      <FormSectionHeading id="business-manager-title" Icon={UserRoundCog} title="Gerente y teléfonos" description="Contacto responsable que recibirá el cliente." />
-      <label>Nombre del gerente<input {...textField('managerName')} aria-invalid={Boolean(errors.managerName)} />{errors.managerName && <span className="field-error">{errors.managerName}</span>}</label>
-      <label>Cargo<input {...textField('managerTitle')} /></label>
-      <label>Teléfono para llamadas<input type="tel" {...textField('directPhone')} /></label>
-      <label>Teléfono de WhatsApp<input type="tel" {...textField('whatsappPhone')} /></label>
+    <section className="settings-form-section" aria-labelledby="business-terms-title">
+      <h3 id="business-terms-title">Términos y condiciones</h3>
+      <div className="settings-form-group settings-form-group--blocks">
+        {value.terms.map((term, index) => <label className="settings-form-block" key={index}><span>Término {index + 1}</span><textarea value={term} onChange={(event) => updateTerm(index, event.target.value)} /></label>)}
+      </div>
     </section>
 
-    <section className="form-section" aria-labelledby="business-footer-title">
-      <FormSectionHeading id="business-footer-title" Icon={FileText} title="Pie de página" description="Mensajes de cierre y valores del negocio." />
-      <label>Mensaje de calidad<textarea {...textField('footerQuality')} /></label>
-      <label>Mensaje de compromiso<textarea {...textField('footerCommitment')} /></label>
-      <label>Mensaje final<textarea {...textField('footerFaith')} /></label>
+    <section className="settings-form-section" aria-labelledby="business-footer-title">
+      <h3 id="business-footer-title">Pie de página</h3>
+      <div className="settings-form-group settings-form-group--blocks">
+        <label className="settings-form-block"><span>Mensaje de calidad</span><textarea {...textField('footerQuality')} /></label>
+        <label className="settings-form-block"><span>Mensaje de compromiso</span><textarea {...textField('footerCommitment')} /></label>
+        <label className="settings-form-block"><span>Mensaje final</span><textarea {...textField('footerFaith')} /></label>
+      </div>
     </section>
 
-    <div className="settings-save-bar">
+    {(dirty || saveState !== 'idle') && <div className="settings-ios-savebar">
       <span className="settings-save-feedback" aria-live="polite">
-        {saveState === 'saving' && <span className="settings-save-feedback--saving" role="status"><LoaderCircle className="is-spinning" aria-hidden="true" />Guardando cambios</span>}
-        {saveState === 'saved' && <span className="settings-save-feedback--saved" role="status"><Check aria-hidden="true" />Ajustes guardados</span>}
-        {saveState === 'error' && <span className="settings-save-feedback--error" role="alert"><TriangleAlert aria-hidden="true" />No se pudieron guardar los ajustes. Intenta nuevamente.</span>}
+        {saveState === 'saving' && <span className="settings-save-feedback--saving" role="status"><LoaderCircle className="is-spinning" aria-hidden="true" />Guardando</span>}
+        {saveState === 'saved' && <span className="settings-save-feedback--saved" role="status"><Check aria-hidden="true" />Cambios guardados</span>}
+        {saveState === 'error' && <span className="settings-save-feedback--error" role="alert"><TriangleAlert aria-hidden="true" />No se pudo guardar</span>}
       </span>
-      <button className="button button--primary" type="submit" disabled={saveState === 'saving'}>
-        {saveState === 'saving' ? <><LoaderCircle className="is-spinning" aria-hidden="true" />Guardando ajustes</> : <><Check aria-hidden="true" />Guardar ajustes</>}
-      </button>
-    </div>
+      {dirty && <button className="button button--primary" type="submit" disabled={saveState === 'saving'}>
+        {saveState === 'saving' ? <><LoaderCircle className="is-spinning" aria-hidden="true" />Guardando</> : <><Check aria-hidden="true" />Guardar</>}
+      </button>}
+    </div>}
   </form>
 }
