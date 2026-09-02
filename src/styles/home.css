@@ -14,8 +14,8 @@
   max-width: 19rem;
   margin: 0;
   color: #050505;
-  font-size: 2rem;
-  font-weight: 800;
+  font-size: var(--font-size-page-title);
+  font-weight: var(--font-weight-heavy);
   letter-spacing: -.035em;
   line-height: 1.02;
 }
@@ -23,7 +23,8 @@
 .dashboard .welcome p {
   margin: .15rem 0 0;
   color: #6b6b78;
-  font-size: 1rem;
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-regular);
   line-height: 1.25;
 }
 
@@ -46,7 +47,7 @@
 .dashboard .total-card > div > span {
   color: #fff;
   font-size: .78rem;
-  font-weight: 550;
+  font-weight: var(--font-weight-medium);
   opacity: .9;
 }
 
@@ -66,7 +67,7 @@
   margin-top: .45rem;
   color: #fff;
   font-size: 1.78rem;
-  font-weight: 800;
+  font-weight: var(--font-weight-heavy);
   letter-spacing: -.035em;
   line-height: 1;
   white-space: nowrap;
@@ -118,7 +119,7 @@
   margin-top: .08rem;
   color: #050505;
   font-size: .9rem;
-  font-weight: 750;
+  font-weight: var(--font-weight-bold);
   line-height: 1.1;
 }
 
@@ -239,8 +240,6 @@
 }
 
 @media (max-width: 23rem) {
-  .dashboard .welcome h1 { font-size: 1.45rem; }
-  .dashboard .total-card > strong { font-size: 1.55rem; }
   .dashboard .stats-grid { gap: .45rem; }
   .dashboard .stat-card { min-height: 5.75rem; padding-inline: .2rem; }
 }
