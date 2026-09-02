@@ -38,7 +38,7 @@ describe('App shell', () => {
     expect(screen.getByRole('link', { name: 'Ajustes' })).toHaveAttribute('aria-current', 'page')
   })
 
-  it('restarts the subtle page entrance when the route changes', async () => {
+  it('keeps the primary tab container stable to avoid visual flicker', async () => {
     const user = userEvent.setup()
     render(<App />)
 
@@ -49,7 +49,8 @@ describe('App shell', () => {
     await screen.findByRole('heading', { level: 1, name: 'Ajustes' })
 
     const nextPage = screen.getByRole('main').querySelector('.route-transition')
-    expect(nextPage).not.toBe(initialPage)
+    expect(nextPage).toBe(initialPage)
+    expect(nextPage).toHaveClass('route-transition--tab')
   })
 
   it('gives every primary destination a large accessible page title', async () => {
