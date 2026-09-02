@@ -363,8 +363,8 @@ a { color: inherit; }
 /* Client panel — reference layout */
 .clients-panel { width: 100%; max-width: 34rem; margin: 0 auto; gap: 1.45rem; }
 .clients-panel .page-header { padding-bottom: .05rem; }
-.clients-panel .page-header h1 { font-size: 2rem; font-weight: 760; letter-spacing: -.04em; }
-.clients-panel .page-header p { margin-top: .15rem; color: #6b6b76; font-size: 1rem; }
+.clients-panel .page-header h1 { font-size: var(--font-size-page-title); font-weight: var(--font-weight-heavy); letter-spacing: -.04em; }
+.clients-panel .page-header p { margin-top: .15rem; color: #6b6b76; font-size: var(--font-size-body); font-weight: var(--font-weight-regular); }
 
 .clients-toolbar { display: grid; grid-template-columns: minmax(0, 1fr) 3.5rem; align-items: center; gap: .75rem; }
 .clients-search { position: relative; display: flex; min-width: 0; align-items: center; }
@@ -380,14 +380,14 @@ a { color: inherit; }
 .client-panel-list { display: grid; gap: .7rem; }
 .client-panel-card { display: grid; grid-template-columns: 2.8rem minmax(0, 1fr) auto; width: 100%; min-height: 4.65rem; align-items: center; gap: .9rem; padding: .7rem 1rem .7rem .85rem; border: 1px solid #e4e4e8; border-radius: 1.1rem; background: #fff; box-shadow: 0 1px 2px rgb(20 33 61 / 10%); color: #111; text-align: left; cursor: pointer; }
 .client-panel-card:active { background: #fafafa; }
-.client-panel-avatar { display: grid; width: 2.8rem; height: 2.8rem; place-items: center; border-radius: 50%; color: #fff; font-size: .85rem; font-weight: 750; letter-spacing: -.01em; }
+.client-panel-avatar { display: grid; width: 2.8rem; height: 2.8rem; place-items: center; border-radius: 50%; color: #fff; font-size: .85rem; font-weight: var(--font-weight-bold); letter-spacing: -.01em; }
 .client-avatar--blue { background: #3b82f6; }
 .client-avatar--pink { background: #ec4899; }
 .client-avatar--green { background: #10b981; }
 .client-avatar--purple { background: #8b5cf6; }
 .client-avatar--orange { background: #f97316; }
 .client-panel-info { display: grid; min-width: 0; gap: .18rem; }
-.client-panel-info strong { overflow: hidden; color: #050505; font-size: 1rem; font-weight: 700; line-height: 1.2; text-overflow: ellipsis; white-space: nowrap; }
+.client-panel-info strong { overflow: hidden; color: #050505; font-size: 1rem; font-weight: var(--font-weight-bold); line-height: 1.2; text-overflow: ellipsis; white-space: nowrap; }
 .client-panel-info small { display: flex; min-width: 0; align-items: center; gap: .25rem; overflow: hidden; color: #70717c; font-size: .82rem; line-height: 1.25; text-overflow: ellipsis; white-space: nowrap; }
 .client-panel-info small svg { flex: 0 0 auto; width: .8rem; height: .8rem; stroke-width: 1.8; }
 .client-panel-chevron { width: 1.15rem; height: 1.15rem; color: #b9bbc2; stroke-width: 1.8; }
@@ -396,4 +396,76 @@ a { color: inherit; }
   .clients-toolbar { grid-template-columns: minmax(0, 1fr) 3.25rem; gap: .6rem; }
   .clients-add { width: 3.25rem; }
   .client-panel-card { padding-right: .75rem; }
+}
+
+
+/* Unified application scale and typography */
+.dashboard,
+.clients-panel,
+.quotations-page,
+.settings-page,
+.quotation-detail,
+.quotation-editor {
+  width: 100%;
+  max-width: 34rem;
+  margin-inline: auto;
+}
+
+.page-header h1,
+.welcome h1 {
+  color: var(--color-text-strong);
+  font-size: var(--font-size-page-title);
+  font-weight: var(--font-weight-heavy);
+  letter-spacing: -.04em;
+  line-height: 1.05;
+}
+
+.page-header p,
+.welcome p {
+  color: var(--color-label-secondary);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-regular);
+  line-height: 1.3;
+}
+
+.client-panel-info strong,
+.quotation-card-copy strong,
+.quote-card__content h3,
+.settings-row strong,
+.form-section h3 {
+  font-weight: var(--font-weight-bold);
+}
+
+.quotation-card-total > strong,
+.quote-card__aside > strong,
+.detail-summary > strong,
+.general-total strong,
+.total-card > strong {
+  font-weight: var(--font-weight-heavy);
+}
+
+.client-panel-info small,
+.quotation-card-copy small,
+.quote-card__content > span,
+.settings-row small,
+.form-section__header small,
+.business-profile-form__intro p {
+  font-weight: var(--font-weight-regular);
+}
+
+.button,
+.quotation-new-button,
+.form-card label,
+.quotation-editor label {
+  font-weight: var(--font-weight-semibold);
+}
+
+.status-badge,
+.sync-badge {
+  font-weight: var(--font-weight-medium);
+}
+
+.section-label,
+.recent h2 {
+  font-weight: var(--font-weight-bold);
 }
