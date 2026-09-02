@@ -6,18 +6,20 @@ export function PwaInstallCard() {
   const { install, mode } = usePwaInstall()
   if (mode === 'installed' || mode === 'unavailable') return null
 
-  if (mode === 'ios') return <div className="settings-row install-card">
-    <div className="settings-row__content">
-      <span className="settings-row__icon"><Smartphone aria-hidden="true" /></span>
-      <span><strong>Instalar aplicación</strong><small>En Safari toca <b><Share2 aria-hidden="true" />Compartir</b> y luego <b>Añadir a pantalla de inicio</b>.</small></span>
-    </div>
+  if (mode === 'ios') return <div className="settings-ios-row settings-ios-install">
+    <span className="settings-ios-icon"><Smartphone aria-hidden="true" /></span>
+    <span className="settings-ios-copy">
+      <strong>Instalar aplicación</strong>
+      <small>En Safari toca <b><Share2 aria-hidden="true" />Compartir</b> y luego “Añadir a pantalla de inicio”.</small>
+    </span>
   </div>
 
-  return <div className="settings-row install-card">
-    <div className="settings-row__content">
-      <span className="settings-row__icon"><Download aria-hidden="true" /></span>
-      <span><strong>Instalar aplicación</strong><small>Acceso rápido desde tu pantalla de inicio.</small></span>
-    </div>
-    <button className="button button--primary" type="button" onClick={() => void install()}><Download aria-hidden="true" />Instalar aplicación</button>
+  return <div className="settings-ios-row settings-ios-install">
+    <span className="settings-ios-icon"><Download aria-hidden="true" /></span>
+    <span className="settings-ios-copy">
+      <strong>Instalar aplicación</strong>
+      <small>Acceso rápido desde tu pantalla de inicio.</small>
+    </span>
+    <button className="settings-ios-text-button" type="button" onClick={() => void install()}>Instalar</button>
   </div>
 }
