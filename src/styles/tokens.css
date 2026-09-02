@@ -45,6 +45,13 @@
   --line-height-heading: 1.25;
   --line-height-body: 1.5;
 
+  /* Unified typography weights */
+  --font-weight-regular: 400;
+  --font-weight-medium: 550;
+  --font-weight-semibold: 650;
+  --font-weight-bold: 750;
+  --font-weight-heavy: 800;
+
   --space-1: 0.25rem;
   --space-2: 0.5rem;
   --space-3: 0.75rem;
