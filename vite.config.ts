@@ -1,7 +1,7 @@
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 import { loadEnv, type Plugin } from 'vite'
-import { defineConfig } from 'vitest/config'
+import { configDefaults, defineConfig } from 'vitest/config'
 
 function requirePrivateCloudConfiguration(): Plugin {
   return {
@@ -82,6 +82,6 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
     css: true,
-    exclude: ['tests/e2e/**', 'node_modules/**', 'dist/**']
+    exclude: [...configDefaults.exclude, 'tests/e2e/**', '.worktrees/**', 'dist/**']
   }
 })
