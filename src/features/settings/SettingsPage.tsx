@@ -18,23 +18,39 @@ export function SettingsPage() {
     updatedAt: new Date().toISOString(),
   })
 
-  return <div className="settings-page">
-    <PageHeader title="Ajustes" subtitle="Respaldo y datos del negocio" />
-    <div className="settings-group">
-      <PwaInstallCard />
-      <div className="settings-row">
-        <div className="settings-row__content">
-          <span className="settings-row__icon"><Cloud aria-hidden="true" /></span>
-          <span><strong>Respaldo en la nube</strong><SyncBadge state={sync.state} /></span>
-        </div>
-        <div className="settings-actions">
-          <button className="button button--quiet" type="button" onClick={() => void sync.syncNow()}>
-            <RefreshCw aria-hidden="true" />Sincronizar
+  return <div className="settings-page settings-ios">
+    <PageHeader title="Ajustes" subtitle="Configura la aplicación y los datos de tu negocio" />
+
+    <section className="settings-ios-section" aria-labelledby="settings-app-title">
+      <h2 id="settings-app-title">Aplicación</h2>
+      <div className="settings-ios-group">
+        <PwaInstallCard />
+        <div className="settings-ios-row settings-ios-row--sync">
+          <span className="settings-ios-icon"><Cloud aria-hidden="true" /></span>
+          <span className="settings-ios-copy">
+            <strong>Respaldo en la nube</strong>
+            <small>Protege y sincroniza tus datos.</small>
+          </span>
+          <span className="settings-ios-status"><SyncBadge state={sync.state} /></span>
+          <button className="settings-ios-action" type="button" onClick={() => void sync.syncNow()} aria-label="Sincronizar ahora">
+            <RefreshCw aria-hidden="true" />
           </button>
         </div>
       </div>
-    </div>
+      <p className="settings-ios-help">La aplicación guarda los cambios localmente y los respalda cuando hay conexión.</p>
+    </section>
+
     <BusinessProfileForm key={storedProfile?.updatedAt ?? 'default'} initialValue={profile} onSave={save} />
-    {sync.signOut && <button className="button button--quiet" type="button" style={{ width: '100%', justifyContent: 'center', gap: '.45rem', color: 'var(--color-danger)' }} onClick={() => { if (window.confirm('¿Seguro que deseas cerrar sesión?')) { void sync.signOut?.() } }}><LogOut aria-hidden="true" />Cerrar sesión</button>}
+
+    {sync.signOut && <section className="settings-ios-section settings-ios-session" aria-labelledby="settings-session-title">
+      <h2 id="settings-session-title">Sesión</h2>
+      <div className="settings-ios-group">
+        <button className="settings-ios-logout" type="button" onClick={() => {
+          if (window.confirm('¿Seguro que deseas cerrar sesión?')) void sync.signOut?.()
+        }}>
+          <LogOut aria-hidden="true" />Cerrar sesión
+        </button>
+      </div>
+    </section>}
   </div>
 }
