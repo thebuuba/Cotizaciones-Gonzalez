@@ -361,7 +361,7 @@ a { color: inherit; }
 
 
 /* Client panel — reference layout */
-.clients-panel { gap: 1.45rem; }
+.clients-panel { width: 100%; max-width: 34rem; margin: 0 auto; gap: 1.45rem; }
 .clients-panel .page-header { padding-bottom: .05rem; }
 .clients-panel .page-header h1 { font-size: 2rem; font-weight: 760; letter-spacing: -.04em; }
 .clients-panel .page-header p { margin-top: .15rem; color: #6b6b76; font-size: 1rem; }
