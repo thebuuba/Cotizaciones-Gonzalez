@@ -12,48 +12,35 @@ const records: ClientRecord[] = [
 ]
 
 describe('ClientsPage', () => {
-  it('filters clients without losing their project locations', async () => {
+  it('filters clients without losing their data', async () => {
     const user = userEvent.setup()
     render(<ClientsPage clients={records} onSave={vi.fn()} onStartQuotation={vi.fn()} />)
     await user.type(screen.getByRole('searchbox', { name: 'Buscar clientes' }), 'María')
     expect(screen.getByText('María García')).toBeInTheDocument()
     expect(screen.queryByText('Carlos López')).not.toBeInTheDocument()
-    expect(screen.getByText('Casa · Piantini')).toBeInTheDocument()
     expect(screen.getByRole('list', { name: 'Lista de clientes' })).toBeInTheDocument()
     expect(screen.getAllByRole('listitem')).toHaveLength(1)
-  })
-
-  it('starts a quotation with the selected project location', async () => {
-    const user = userEvent.setup()
-    const onStartQuotation = vi.fn()
-    render(<ClientsPage clients={records} onSave={vi.fn()} onStartQuotation={onStartQuotation} />)
-    await user.click(screen.getByRole('button', { name: 'Cotizar en Casa para María García' }))
-    expect(onStartQuotation).toHaveBeenCalledWith('c1', 'l1')
-  })
-
-  it('starts from the contact address when a client has no project locations', async () => {
-    const user = userEvent.setup()
-    const onStartQuotation = vi.fn()
-    render(<ClientsPage clients={records} onSave={vi.fn()} onStartQuotation={onStartQuotation} />)
-    await user.click(screen.getByRole('button', { name: 'Cotizar para Carlos López' }))
-    expect(onStartQuotation).toHaveBeenCalledWith('c2')
   })
 
   it('opens client creation from the empty state', async () => {
     const user = userEvent.setup()
     render(<ClientsPage clients={[]} onSave={vi.fn()} onStartQuotation={vi.fn()} />)
-
     await user.click(screen.getByRole('button', { name: 'Agregar cliente' }))
     expect(screen.getByRole('heading', { name: 'Nuevo cliente' })).toBeInTheDocument()
   })
 
-  it('opens an existing client with contact and locations ready to edit', async () => {
+  it('opens an existing client for editing', async () => {
     const user = userEvent.setup()
     render(<ClientsPage clients={records} onSave={vi.fn()} onStartQuotation={vi.fn()} />)
-    await user.click(screen.getByRole('button', { name: 'Editar María García' }))
+    await user.click(screen.getByText('María García'))
     expect(screen.getByLabelText('Nombre del cliente')).toHaveValue('María García')
-    expect(screen.getByLabelText('Dirección de contacto')).toHaveValue('Santo Domingo')
-    expect(screen.getByLabelText('Nombre de ubicación 1')).toHaveValue('Casa')
+  })
+
+  it('opens new client form from page action button', async () => {
+    const user = userEvent.setup()
+    render(<ClientsPage clients={records} onSave={vi.fn()} onStartQuotation={vi.fn()} />)
+    await user.click(screen.getByRole('button', { name: 'Nuevo cliente' }))
+    expect(screen.getByRole('heading', { name: 'Nuevo cliente' })).toBeInTheDocument()
   })
 })
 
