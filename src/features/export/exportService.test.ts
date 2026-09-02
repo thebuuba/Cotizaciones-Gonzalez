@@ -18,6 +18,13 @@ vi.mock('jspdf', () => ({
 
 import { exportQuotationImages, exportQuotationPdf, renderPagePng, shareOrDownload } from './exportService'
 
+function exportPage(): HTMLElement {
+  const page = document.createElement('article')
+  Object.defineProperty(page, 'offsetWidth', { configurable: true, value: 794 })
+  Object.defineProperty(page, 'offsetHeight', { configurable: true, value: 1123 })
+  return page
+}
+
 describe('quotation export service', () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -27,11 +34,11 @@ describe('quotation export service', () => {
   })
 
   it('captures each canonical page as a high-resolution white PNG', async () => {
-    const page = document.createElement('article')
+    const page = exportPage()
     await renderPagePng(page)
 
     expect(mocks.toBlob).toHaveBeenCalledWith(page, expect.objectContaining({
-      pixelRatio: 4,
+      pixelRatio: 2.5,
       backgroundColor: '#ffffff',
       cacheBust: true,
     }))
@@ -39,7 +46,7 @@ describe('quotation export service', () => {
 
   it('returns one safely named image per page', async () => {
     const files = await exportQuotationImages([
-      document.createElement('article'), document.createElement('article'),
+      exportPage(), exportPage(),
     ], 'COT-0001 María/Rodríguez')
 
     expect(files.map((file) => file.name)).toEqual([
@@ -51,7 +58,7 @@ describe('quotation export service', () => {
   it('assembles the same captured pages into one A4 PDF', async () => {
     const scrollTo = vi.mocked(window.scrollTo)
     const file = await exportQuotationPdf([
-      document.createElement('article'), document.createElement('article'),
+      exportPage(), exportPage(),
     ], 'COT-0001 María Rodríguez')
 
     expect(file.name).toBe('COT-0001-Maria-Rodriguez.pdf')
