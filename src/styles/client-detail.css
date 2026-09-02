@@ -1,0 +1,63 @@
+/* Ajustes finales del detalle de cliente */
+.client-detail-header--simple {
+  grid-template-columns: var(--tap-target) minmax(0, 1fr);
+  align-items: center;
+}
+
+.client-detail-heading--simple {
+  min-width: 0;
+}
+
+.client-detail-heading--simple > div {
+  min-width: 0;
+}
+
+.client-detail-heading--simple h1 {
+  overflow: visible;
+  white-space: normal;
+  text-overflow: clip;
+  overflow-wrap: anywhere;
+}
+
+.client-detail-heading--simple p {
+  max-width: 22rem;
+}
+
+.client-detail-section {
+  gap: .8rem;
+  padding: .95rem;
+}
+
+.client-detail-fields {
+  gap: .75rem;
+}
+
+.client-detail-fields input,
+.client-location-fields input {
+  min-height: 2.85rem;
+}
+
+.client-location-card {
+  grid-template-columns: 2.2rem minmax(0, 1fr);
+  padding: .75rem;
+}
+
+.client-detail-savebar--simple {
+  position: static;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.client-detail-savebar--simple .client-detail-save {
+  min-height: 3rem;
+  border-radius: 1rem;
+}
+
+@media (max-width: 23rem) {
+  .client-detail-heading--simple h1 {
+    font-size: 1.65rem;
+  }
+}
