@@ -21,9 +21,9 @@ describe('QuotationDocument', () => {
     for (const heading of ['#', 'DESCRIPCIÓN', 'CANTIDAD', 'UNIDAD', 'PRECIO UNITARIO', 'TOTAL']) {
       expect(within(page).getByRole('columnheader', { name: heading })).toBeInTheDocument()
     }
-    expect(within(page).getByText('TOTAL DE MATERIALES')).toBeInTheDocument()
-    expect(within(page).getByText('MANO DE OBRA INSTALACIÓN')).toBeInTheDocument()
-    expect(within(page).getByText('TOTAL GENERAL')).toBeInTheDocument()
+    expect(within(page).getByText('Total de materiales')).toBeInTheDocument()
+    expect(within(page).getByText('Mano de obra instalación')).toBeInTheDocument()
+    expect(within(page).getByText('Total general')).toBeInTheDocument()
     expect(within(page).getByText('TÉRMINOS & CONDICIONES')).toBeInTheDocument()
     expect(within(page).getByText('OBSERVACIONES')).toBeInTheDocument()
     expect(within(page).getByText('CUENTAS PARA DEPÓSITO / TRANSFERENCIA')).toBeInTheDocument()
