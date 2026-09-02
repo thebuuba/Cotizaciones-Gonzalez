@@ -34,7 +34,7 @@
   background: var(--palette-gold);
   color: var(--palette-black);
   font-size: var(--font-size-label);
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   text-decoration: none;
 }
 
@@ -51,7 +51,7 @@
 .quotations-page .page-header h1 {
   color: var(--palette-black);
   font-size: var(--font-size-page-title);
-  font-weight: 800;
+  font-weight: var(--font-weight-heavy);
   letter-spacing: -.04em;
   line-height: 1.05;
 }
@@ -113,7 +113,7 @@
 .quotations-page .quotation-card-copy strong {
   color: var(--palette-black);
   font-size: var(--font-size-label);
-  font-weight: 650;
+  font-weight: var(--font-weight-bold);
   line-height: 1.25;
   overflow-wrap: anywhere;
 }
@@ -134,7 +134,7 @@
 .quotations-page .quotation-card-total > strong {
   color: var(--palette-black);
   font-size: var(--font-size-label);
-  font-weight: 750;
+  font-weight: var(--font-weight-heavy);
   line-height: 1.2;
   white-space: nowrap;
 }
