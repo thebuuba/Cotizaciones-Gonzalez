@@ -3,7 +3,7 @@
   width: 100%;
   max-width: 34rem;
   margin: 0 auto;
-  gap: 1.05rem;
+  gap: 1.45rem;
 }
 
 .dashboard .welcome {
@@ -14,16 +14,16 @@
   max-width: 19rem;
   margin: 0;
   color: #050505;
-  font-size: 1.55rem;
+  font-size: 2rem;
   font-weight: 800;
   letter-spacing: -.035em;
   line-height: 1.02;
 }
 
 .dashboard .welcome p {
-  margin: .45rem 0 0;
+  margin: .15rem 0 0;
   color: #6b6b78;
-  font-size: .78rem;
+  font-size: 1rem;
   line-height: 1.25;
 }
 
@@ -45,7 +45,7 @@
 
 .dashboard .total-card > div > span {
   color: #fff;
-  font-size: .66rem;
+  font-size: .78rem;
   font-weight: 550;
   opacity: .9;
 }
@@ -196,7 +196,7 @@
   margin: 0;
   overflow: hidden;
   color: #050505;
-  font-size: .76rem;
+  font-size: .9rem;
   font-weight: 750;
   line-height: 1.2;
   text-overflow: ellipsis;
@@ -224,7 +224,7 @@
 
 .dashboard .quote-card__aside > strong {
   color: #050505;
-  font-size: .7rem;
+  font-size: .78rem;
   font-weight: 800;
   line-height: 1.1;
   white-space: nowrap;
