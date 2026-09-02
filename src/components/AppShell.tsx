@@ -1,4 +1,4 @@
-import { Suspense, useEffect, useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import { BottomNav } from './BottomNav'
 
@@ -34,5 +34,5 @@ export function AppShell() {
     previousPathRef.current = location.pathname
   }, [location.pathname])
 
-  return <div className="app-frame"><a className="skip-link" href="#main-content">Saltar al contenido</a><main id="main-content" className="app-content" tabIndex={-1}><Suspense fallback={<p className="loading-state" role="status">Cargando pantalla…</p>}><div className={`route-transition route-transition--${direction}`} key={routeKey}><Outlet/></div></Suspense></main><BottomNav/></div>
+  return <div className="app-frame"><a className="skip-link" href="#main-content">Saltar al contenido</a><main id="main-content" className="app-content" tabIndex={-1}><div className={`route-transition route-transition--${direction}`} key={routeKey}><Outlet/></div></main><BottomNav/></div>
 }
