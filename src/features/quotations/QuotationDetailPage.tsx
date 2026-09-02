@@ -28,23 +28,24 @@ export function QuotationDetailPage({ snapshot, onStatusChange, onDelete }: {
   onStatusChange: (status: QuotationStatus) => void | Promise<void>
   onDelete: () => void | Promise<void>
 }) {
-  const documentRef = useRef<HTMLDivElement>(null)
+  const exportDocumentRef = useRef<HTMLDivElement>(null)
   const [exporting, setExporting] = useState<'pdf' | 'image' | null>(null)
   const [exportMessage, setExportMessage] = useState('')
   const [menuOpen, setMenuOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
   const totals = calculateQuotationTotals(snapshot.materialItems, snapshot.quotation.laborMinor)
   const baseName = `${snapshot.quotation.number} ${snapshot.quotation.clientName}`
-  const pages = () => Array.from(documentRef.current?.querySelectorAll<HTMLElement>('[data-export-page]') ?? [])
+  const exportPages = () => Array.from(exportDocumentRef.current?.querySelectorAll<HTMLElement>('[data-export-page]') ?? [])
 
   const exportPdf = async () => {
     setExporting('pdf')
     setExportMessage('')
     try {
-      await shareOrDownload([await exportQuotationPdf(pages(), baseName)])
+      await shareOrDownload([await exportQuotationPdf(exportPages(), baseName)])
       setExportMessage('PDF preparado')
-    } catch {
-      setExportMessage('No se pudo exportar el PDF')
+    } catch (error) {
+      console.error('Error al exportar PDF', error)
+      setExportMessage('No se pudo exportar el PDF. Intenta nuevamente.')
     } finally {
       setExporting(null)
     }
@@ -54,10 +55,11 @@ export function QuotationDetailPage({ snapshot, onStatusChange, onDelete }: {
     setExporting('image')
     setExportMessage('')
     try {
-      await shareOrDownload(await exportQuotationImages(pages(), baseName))
+      await shareOrDownload(await exportQuotationImages(exportPages(), baseName))
       setExportMessage('Imagen preparada')
-    } catch {
-      setExportMessage('No se pudo exportar la imagen')
+    } catch (error) {
+      console.error('Error al exportar imagen', error)
+      setExportMessage('No se pudo exportar la imagen. Intenta nuevamente.')
     } finally {
       setExporting(null)
     }
@@ -141,7 +143,11 @@ export function QuotationDetailPage({ snapshot, onStatusChange, onDelete }: {
 
     <section className="quotation-detail-group quotation-detail-preview" aria-labelledby="quotation-preview-title">
       <h2 id="quotation-preview-title">Vista previa</h2>
-      <div className="quotation-detail-preview-frame" ref={documentRef}><QuotationDocument snapshot={snapshot} /></div>
+      <div className="quotation-detail-preview-frame"><QuotationDocument snapshot={snapshot} /></div>
     </section>
+
+    <div className="quotation-export-stage" ref={exportDocumentRef} aria-hidden="true">
+      <QuotationDocument snapshot={snapshot} />
+    </div>
   </div>
 }
