@@ -18,21 +18,24 @@ export function AppShell() {
   const location = useLocation()
   const previousPathRef = useRef<string | null>(null)
   const previousPath = previousPathRef.current
-  const routeKey = `${location.pathname}${location.search}`
+  const primaryTab = isTabRoute(location.pathname)
+  const routeKey = primaryTab ? 'primary-tabs' : `${location.pathname}${location.search}`
 
   let direction: 'initial' | 'forward' | 'back' | 'tab' = 'initial'
   if (previousPath) {
-    if (isTabRoute(previousPath) && isTabRoute(location.pathname)) direction = 'tab'
-    else {
-      const previousDepth = routeDepth(previousPath)
-      const currentDepth = routeDepth(location.pathname)
-      direction = currentDepth < previousDepth ? 'back' : 'forward'
-    }
+    if (isTabRoute(previousPath) && primaryTab) direction = 'tab'
+    else direction = routeDepth(location.pathname) < routeDepth(previousPath) ? 'back' : 'forward'
   }
 
   useEffect(() => {
     previousPathRef.current = location.pathname
   }, [location.pathname])
 
-  return <div className="app-frame"><a className="skip-link" href="#main-content">Saltar al contenido</a><main id="main-content" className="app-content" tabIndex={-1}><div className={`route-transition route-transition--${direction}`} key={routeKey}><Outlet/></div></main><BottomNav/></div>
+  return <div className="app-frame">
+    <a className="skip-link" href="#main-content">Saltar al contenido</a>
+    <main id="main-content" className="app-content" tabIndex={-1}>
+      <div className={`route-transition route-transition--${direction}`} key={routeKey}><Outlet /></div>
+    </main>
+    <BottomNav />
+  </div>
 }
