@@ -7,9 +7,11 @@ afterEach(() => {
   window.history.replaceState({}, '', '/')
 })
 
-it('keeps the main shell available while a route screen is loading', async () => {
+it('renders the requested primary screen directly inside the persistent app shell', async () => {
   vi.resetModules()
-  vi.doMock('../features/settings/SettingsPage', () => new Promise(() => {}))
+  vi.doMock('../features/settings/SettingsPage', () => ({
+    SettingsPage: () => <h1>Ajustes</h1>,
+  }))
   window.history.replaceState({}, '', '/ajustes')
   const { App } = await import('./App')
 
@@ -17,5 +19,6 @@ it('keeps the main shell available while a route screen is loading', async () =>
 
   expect(screen.getByRole('main')).toBeInTheDocument()
   expect(screen.getByRole('navigation', { name: 'Navegación principal' })).toBeInTheDocument()
-  expect(screen.getByRole('status')).toHaveTextContent('Cargando pantalla…')
+  expect(screen.getByRole('heading', { level: 1, name: 'Ajustes' })).toBeInTheDocument()
+  expect(screen.queryByText('Cargando pantalla…')).not.toBeInTheDocument()
 })
