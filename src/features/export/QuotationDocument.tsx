@@ -1,5 +1,5 @@
 import { Award, CheckCircle2, ClipboardList, Grid2X2, Hammer, Heart, MessageCircle, Phone, ShieldCheck, UserRound } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo } from 'react'
 
 import banreservasLogo from '../../assets/bank-logos/banreservas.svg'
 import santacruzLogo from '../../assets/bank-logos/santacruz.png'
@@ -23,17 +23,14 @@ function formatDate(value: string): string {
 }
 
 function useBlobUrl(blob?: Blob): string | undefined {
-  const [url, setUrl] = useState<string>()
-
-  useEffect(() => {
-    if (!blob || typeof URL.createObjectURL !== 'function') {
-      setUrl(undefined)
-      return
-    }
-    const nextUrl = URL.createObjectURL(blob)
-    setUrl(nextUrl)
-    return () => URL.revokeObjectURL(nextUrl)
+  const url = useMemo(() => {
+    if (!blob || typeof URL.createObjectURL !== 'function') return undefined
+    return URL.createObjectURL(blob)
   }, [blob])
+
+  useEffect(() => () => {
+    if (url && typeof URL.revokeObjectURL === 'function') URL.revokeObjectURL(url)
+  }, [url])
 
   return url
 }
