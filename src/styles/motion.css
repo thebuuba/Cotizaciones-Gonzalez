@@ -1,0 +1,71 @@
+/* Movimiento iOS sutil: continuidad de ruta, respuesta táctil y listas ligeras. */
+.route-transition {
+  min-width: 0;
+  animation: ios-route-enter var(--duration-route) var(--ease-ios) both;
+}
+
+:is(
+  .button:not(:disabled),
+  .icon-button:not(:disabled),
+  .fab,
+  .bottom-nav__item,
+  .quote-card,
+  .quotation-card-main,
+  .client-card__edit,
+  .location-row button,
+  .quotation-new-button,
+  .actions-menu__item
+) {
+  transition-duration: var(--duration-press);
+  transition-property: transform, opacity, filter, color, background-color, box-shadow;
+  transition-timing-function: var(--ease-ios);
+}
+
+:is(
+  .button:not(:disabled),
+  .icon-button:not(:disabled),
+  .fab,
+  .bottom-nav__item,
+  .quote-card,
+  .quotation-card-main,
+  .client-card__edit,
+  .location-row button,
+  .quotation-new-button,
+  .actions-menu__item
+):active {
+  transform: scale(.975);
+}
+
+.bottom-nav__item svg {
+  transition: transform var(--duration-fast) var(--ease-ios), stroke-width var(--duration-fast) var(--ease-ios);
+}
+
+.bottom-nav__item.is-active svg {
+  transform: translateY(-1px) scale(1.06);
+}
+
+@keyframes ios-route-enter {
+  from { opacity: 0; transform: translateY(6px) scale(.995); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-delay: 0s !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+
+  ::view-transition-old(*),
+  ::view-transition-new(*),
+  ::view-transition-group(*) {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+  }
+}
+
+

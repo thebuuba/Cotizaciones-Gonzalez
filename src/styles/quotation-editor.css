@@ -1,0 +1,129 @@
+/* Editor de cotizaciones: formulario iOS sencillo y de una sola columna. */
+.quotation-editor {
+  width: 100%;
+  max-width: 34rem;
+  margin: 0 auto;
+  gap: .9rem;
+  padding-bottom: calc(6.5rem + env(safe-area-inset-bottom));
+}
+
+.quotation-editor .editor-intro {
+  display: grid;
+  gap: .2rem;
+  padding: .25rem .15rem .55rem;
+}
+
+.quotation-editor .editor-intro > span {
+  margin: 0;
+  color: var(--color-label-secondary);
+  font-size: var(--font-size-auxiliary);
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.quotation-editor .editor-intro h1 {
+  font-size: var(--font-size-featured-total);
+}
+
+.quotation-editor .editor-intro p {
+  margin: .1rem 0 0;
+  color: var(--color-label-secondary);
+  font-size: var(--font-size-secondary);
+}
+
+.quotation-editor .editor-section {
+  gap: .85rem;
+  padding: .95rem;
+  border-color: var(--color-separator);
+  border-radius: var(--group-radius);
+  background: var(--palette-white);
+}
+
+.quotation-editor .editor-section > h2,
+.quotation-editor .section-heading h2 {
+  margin: 0;
+  font-size: var(--font-size-body);
+  letter-spacing: -.015em;
+}
+
+.quotation-editor input,
+.quotation-editor textarea,
+.quotation-editor select {
+  min-height: 3rem;
+  border-color: transparent;
+  border-radius: var(--control-radius);
+  background: var(--color-fill);
+}
+
+.quotation-editor textarea {
+  min-height: 6.5rem;
+}
+
+.quotation-editor .material-card {
+  padding: .8rem;
+  border: 0 !important;
+  background: var(--color-secondary-grouped-bg);
+}
+
+.quotation-editor .section-heading {
+  align-items: flex-end;
+}
+
+.quotation-editor .section-heading .button {
+  min-height: var(--tap-target);
+  border-radius: var(--control-radius);
+}
+
+.quotation-editor .material-actions {
+  gap: .15rem;
+}
+
+.quotation-editor .material-actions .icon-button {
+  background: transparent;
+}
+
+.quotation-editor .totals-section .general-total {
+  border-radius: 0 0 var(--group-radius) var(--group-radius);
+}
+
+.editor-save-panel {
+  display: grid;
+  gap: .55rem;
+  padding-top: .15rem;
+}
+
+.editor-save-panel .save-state {
+  justify-self: center;
+  text-align: center;
+}
+
+.editor-save-panel .save-state:empty {
+  display: none;
+}
+
+.editor-save-button {
+  width: 100%;
+  min-height: 3.35rem;
+  justify-content: center;
+  border-radius: 1rem;
+  font-size: var(--font-size-body);
+  font-weight: 750;
+}
+
+.editor-save-button svg {
+  width: 1.15rem;
+}
+
+@media (max-width: 30rem) {
+  .quotation-editor .section-heading {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .quotation-editor .section-heading .button {
+    justify-content: center;
+  }
+}
+
+

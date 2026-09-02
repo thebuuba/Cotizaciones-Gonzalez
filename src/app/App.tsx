@@ -1,14 +1,16 @@
+import { lazy } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { BrowserRouter, Route, Routes, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { quotationRepository, businessProfileRepository, clientRepository } from './providers'
 import { AppShell } from '../components/AppShell'
 import { HomePage } from '../features/home/HomePage'
-import { QuotationsPage } from '../features/quotations/QuotationsPage'
-import { ClientsPage } from '../features/clients/ClientsPage'
-import { SettingsPage } from '../features/settings/SettingsPage'
-import { QuotationEditor } from '../features/quotations/QuotationEditor'
 import { createDefaultBusinessProfile } from '../db/defaults'
-import { QuotationDetailPage } from '../features/quotations/QuotationDetailPage'
+
+const QuotationsPage = lazy(() => import('../features/quotations/QuotationsPage').then((module) => ({ default: module.QuotationsPage })))
+const ClientsPage = lazy(() => import('../features/clients/ClientsPage').then((module) => ({ default: module.ClientsPage })))
+const SettingsPage = lazy(() => import('../features/settings/SettingsPage').then((module) => ({ default: module.SettingsPage })))
+const QuotationEditor = lazy(() => import('../features/quotations/QuotationEditor').then((module) => ({ default: module.QuotationEditor })))
+const QuotationDetailPage = lazy(() => import('../features/quotations/QuotationDetailPage').then((module) => ({ default: module.QuotationDetailPage })))
 
 function HomeRoute() {
   const quotations = useLiveQuery(() => quotationRepository.list(), [], [])

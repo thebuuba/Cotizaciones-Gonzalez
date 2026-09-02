@@ -39,6 +39,14 @@ describe('ClientsPage', () => {
     expect(onStartQuotation).toHaveBeenCalledWith('c2')
   })
 
+  it('opens client creation from the empty state', async () => {
+    const user = userEvent.setup()
+    render(<ClientsPage clients={[]} onSave={vi.fn()} onStartQuotation={vi.fn()} />)
+
+    await user.click(screen.getByRole('button', { name: 'Agregar cliente' }))
+    expect(screen.getByRole('heading', { name: 'Nuevo cliente' })).toBeInTheDocument()
+  })
+
   it('opens an existing client with contact and locations ready to edit', async () => {
     const user = userEvent.setup()
     render(<ClientsPage clients={records} onSave={vi.fn()} onStartQuotation={vi.fn()} />)
@@ -55,8 +63,11 @@ describe('ClientForm', () => {
     render(<ClientForm onSave={vi.fn()} onCancel={vi.fn()} />)
     await user.type(screen.getByLabelText('Correo electrónico'), 'incorrecto')
     await user.click(screen.getByRole('button', { name: 'Guardar cliente' }))
-    expect(screen.getByText('Escribe el nombre del cliente.')).toBeInTheDocument()
-    expect(screen.getByText('Escribe un correo válido.')).toBeInTheDocument()
+    expect(screen.getAllByText('Escribe el nombre del cliente.')).toHaveLength(2)
+    expect(screen.getAllByText('Escribe un correo válido.')).toHaveLength(2)
+    expect(screen.getByRole('alert')).toHaveTextContent('Escribe el nombre del cliente.')
+    expect(screen.getByRole('alert')).toHaveTextContent('Escribe un correo válido.')
+    expect(screen.getByRole('alert')).toHaveFocus()
     expect(screen.getByLabelText('Correo electrónico')).toHaveValue('incorrecto')
   })
 
@@ -73,5 +84,19 @@ describe('ClientForm', () => {
     await user.type(screen.getByLabelText('Dirección de ubicación 2'), 'Naco')
     await user.click(screen.getByRole('button', { name: 'Guardar cliente' }))
     expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ client: expect.objectContaining({ address: 'Santo Domingo' }), locations: [expect.objectContaining({ label: 'Casa', address: 'Piantini' }), expect.objectContaining({ label: 'Apartamento', address: 'Naco' })] }))
+  })
+
+  it('clears the error summary after a corrected submission', async () => {
+    const user = userEvent.setup()
+    const onSave = vi.fn()
+    render(<ClientForm onSave={onSave} onCancel={vi.fn()} />)
+
+    await user.click(screen.getByRole('button', { name: 'Guardar cliente' }))
+    expect(screen.getByRole('alert')).toBeInTheDocument()
+    await user.type(screen.getByLabelText('Nombre del cliente'), 'María García')
+    await user.click(screen.getByRole('button', { name: 'Guardar cliente' }))
+
+    expect(onSave).toHaveBeenCalledTimes(1)
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
   })
 })

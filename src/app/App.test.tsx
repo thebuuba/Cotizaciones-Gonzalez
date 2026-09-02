@@ -11,6 +11,8 @@ describe('App shell', () => {
 
     expect(screen.queryByRole('banner')).not.toBeInTheDocument()
     expect(screen.getByRole('navigation', { name: 'Navegación principal' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Saltar al contenido' })).toHaveAttribute('href', '#main-content')
+    expect(screen.getByRole('main')).toHaveAttribute('id', 'main-content')
 
     for (const destination of ['Inicio', 'Cotizaciones', 'Clientes', 'Ajustes']) {
       expect(screen.getByRole('link', { name: destination })).toBeInTheDocument()
@@ -32,6 +34,7 @@ describe('App shell', () => {
 
     expect(screen.getByRole('link', { name: 'Inicio' })).toHaveAttribute('aria-current', 'page')
     await user.click(screen.getByRole('link', { name: 'Ajustes' }))
+    await screen.findByRole('heading', { level: 1, name: 'Ajustes' })
     expect(screen.getByRole('link', { name: 'Ajustes' })).toHaveAttribute('aria-current', 'page')
   })
 
@@ -43,9 +46,9 @@ describe('App shell', () => {
     expect(initialPage).toBeInTheDocument()
 
     await user.click(screen.getByRole('link', { name: 'Ajustes' }))
+    await screen.findByRole('heading', { level: 1, name: 'Ajustes' })
 
     const nextPage = screen.getByRole('main').querySelector('.route-transition')
-    expect(screen.getByRole('heading', { level: 1, name: 'Ajustes' })).toBeInTheDocument()
     expect(nextPage).not.toBe(initialPage)
   })
 
@@ -56,7 +59,7 @@ describe('App shell', () => {
     expect(screen.getByRole('heading', { level: 1, name: 'Acabados Modernos Gonzalez' })).toBeInTheDocument()
     for (const destination of ['Cotizaciones', 'Clientes', 'Ajustes']) {
       await user.click(screen.getByRole('link', { name: destination }))
-      expect(screen.getByRole('heading', { level: 1, name: destination })).toBeInTheDocument()
+      expect(await screen.findByRole('heading', { level: 1, name: destination })).toBeInTheDocument()
     }
   })
 
@@ -65,9 +68,10 @@ describe('App shell', () => {
     render(<App />)
 
     await user.click(screen.getByRole('link', { name: 'Cotizaciones' }))
+    await screen.findByRole('heading', { level: 1, name: 'Cotizaciones' })
     await user.click(screen.getByRole('link', { name: 'Nueva cotización' }))
 
-    expect(screen.getByRole('heading', { name: 'Nueva cotización' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Nueva cotización' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Agregar material' })).toBeInTheDocument()
     expect(screen.queryByRole('link', { name: 'Nueva cotización' })).not.toBeInTheDocument()
   })

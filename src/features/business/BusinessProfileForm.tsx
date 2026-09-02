@@ -1,6 +1,7 @@
 import { useState, type ChangeEvent, type FormEvent } from 'react'
 
 import { createDefaultBusinessProfile } from '../../db/defaults'
+import { FormErrorSummary } from '../../components/FormErrorSummary'
 import { businessProfileSchema, type BusinessProfileDraft } from './businessProfileSchema'
 
 const initialProfile = createDefaultBusinessProfile('default', new Date(0).toISOString())
@@ -58,6 +59,7 @@ export function BusinessProfileForm({ initialValue = empty, onSave }: {
   return <form className="form-card business-profile-form" onSubmit={submit} noValidate>
     <h2>Perfil del negocio</h2>
     <p>Estos datos se colocarán automáticamente en cada cotización.</p>
+    <FormErrorSummary errors={errors} />
 
     <section className="form-section"><h3>Marca</h3>
       <label>Nombre del negocio<input {...textField('businessName')} aria-invalid={Boolean(errors.businessName)} />{errors.businessName && <span className="field-error">{errors.businessName}</span>}</label>

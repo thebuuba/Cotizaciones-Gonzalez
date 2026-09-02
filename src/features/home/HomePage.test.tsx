@@ -33,4 +33,11 @@ describe('HomePage', () => {
     expect(screen.getAllByRole('listitem')).toHaveLength(2)
     expect(screen.queryByText('Sincronizado')).not.toBeInTheDocument()
   })
+
+  it('offers the next action when there are no recent quotations', () => {
+    render(<MemoryRouter><HomePage businessName="Acabados Modernos Gonzalez" quotations={[]} /></MemoryRouter>)
+
+    expect(screen.getByRole('heading', { name: 'Aún no hay cotizaciones' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Crear cotización' })).toHaveAttribute('href', '/cotizaciones/nueva')
+  })
 })

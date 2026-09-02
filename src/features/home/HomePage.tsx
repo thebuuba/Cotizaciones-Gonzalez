@@ -2,6 +2,7 @@ import { ChartNoAxesColumnIncreasing, FileText, Send, ShieldCheck } from 'lucide
 import { Link } from 'react-router-dom'
 
 import { StatusBadge } from '../../components/StatusBadge'
+import { EmptyState } from '../../components/EmptyState'
 import { calculateQuotationTotals, formatMoney } from '../../domain/money'
 import type { QuotationSnapshot } from '../../domain/types'
 
@@ -25,9 +26,9 @@ export function HomePage({ businessName, quotations }: { businessName: string; q
     <section className="stats-grid" aria-label="Estados de cotizaciones">
       {stats.map(({ status, label, Icon }) => <article className={`stat-card stat-card--${status}`} aria-label={`${count(status)} ${label}`} key={status}><Icon aria-hidden="true" /><strong>{count(status)}</strong><span>{label[0]!.toUpperCase() + label.slice(1)}{count(status) === 1 ? '' : 's'}</span></article>)}
     </section>
-    <section className="recent"><h2>Cotizaciones recientes</h2><ul className="recent-list" aria-label="Cotizaciones recientes">{quotations.slice(0, 3).map((item) => {
+    <section className="recent"><h2>Cotizaciones recientes</h2>{quotations.length ? <ul className="recent-list" aria-label="Cotizaciones recientes">{quotations.slice(0, 3).map((item) => {
       const QuoteIcon = item.quotation.status === 'approved' ? ShieldCheck : item.quotation.status === 'sent' ? Send : FileText
       return <li key={item.quotation.id}><Link to={`/cotizaciones/${item.quotation.id}`} className={`quote-card quote-card--${item.quotation.status}`}><span className="quote-card__icon"><QuoteIcon aria-hidden="true" /></span><div className="quote-card__content"><h3>{item.quotation.clientName}</h3><span>{item.quotation.clientAddress}</span></div><div className="quote-card__aside"><strong>{formatMoney(totalOf(item))}</strong><StatusBadge status={item.quotation.status} /></div></Link></li>
-    })}</ul></section>
+    })}</ul> : <EmptyState Icon={FileText} title="Aún no hay cotizaciones" description="Crea la primera para comenzar a medir tu trabajo." action={<Link className="button button--primary" to="/cotizaciones/nueva">Crear cotización</Link>} />}</section>
   </div>
 }

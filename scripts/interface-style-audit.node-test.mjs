@@ -1,7 +1,10 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
+import { mkdtempSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 
-import { auditCssTypography } from './interface-style-audit.mjs'
+import { auditCssTypography, auditInterfaceStyles } from './interface-style-audit.mjs'
 
 test('accepts semantic typography tokens', () => {
   assert.deepEqual(auditCssTypography('.title { font-size: var(--font-size-page-title); }'), [])
@@ -18,4 +21,17 @@ test('ignores font-size declarations inside animation keyframes', () => {
   const css = '@keyframes pulse { from { font-size: .82rem; } to { font-size: 1rem; } }'
 
   assert.deepEqual(auditCssTypography(css), [])
+})
+
+test('audits styles imported by the interface entry point', () => {
+  const directory = mkdtempSync(join(tmpdir(), 'interface-style-audit-'))
+  const entry = join(directory, 'global.css')
+  const imported = join(directory, 'page.css')
+  writeFileSync(entry, "@import './page.css';")
+  writeFileSync(imported, '.title { font-size: .82rem; }')
+
+  assert.deepEqual(
+    auditInterfaceStyles([entry]),
+    [`${imported}: font-size must use a semantic token: .82rem`],
+  )
 })

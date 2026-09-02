@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs'
 import console from 'node:console'
 import process from 'node:process'
+import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 export const interfaceStyles = ['src/styles/global.css']
@@ -46,10 +47,25 @@ export function auditCssTypography(css) {
 }
 
 export function auditInterfaceStyles(styles = interfaceStyles) {
-  return styles.flatMap((file) => {
+  const visited = new Set()
+  const issues = []
+
+  const auditFile = (file) => {
+    const resolvedFile = resolve(file)
+    if (visited.has(resolvedFile)) return
+    visited.add(resolvedFile)
+
     const css = readFileSync(file, 'utf8')
-    return auditCssTypography(css).map((issue) => `${file}: ${issue}`)
-  })
+    issues.push(...auditCssTypography(css).map((issue) => `${file}: ${issue}`))
+
+    for (const match of css.matchAll(/@import\s+(?:url\()?['"]([^'"]+)['"]/gi)) {
+      if (!match[1].startsWith('.')) continue
+      auditFile(resolve(dirname(resolvedFile), match[1]))
+    }
+  }
+
+  styles.forEach(auditFile)
+  return issues
 }
 
 const invokedPath = process.argv[1]

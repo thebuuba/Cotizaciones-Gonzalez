@@ -34,6 +34,12 @@ describe('QuotationsPage', () => {
     expect(screen.queryByLabelText('Filtrar por estado')).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /Duplicar|Eliminar/ })).not.toBeInTheDocument()
   })
+
+  it('offers creation from the empty state', () => {
+    render(<MemoryRouter><QuotationsPage quotations={[]} /></MemoryRouter>)
+
+    expect(screen.getByRole('link', { name: 'Crear cotización' })).toHaveAttribute('href', '/cotizaciones/nueva')
+  })
 })
 
 describe('QuotationDetailPage', () => {

@@ -1,0 +1,230 @@
+/* Quotations reference: native compact list */
+.quotations-page {
+  width: 100%;
+  max-width: 34rem;
+  margin: 0 auto;
+  gap: .7rem;
+}
+
+.quotations-page .page-header {
+  padding: .4rem 0 0;
+}
+
+.quotation-page-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: .75rem;
+}
+
+.quotation-page-heading .page-header {
+  min-width: 0;
+  flex: 1;
+}
+
+.quotation-new-button {
+  display: inline-flex;
+  min-width: 5.3rem;
+  min-height: var(--tap-target);
+  align-items: center;
+  justify-content: center;
+  gap: .3rem;
+  padding: 0 .8rem;
+  border-radius: var(--radius-pill);
+  background: var(--palette-gold);
+  color: var(--palette-black);
+  font-size: var(--font-size-label);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.quotation-new-button svg {
+  width: 1rem;
+  height: 1rem;
+  stroke-width: 2.5;
+}
+
+.quotation-new-button:active {
+  background: color-mix(in srgb, var(--palette-gold) 82%, var(--palette-black));
+}
+
+.quotations-page .page-header h1 {
+  color: var(--palette-black);
+  font-size: var(--font-size-page-title);
+  font-weight: 800;
+  letter-spacing: -.04em;
+  line-height: 1.05;
+}
+
+.quotations-page .quotation-list {
+  gap: .6rem;
+}
+
+.quotations-page .quotation-list-card {
+  overflow: hidden;
+  border: 0;
+  border-radius: .9rem;
+  background: var(--palette-white);
+  box-shadow: none;
+}
+
+.quotations-page .quotation-card-main {
+  grid-template-columns: 2.35rem minmax(0, 1fr) auto;
+  min-height: 3.75rem;
+  gap: .7rem;
+  padding: .55rem .65rem;
+}
+
+.quotations-page .quotation-card-icon {
+  width: 2.35rem;
+  height: 2.35rem;
+  border-radius: .7rem;
+  background: var(--color-fill);
+  color: var(--palette-black);
+}
+
+.quotations-page .quotation-card-icon svg {
+  width: 1.05rem;
+  height: 1.05rem;
+  stroke-width: 2.2;
+}
+
+.quotation-list-card--sent .quotation-card-icon {
+  background: color-mix(in srgb, var(--palette-gold) 16%, var(--palette-white));
+  color: var(--palette-gold);
+}
+
+.quotation-list-card--approved .quotation-card-icon {
+  background: color-mix(in srgb, var(--color-success) 14%, var(--palette-white));
+  color: var(--color-success);
+}
+
+.quotation-list-card--rejected .quotation-card-icon {
+  background: color-mix(in srgb, var(--color-danger) 12%, var(--palette-white));
+  color: var(--color-danger);
+}
+
+.quotation-card-copy {
+  display: grid;
+  min-width: 0;
+  align-content: center;
+}
+
+.quotations-page .quotation-card-copy strong {
+  color: var(--palette-black);
+  font-size: var(--font-size-label);
+  font-weight: 650;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.quotations-page .quotation-card-copy small {
+  margin-top: .12rem;
+  font-size: var(--font-size-auxiliary);
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.quotations-page .quotation-card-total {
+  align-content: center;
+  justify-items: end;
+  gap: .2rem;
+}
+
+.quotations-page .quotation-card-total > strong {
+  color: var(--palette-black);
+  font-size: var(--font-size-label);
+  font-weight: 750;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.quotations-page .quotation-card-total .status-badge {
+  min-height: 1rem;
+  padding: .08rem .38rem;
+  border: 0;
+  box-shadow: none;
+  font-size: var(--font-size-auxiliary);
+}
+
+@media (min-width: 48rem) {
+  :root {
+    --page-gutter: 1.5rem;
+  }
+
+  .app-content {
+    padding-top: calc(1.75rem + env(safe-area-inset-top));
+  }
+
+  .bottom-nav {
+    right: max(0px, calc((100vw - 52rem) / 2));
+    left: max(0px, calc((100vw - 52rem) / 2));
+  }
+
+  .dashboard {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+
+  .page-header,
+  .welcome,
+  .total-card,
+  .recent {
+    grid-column: 1 / -1;
+  }
+
+  .stats-grid {
+    grid-column: 1 / -1;
+  }
+
+  .business-profile-form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .business-profile-form > h2,
+  .business-profile-form > p,
+  .business-profile-form > button {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 30rem) {
+  .settings-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .settings-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .settings-actions .button {
+    flex: 1;
+  }
+
+  .editor-intro {
+    gap: .9rem;
+  }
+
+  .editor-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .preview-heading {
+    align-items: stretch;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 32rem) {
+  .app-content {
+    padding-top: calc(.75rem + env(safe-area-inset-top));
+  }
+
+  .page-header h1,
+  .welcome h1 {
+    font-size: var(--font-size-page-title);
+  }
+}
+
+

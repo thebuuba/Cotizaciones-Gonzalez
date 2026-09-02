@@ -46,8 +46,11 @@ describe('BusinessProfileForm', () => {
 
     await user.click(screen.getByRole('button', { name: 'Guardar ajustes' }))
 
-    expect(screen.getByText('Escribe el nombre del negocio.')).toBeInTheDocument()
-    expect(screen.getByText('Escribe el nombre del gerente.')).toBeInTheDocument()
+    expect(screen.getAllByText('Escribe el nombre del negocio.')).toHaveLength(2)
+    expect(screen.getAllByText('Escribe el nombre del gerente.')).toHaveLength(2)
+    expect(screen.getByRole('alert')).toHaveTextContent('Escribe el nombre del negocio.')
+    expect(screen.getByRole('alert')).toHaveTextContent('Escribe el nombre del gerente.')
+    expect(screen.getByRole('alert')).toHaveFocus()
     expect(screen.getByLabelText('Teléfono de WhatsApp')).toHaveValue('849-379-7731')
   })
 
