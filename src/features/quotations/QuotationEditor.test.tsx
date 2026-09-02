@@ -58,6 +58,7 @@ describe('QuotationEditor', () => {
     await user.selectOptions(screen.getByLabelText('Unidad 1'), 'm²')
     await user.type(screen.getByLabelText('Precio unitario 1'), '1000')
     expect(screen.getByTestId('material-total-0')).toHaveTextContent(/RD[$]\s?1,500\.00/)
+    expect(screen.getByRole('list', { name: 'Materiales de la cotización' })).toBeInTheDocument()
 
     await user.type(screen.getByLabelText('Mano de obra instalación'), '800')
     expect(screen.getByTestId('materials-total')).toHaveTextContent(/RD[$]\s?1,500\.00/)

@@ -7,5 +7,5 @@ const content = {
 }
 export function SyncBadge({ state }: { state: SyncState }) {
   const { label, Icon } = content[state]
-  return <span className={`sync-badge sync-badge--${state}`}><Icon aria-hidden="true" />{label}</span>
+  return <span className={`sync-badge sync-badge--${state}`} role="status" aria-live="polite"><Icon aria-hidden="true" />{label}</span>
 }

@@ -1,4 +1,6 @@
 import { readFileSync } from 'node:fs'
+import console from 'node:console'
+import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 
 export const interfaceStyles = ['src/styles/global.css']

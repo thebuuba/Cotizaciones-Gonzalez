@@ -30,6 +30,7 @@ describe('HomePage', () => {
     expect(screen.getByLabelText('1 enviada')).toBeInTheDocument()
     expect(screen.getByText('María Rodríguez')).toBeInTheDocument()
     expect(screen.getByText('María García')).toBeInTheDocument()
+    expect(screen.getAllByRole('listitem')).toHaveLength(2)
     expect(screen.queryByText('Sincronizado')).not.toBeInTheDocument()
   })
 })

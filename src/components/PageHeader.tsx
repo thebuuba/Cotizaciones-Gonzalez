@@ -1,3 +1,3 @@
 export function PageHeader({ title, subtitle }: { title: string; subtitle?: string }) {
-  return <div className="page-header"><h1>{title}</h1>{subtitle && <p>{subtitle}</p>}</div>
+  return <header className="page-header" role="group"><h1>{title}</h1>{subtitle && <p>{subtitle}</p>}</header>
 }

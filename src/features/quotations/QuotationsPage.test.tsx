@@ -28,6 +28,8 @@ describe('QuotationsPage', () => {
     expect(screen.getByText('Ana García')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Nueva cotización' })).toHaveAttribute('href', '/cotizaciones/nueva')
     expect(screen.getByRole('link', { name: /María Rodríguez/ })).toHaveAttribute('href', '/cotizaciones/quote-1')
+    expect(screen.getByRole('list', { name: 'Lista de cotizaciones' })).toBeInTheDocument()
+    expect(screen.getAllByRole('listitem')).toHaveLength(2)
     expect(screen.queryByLabelText('Buscar cotizaciones')).not.toBeInTheDocument()
     expect(screen.queryByLabelText('Filtrar por estado')).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /Duplicar|Eliminar/ })).not.toBeInTheDocument()

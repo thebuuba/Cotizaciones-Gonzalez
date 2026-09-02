@@ -19,6 +19,8 @@ describe('ClientsPage', () => {
     expect(screen.getByText('María García')).toBeInTheDocument()
     expect(screen.queryByText('Carlos López')).not.toBeInTheDocument()
     expect(screen.getByText('Casa · Piantini')).toBeInTheDocument()
+    expect(screen.getByRole('list', { name: 'Lista de clientes' })).toBeInTheDocument()
+    expect(screen.getAllByRole('listitem')).toHaveLength(1)
   })
 
   it('starts a quotation with the selected project location', async () => {
