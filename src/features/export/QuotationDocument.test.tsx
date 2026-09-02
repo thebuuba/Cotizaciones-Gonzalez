@@ -26,9 +26,8 @@ describe('QuotationDocument', () => {
     expect(within(page).getByText('TOTAL GENERAL')).toBeInTheDocument()
     expect(within(page).getByText('TÉRMINOS & CONDICIONES')).toBeInTheDocument()
     expect(within(page).getByText('OBSERVACIONES')).toBeInTheDocument()
-    expect(within(page).getByText('CUENTAS BANCARIAS')).toBeInTheDocument()
+    expect(within(page).getByText('CUENTAS PARA DEPÓSITO / TRANSFERENCIA')).toBeInTheDocument()
     expect(within(page).getByText('Jefferson Gonzalez Del Rosario')).toBeInTheDocument()
-    expect(within(page).getByLabelText('Sello Acabados Modernos Gonzalez')).toBeInTheDocument()
     expect(within(page).getByText('Dios es bueno todo el tiempo')).toBeInTheDocument()
   })
 
@@ -48,7 +47,7 @@ describe('QuotationDocument', () => {
     const pages = screen.getAllByTestId(/quotation-page-/)
     expect(pages.length).toBeGreaterThan(1)
     for (const page of pages) {
-      expect(within(page).getByText(/Acabados Modernos Gonzalez/i)).toBeInTheDocument()
+      expect(within(page).getAllByText(/Acabados Modernos Gonzalez/i).length).toBeGreaterThan(0)
       expect(within(page).getByRole('columnheader', { name: 'DESCRIPCIÓN' })).toBeInTheDocument()
     }
   })

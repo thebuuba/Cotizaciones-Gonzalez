@@ -31,7 +31,7 @@ describe('quotation export service', () => {
     await renderPagePng(page)
 
     expect(mocks.toBlob).toHaveBeenCalledWith(page, expect.objectContaining({
-      pixelRatio: 3,
+      pixelRatio: 4,
       backgroundColor: '#ffffff',
       cacheBust: true,
     }))

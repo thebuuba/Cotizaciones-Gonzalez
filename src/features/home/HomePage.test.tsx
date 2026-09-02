@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react'
+import { MemoryRouter } from 'react-router-dom'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { quotationSnapshotFactory } from '../../test/factories'
@@ -20,7 +21,7 @@ describe('HomePage', () => {
     sent.quotation.laborMinor = 0
     sent.materialItems = [{ id: 'item-3', quotationId: 'quote-2', description: 'Cerámica exterior', quantityMilli: 1_000, unit: 'unidad', unitPriceMinor: 50_000_00, position: 0 }]
 
-    render(<HomePage businessName="Acabados Modernos Gonzalez" quotations={[approved, sent]} />)
+    render(<MemoryRouter><HomePage businessName="Acabados Modernos Gonzalez" quotations={[approved, sent]} /></MemoryRouter>)
 
     expect(screen.getByRole('heading', { name: 'Acabados Modernos Gonzalez' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { level: 2, name: 'Cotizaciones recientes' })).toBeInTheDocument()

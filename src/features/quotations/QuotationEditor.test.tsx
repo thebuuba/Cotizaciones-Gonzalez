@@ -55,8 +55,7 @@ describe('QuotationEditor', () => {
 
     await user.type(screen.getByLabelText('Descripción 1'), 'Cerámica de piso')
     await user.type(screen.getByLabelText('Cantidad 1'), '1,5')
-    await user.clear(screen.getByLabelText('Unidad 1'))
-    await user.type(screen.getByLabelText('Unidad 1'), 'm²')
+    await user.selectOptions(screen.getByLabelText('Unidad 1'), 'm²')
     await user.type(screen.getByLabelText('Precio unitario 1'), '1000')
     expect(screen.getByTestId('material-total-0')).toHaveTextContent(/RD[$]\s?1,500\.00/)
 
@@ -70,14 +69,13 @@ describe('QuotationEditor', () => {
     expect(screen.queryByLabelText('Descripción 2')).not.toBeInTheDocument()
   })
 
-  it('accepts a custom material unit beyond the suggestions', async () => {
+  it('offers the approved construction units', async () => {
     const user = userEvent.setup()
     render(<QuotationEditor business={quotationSnapshotFactory().business} clients={[clientRecord()]} onSave={vi.fn()} />)
 
-    await user.clear(screen.getByLabelText('Unidad 1'))
-    await user.type(screen.getByLabelText('Unidad 1'), 'cubeta')
+    await user.selectOptions(screen.getByLabelText('Unidad 1'), 'global')
 
-    expect(screen.getByLabelText('Unidad 1')).toHaveValue('cubeta')
+    expect(screen.getByLabelText('Unidad 1')).toHaveValue('global')
   })
 
   it('contains only fields from the approved sheet', () => {
