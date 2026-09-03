@@ -1,4 +1,4 @@
-import { ChevronLeft, FileImage, FileText, MapPin, MoreHorizontal, Pencil, Phone, Trash2 } from 'lucide-react'
+import { ChevronLeft, FileImage, FileText, MapPin, MoreHorizontal, Pencil, Phone, Share2, Trash2 } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 
@@ -23,19 +23,65 @@ function formatQuantity(quantityMilli: number): string {
   return new Intl.NumberFormat('es-DO', { maximumFractionDigits: 3 }).format(quantityMilli / 1000)
 }
 
+export function buildQuotationShareText(snapshot: QuotationSnapshot): string {
+  const totals = calculateQuotationTotals(snapshot.materialItems, snapshot.quotation.laborMinor)
+  const materials = snapshot.materialItems.length
+    ? snapshot.materialItems.map((item, index) => `${index + 1}. ${item.description} — ${formatQuantity(item.quantityMilli)} ${item.unit} × ${formatMoney(item.unitPriceMinor)} = ${formatMoney(calculateMaterialTotal(item))}`)
+    : ['Sin materiales registrados.']
+
+  return [
+    snapshot.business.businessName,
+    `Cotización ${snapshot.quotation.number}`,
+    `Cliente: ${snapshot.quotation.clientName}`,
+    snapshot.quotation.clientAddress ? `Dirección: ${snapshot.quotation.clientAddress}` : '',
+    `Fecha: ${formatDate(snapshot.quotation.issueDate)}`,
+    '',
+    'Materiales:',
+    ...materials,
+    '',
+    `Total de materiales: ${formatMoney(totals.materialsMinor)}`,
+    `Mano de obra: ${formatMoney(totals.laborMinor)}`,
+    `Total general: ${formatMoney(totals.totalMinor)}`,
+    snapshot.quotation.observations ? `\nObservaciones: ${snapshot.quotation.observations}` : '',
+  ].filter((line) => line !== '').join('\n')
+}
+
 export function QuotationDetailPage({ snapshot, onStatusChange, onDelete }: {
   snapshot: QuotationSnapshot
   onStatusChange: (status: QuotationStatus) => void | Promise<void>
   onDelete: () => void | Promise<void>
 }) {
   const exportDocumentRef = useRef<HTMLDivElement>(null)
-  const [exporting, setExporting] = useState<'pdf' | 'image' | null>(null)
+  const [exporting, setExporting] = useState<'pdf' | 'image' | 'share' | null>(null)
   const [exportMessage, setExportMessage] = useState('')
   const [menuOpen, setMenuOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
   const totals = calculateQuotationTotals(snapshot.materialItems, snapshot.quotation.laborMinor)
   const baseName = `${snapshot.quotation.number} ${snapshot.quotation.clientName}`
   const exportPages = () => Array.from(exportDocumentRef.current?.querySelectorAll<HTMLElement>('[data-export-page]') ?? [])
+
+  const shareQuotation = async () => {
+    setExporting('share')
+    setExportMessage('')
+    const text = buildQuotationShareText(snapshot)
+    try {
+      if ('share' in navigator && typeof navigator.share === 'function') {
+        await navigator.share({ title: `Cotización ${snapshot.quotation.number}`, text })
+        setExportMessage('Cotización compartida')
+      } else if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(text)
+        setExportMessage('Resumen copiado al portapapeles')
+      } else {
+        throw new Error('Compartir no disponible')
+      }
+    } catch (error) {
+      if (error instanceof DOMException && error.name === 'AbortError') return
+      console.error('Error al compartir cotización', error)
+      setExportMessage('No se pudo compartir la cotización. Intenta nuevamente.')
+    } finally {
+      setExporting(null)
+    }
+  }
 
   const exportPdf = async () => {
     setExporting('pdf')
@@ -135,6 +181,7 @@ export function QuotationDetailPage({ snapshot, onStatusChange, onDelete }: {
     <section className="quotation-detail-group" aria-labelledby="quotation-export-title">
       <h2 id="quotation-export-title">Compartir</h2>
       <div className="quotation-detail-card quotation-detail-actions">
+        <button className="quotation-detail-action" type="button" disabled={Boolean(exporting)} onClick={() => void shareQuotation()}><span className="quotation-detail-action-icon"><Share2 aria-hidden="true" /></span><span><strong>{exporting === 'share' ? 'Abriendo opciones…' : 'Compartir cotización'}</strong><small>Enviar un resumen como texto por WhatsApp, Mensajes o correo</small></span></button>
         <button className="quotation-detail-action" type="button" disabled={Boolean(exporting)} onClick={() => void exportPdf()}><span className="quotation-detail-action-icon"><FileText aria-hidden="true" /></span><span><strong>{exporting === 'pdf' ? 'Creando PDF…' : 'Exportar PDF'}</strong><small>Documento listo para enviar o imprimir</small></span></button>
         <button className="quotation-detail-action" type="button" disabled={Boolean(exporting)} onClick={() => void exportImages()}><span className="quotation-detail-action-icon"><FileImage aria-hidden="true" /></span><span><strong>{exporting === 'image' ? 'Creando imagen…' : 'Exportar imagen'}</strong><small>Guarda la cotización como imagen</small></span></button>
       </div>
