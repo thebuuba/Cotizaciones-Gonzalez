@@ -11,6 +11,21 @@ describe('AuthGate', () => {
     expect(screen.queryByText('Aplicación local')).not.toBeInTheDocument()
   })
 
+  it('shows a visual startup loader while the session is restored', () => {
+    const client = {
+      auth: {
+        getSession: vi.fn().mockReturnValue(new Promise(() => undefined)),
+        onAuthStateChange: vi.fn().mockReturnValue({ data: { subscription: { unsubscribe: vi.fn() } } }),
+      },
+    } as unknown as AuthClient
+
+    render(<AuthGate client={client}><p>Privado</p></AuthGate>)
+
+    expect(screen.getByRole('status', { name: 'Cargando aplicación' })).toBeInTheDocument()
+    expect(screen.queryByText('Preparando respaldo…')).not.toBeInTheDocument()
+    expect(screen.queryByText('Privado')).not.toBeInTheDocument()
+  })
+
   it('restores a session and otherwise signs the private owner in with email and password', async () => {
     const signInWithPassword = vi.fn().mockResolvedValue({ error: null })
     const client = {
