@@ -179,7 +179,7 @@ export function QuotationEditor({ business, clients, initialValue, initialClient
       <legend className="sr-only">Materiales de la cotización</legend>
       <div className="editor-section-heading editor-section-heading--action">
         <div><span>Materiales</span><h2>Partidas de la cotización</h2></div>
-        <button className="editor-text-action" type="button" onClick={() => append(newMaterial())}><Plus aria-hidden="true" />Agregar</button>
+        <button className="editor-text-action" type="button" aria-label="Agregar material" onClick={() => append(newMaterial())}><Plus aria-hidden="true" />Agregar</button>
       </div>
       <ol className="material-list" aria-label="Materiales de la cotización">{fields.map((field, index) => <li className="material-card" key={field.fieldKey}>
         <div className="material-card__heading"><strong>Partida {index + 1}</strong><div className="material-actions">
@@ -188,14 +188,14 @@ export function QuotationEditor({ business, clients, initialValue, initialClient
           <button className="icon-button icon-button--danger" type="button" disabled={fields.length === 1} onClick={() => remove(index)} aria-label={`Eliminar material ${index + 1}`}><Trash2 aria-hidden="true" /></button>
         </div></div>
         <div className="material-card__body">
-          <label className="editor-row editor-row--stack"><span>Descripción<span className="sr-only"> {index + 1}</span></span><input {...register(`materials.${index}.description`)} placeholder="Ej. Pintura interior" /></label>
+          <label className="editor-row editor-row--stack"><span>Descripción<span className="sr-only"> {index + 1}</span></span><input aria-label={`Descripción ${index + 1}`} {...register(`materials.${index}.description`)} placeholder="Ej. Pintura interior" /></label>
           <div className="editor-material-pair">
-            <label className="editor-compact-field"><span>Cantidad<span className="sr-only"> {index + 1}</span></span><input inputMode="decimal" {...register(`materials.${index}.quantity`)} placeholder="0" /></label>
-            <label className="editor-compact-field"><span>Unidad<span className="sr-only"> {index + 1}</span></span><select {...register(`materials.${index}.unit`)}>{units.map((unit) => <option key={unit} value={unit}>{unit}</option>)}</select></label>
+            <label className="editor-compact-field"><span>Cantidad<span className="sr-only"> {index + 1}</span></span><input aria-label={`Cantidad ${index + 1}`} inputMode="decimal" {...register(`materials.${index}.quantity`)} placeholder="0" /></label>
+            <label className="editor-compact-field"><span>Unidad<span className="sr-only"> {index + 1}</span></span><select aria-label={`Unidad ${index + 1}`} {...register(`materials.${index}.unit`)}>{units.map((unit) => <option key={unit} value={unit}>{unit}</option>)}</select></label>
           </div>
           <div className="editor-price-row">
             <label htmlFor={`material-price-${index}`}>Precio unitario<span className="sr-only"> {index + 1}</span></label>
-            <div className="money-input"><span>RD$</span><input id={`material-price-${index}`} inputMode="decimal" {...register(`materials.${index}.unitPrice`)} placeholder="0.00" /></div>
+            <div className="money-input"><span>RD$</span><input aria-label={`Precio unitario ${index + 1}`} id={`material-price-${index}`} inputMode="decimal" {...register(`materials.${index}.unitPrice`)} placeholder="0.00" /></div>
           </div>
           <div className="row-total"><span>Total</span><strong data-testid={`material-total-${index}`}>{formatMoney(rowTotals[index] ?? 0)}</strong></div>
         </div>
