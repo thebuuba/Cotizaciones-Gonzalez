@@ -1,0 +1,78 @@
+.app-startup-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  min-height: 100dvh;
+  place-items: center;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 42%, color-mix(in srgb, var(--color-accent) 9%, var(--color-surface)) 0, transparent 34%),
+    var(--color-bg);
+}
+
+.app-startup-loader__visual {
+  position: relative;
+  display: grid;
+  width: 7rem;
+  height: 7rem;
+  place-items: center;
+  animation: app-startup-enter 420ms var(--ease-standard) both;
+}
+
+.app-startup-loader__halo {
+  position: absolute;
+  inset: -0.4rem;
+  border: 2px solid color-mix(in srgb, var(--color-primary) 12%, transparent);
+  border-top-color: var(--color-accent);
+  border-right-color: color-mix(in srgb, var(--color-accent) 45%, transparent);
+  border-radius: 50%;
+  animation: app-startup-spin 950ms linear infinite;
+}
+
+.app-startup-loader__icon {
+  width: 4.9rem;
+  height: 4.9rem;
+  border-radius: 1.1rem;
+  box-shadow: 0 14px 36px rgb(20 33 61 / 18%);
+  animation: app-startup-breathe 1.25s ease-in-out infinite;
+}
+
+.app-startup-loader__glow {
+  position: absolute;
+  width: 3.8rem;
+  height: 1rem;
+  bottom: -1.15rem;
+  border-radius: 50%;
+  background: rgb(20 33 61 / 12%);
+  filter: blur(8px);
+  animation: app-startup-shadow 1.25s ease-in-out infinite;
+}
+
+@keyframes app-startup-spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes app-startup-enter {
+  from { opacity: 0; transform: scale(0.88); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes app-startup-breathe {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-0.28rem) scale(1.035); }
+}
+
+@keyframes app-startup-shadow {
+  0%, 100% { opacity: 0.55; transform: scaleX(1); }
+  50% { opacity: 0.28; transform: scaleX(0.82); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-startup-loader__visual,
+  .app-startup-loader__halo,
+  .app-startup-loader__icon,
+  .app-startup-loader__glow {
+    animation: none;
+  }
+}
