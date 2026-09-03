@@ -1,129 +1,536 @@
-/* Editor de cotizaciones: formulario iOS sencillo y de una sola columna. */
-.quotation-editor {
+/* Editor de cotizaciones alineado con el lenguaje iOS agrupado de la app. */
+.quotation-editor--ios {
+  display: grid;
   width: 100%;
   max-width: 34rem;
   margin: 0 auto;
-  gap: .9rem;
-  padding-bottom: calc(6.5rem + env(safe-area-inset-bottom));
+  gap: 1.35rem;
+  padding-bottom: calc(7rem + env(safe-area-inset-bottom));
 }
 
-.quotation-editor .editor-intro {
+.quotation-editor--ios .editor-intro {
   display: grid;
-  gap: .2rem;
-  padding: .25rem .15rem .55rem;
+  gap: .18rem;
+  padding: .1rem .05rem .15rem;
 }
 
-.quotation-editor .editor-intro > span {
+.quotation-editor--ios .editor-intro > span {
   margin: 0;
   color: var(--color-label-secondary);
-  font-size: var(--font-size-auxiliary);
-  font-weight: 700;
-  letter-spacing: .06em;
+  font-size: .72rem;
+  font-weight: var(--font-weight-bold);
+  letter-spacing: .055em;
+  line-height: 1.2;
   text-transform: uppercase;
 }
 
-.quotation-editor .editor-intro h1 {
-  font-size: var(--font-size-featured-total);
+.quotation-editor--ios .editor-intro h1 {
+  margin: 0;
+  color: var(--color-text-strong);
+  font-size: var(--font-size-page-title);
+  font-weight: var(--font-weight-heavy);
+  letter-spacing: -.04em;
+  line-height: 1.05;
 }
 
-.quotation-editor .editor-intro p {
-  margin: .1rem 0 0;
+.quotation-editor--ios .editor-intro p {
+  max-width: 29rem;
+  margin: .25rem 0 0;
   color: var(--color-label-secondary);
   font-size: var(--font-size-secondary);
+  font-weight: var(--font-weight-regular);
+  line-height: 1.4;
 }
 
-.quotation-editor .editor-section {
-  gap: .85rem;
-  padding: .95rem;
-  border-color: var(--color-separator);
-  border-radius: var(--group-radius);
-  background: var(--palette-white);
-}
-
-.quotation-editor .editor-section > h2,
-.quotation-editor .section-heading h2 {
+.quotation-editor--ios .editor-section {
+  display: grid;
+  min-width: 0;
   margin: 0;
-  font-size: var(--font-size-body);
-  letter-spacing: -.015em;
-}
-
-.quotation-editor input,
-.quotation-editor textarea,
-.quotation-editor select {
-  min-height: 3rem;
-  border-color: transparent;
-  border-radius: var(--control-radius);
-  background: var(--color-fill);
-}
-
-.quotation-editor textarea {
-  min-height: 6.5rem;
-}
-
-.quotation-editor .material-card {
-  padding: .8rem;
-  border: 0 !important;
-  background: var(--color-secondary-grouped-bg);
-}
-
-.quotation-editor .section-heading {
-  align-items: flex-end;
-}
-
-.quotation-editor .section-heading .button {
-  min-height: var(--tap-target);
-  border-radius: var(--control-radius);
-}
-
-.quotation-editor .material-actions {
-  gap: .15rem;
-}
-
-.quotation-editor .material-actions .icon-button {
+  padding: 0;
+  gap: .55rem;
+  border: 0;
   background: transparent;
 }
 
-.quotation-editor .totals-section .general-total {
-  border-radius: 0 0 var(--group-radius) var(--group-radius);
-}
-
-.editor-save-panel {
+.quotation-editor--ios .editor-section-heading {
   display: grid;
-  gap: .55rem;
-  padding-top: .15rem;
+  gap: .08rem;
+  padding: 0 .8rem;
 }
 
-.editor-save-panel .save-state {
-  justify-self: center;
-  text-align: center;
+.quotation-editor--ios .editor-section-heading > span,
+.quotation-editor--ios .editor-section-heading > div > span {
+  color: var(--color-label-secondary);
+  font-size: .7rem;
+  font-weight: var(--font-weight-bold);
+  letter-spacing: .045em;
+  line-height: 1.2;
+  text-transform: uppercase;
 }
 
-.editor-save-panel .save-state:empty {
+.quotation-editor--ios .editor-section-heading h2 {
+  margin: 0;
+  color: var(--color-text-strong);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: -.018em;
+  line-height: 1.2;
+}
+
+.quotation-editor--ios .editor-section-heading--action {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: .75rem;
+}
+
+.quotation-editor--ios .editor-section-heading--action > div {
+  display: grid;
+  gap: .08rem;
+}
+
+.quotation-editor--ios .editor-group,
+.quotation-editor--ios .material-card,
+.quotation-editor--ios .editor-notes {
+  overflow: hidden;
+  border: 1px solid var(--color-separator);
+  border-radius: 1rem;
+  background: #fff;
+  box-shadow: 0 1px 2px rgb(20 33 61 / 6%);
+}
+
+.quotation-editor--ios .editor-row {
+  display: grid;
+  grid-template-columns: minmax(6.7rem, .8fr) minmax(0, 1.45fr);
+  min-height: 3.15rem;
+  align-items: center;
+  gap: .75rem;
+  padding: .45rem .85rem;
+  color: var(--color-text-strong);
+  font-size: var(--font-size-secondary);
+  font-weight: var(--font-weight-medium);
+}
+
+.quotation-editor--ios .editor-row + .editor-row {
+  border-top: 1px solid var(--color-separator);
+}
+
+.quotation-editor--ios .editor-row > span:first-child {
+  min-width: 0;
+  color: var(--color-text-strong);
+}
+
+.quotation-editor--ios .editor-row input,
+.quotation-editor--ios .editor-row select {
+  width: 100%;
+  min-width: 0;
+  min-height: 2.25rem;
+  padding: .25rem 0;
+  border: 0;
+  border-radius: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--color-text-strong);
+  font: inherit;
+  font-size: var(--font-size-secondary);
+  font-weight: var(--font-weight-regular);
+  text-align: right;
+  box-shadow: none;
+}
+
+.quotation-editor--ios .editor-row select {
+  padding-right: 1.1rem;
+  text-align-last: right;
+}
+
+.quotation-editor--ios .editor-row input[type='date'] {
+  min-width: 8.5rem;
+}
+
+.quotation-editor--ios input::placeholder,
+.quotation-editor--ios textarea::placeholder {
+  color: #9a9da6;
+  opacity: 1;
+}
+
+.quotation-editor--ios .editor-row input:focus,
+.quotation-editor--ios .editor-row select:focus {
+  box-shadow: none;
+}
+
+.quotation-editor--ios .editor-text-action {
+  display: inline-flex;
+  min-height: 2.2rem;
+  align-items: center;
+  gap: .18rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--palette-gold);
+  font-size: var(--font-size-secondary);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+}
+
+.quotation-editor--ios .editor-text-action svg {
+  width: .9rem;
+  height: .9rem;
+  stroke-width: 2.25;
+}
+
+.quotation-editor--ios .material-list {
+  display: grid;
+  gap: .75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.quotation-editor--ios .material-card {
+  padding: 0;
+}
+
+.quotation-editor--ios .material-card__heading {
+  display: flex;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
+  padding: .4rem .65rem .4rem .85rem;
+  border-bottom: 1px solid var(--color-separator);
+  background: color-mix(in srgb, var(--color-fill) 54%, #fff);
+}
+
+.quotation-editor--ios .material-card__heading strong {
+  color: var(--color-text-strong);
+  font-size: var(--font-size-secondary);
+  font-weight: var(--font-weight-bold);
+}
+
+.quotation-editor--ios .material-actions {
+  display: flex;
+  align-items: center;
+  gap: .08rem;
+}
+
+.quotation-editor--ios .material-actions .icon-button {
+  display: grid;
+  width: 2.15rem;
+  min-width: 2.15rem;
+  height: 2.15rem;
+  min-height: 2.15rem;
+  padding: 0;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--color-label-secondary);
+}
+
+.quotation-editor--ios .material-actions .icon-button svg {
+  width: .95rem;
+  height: .95rem;
+}
+
+.quotation-editor--ios .material-actions .icon-button--danger {
+  color: var(--color-danger);
+}
+
+.quotation-editor--ios .material-actions .icon-button:disabled {
+  opacity: .25;
+}
+
+.quotation-editor--ios .material-card__body {
+  display: grid;
+}
+
+.quotation-editor--ios .material-card__body > * + * {
+  border-top: 1px solid var(--color-separator);
+}
+
+.quotation-editor--ios .editor-row--stack {
+  grid-template-columns: 1fr;
+  gap: .22rem;
+  padding-block: .65rem;
+}
+
+.quotation-editor--ios .editor-row--stack input {
+  min-height: 2.15rem;
+  padding: 0;
+  text-align: left;
+}
+
+.quotation-editor--ios .editor-material-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.quotation-editor--ios .editor-compact-field {
+  display: grid;
+  min-width: 0;
+  gap: .25rem;
+  padding: .6rem .85rem;
+  color: var(--color-label-secondary);
+  font-size: .72rem;
+  font-weight: var(--font-weight-semibold);
+}
+
+.quotation-editor--ios .editor-compact-field + .editor-compact-field {
+  border-left: 1px solid var(--color-separator);
+}
+
+.quotation-editor--ios .editor-compact-field input,
+.quotation-editor--ios .editor-compact-field select {
+  width: 100%;
+  min-width: 0;
+  min-height: 2rem;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--color-text-strong);
+  font-size: var(--font-size-secondary);
+  font-weight: var(--font-weight-regular);
+  box-shadow: none;
+}
+
+.quotation-editor--ios .editor-price-row,
+.quotation-editor--ios .row-total,
+.quotation-editor--ios .editor-summary-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  min-height: 3.1rem;
+  align-items: center;
+  gap: .75rem;
+  padding: .45rem .85rem;
+}
+
+.quotation-editor--ios .editor-price-row > label,
+.quotation-editor--ios .row-total > span,
+.quotation-editor--ios .editor-summary-row > span,
+.quotation-editor--ios .editor-summary-row > label {
+  color: var(--color-text-strong);
+  font-size: var(--font-size-secondary);
+  font-weight: var(--font-weight-medium);
+}
+
+.quotation-editor--ios .money-input {
+  display: flex;
+  min-width: 7rem;
+  min-height: 2.15rem;
+  align-items: center;
+  justify-content: flex-end;
+  gap: .3rem;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.quotation-editor--ios .money-input > span {
+  color: var(--color-label-secondary);
+  font-size: var(--font-size-label);
+  font-weight: var(--font-weight-medium);
+}
+
+.quotation-editor--ios .money-input input {
+  width: 6.8rem;
+  min-width: 0;
+  min-height: 2rem;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--color-text-strong);
+  font-size: var(--font-size-secondary);
+  font-weight: var(--font-weight-regular);
+  text-align: right;
+  box-shadow: none;
+}
+
+.quotation-editor--ios .row-total {
+  background: color-mix(in srgb, var(--color-fill) 45%, #fff);
+}
+
+.quotation-editor--ios .row-total strong,
+.quotation-editor--ios .editor-summary-row strong {
+  color: var(--color-text-strong);
+  font-size: var(--font-size-secondary);
+  font-weight: var(--font-weight-bold);
+  font-variant-numeric: tabular-nums;
+}
+
+.quotation-editor--ios .editor-add-material {
+  display: flex;
+  width: 100%;
+  min-height: 3.15rem;
+  align-items: center;
+  justify-content: center;
+  gap: .35rem;
+  padding: 0 .8rem;
+  border: 1px dashed color-mix(in srgb, var(--palette-gold) 55%, var(--color-separator));
+  border-radius: .9rem;
+  background: color-mix(in srgb, var(--palette-gold) 5%, #fff);
+  color: var(--palette-gold);
+  font-size: var(--font-size-secondary);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+}
+
+.quotation-editor--ios .editor-add-material svg {
+  width: .95rem;
+  height: .95rem;
+}
+
+.quotation-editor--ios .totals-section .editor-group {
+  display: grid;
+}
+
+.quotation-editor--ios .editor-summary-row + .editor-summary-row {
+  border-top: 1px solid var(--color-separator);
+}
+
+.quotation-editor--ios .editor-summary-row--input {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.quotation-editor--ios .general-total {
+  min-height: 3.55rem;
+  background: color-mix(in srgb, var(--palette-gold) 8%, #fff);
+}
+
+.quotation-editor--ios .general-total span {
+  font-weight: var(--font-weight-bold);
+}
+
+.quotation-editor--ios .general-total strong {
+  color: var(--palette-navy);
+  font-size: var(--font-size-section-title);
+  font-weight: var(--font-weight-heavy);
+  letter-spacing: -.025em;
+}
+
+.quotation-editor--ios .editor-notes {
+  display: block;
+  padding: .7rem .85rem .8rem;
+}
+
+.quotation-editor--ios .editor-notes textarea {
+  width: 100%;
+  min-height: 5.6rem;
+  padding: .6rem .7rem;
+  border: 0;
+  border-radius: .75rem;
+  outline: 0;
+  background: var(--color-fill);
+  color: var(--color-text-strong);
+  font: inherit;
+  font-size: var(--font-size-secondary);
+  font-weight: var(--font-weight-regular);
+  line-height: 1.4;
+  resize: vertical;
+  box-shadow: none;
+}
+
+.quotation-editor--ios .editor-notes textarea:focus {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--palette-gold) 18%, transparent);
+}
+
+.quotation-editor--ios .editor-save-panel {
+  position: sticky;
+  bottom: calc(var(--tab-bar-height) + .55rem + env(safe-area-inset-bottom));
+  z-index: 8;
+  display: flex;
+  min-height: 3.55rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: .65rem;
+  padding: .45rem;
+  border: 1px solid var(--color-separator);
+  border-radius: 1rem;
+  background: color-mix(in srgb, var(--color-grouped-bg) 86%, transparent);
+  box-shadow: 0 8px 24px rgb(20 33 61 / 10%);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+}
+
+.quotation-editor--ios .editor-save-panel .save-state {
+  min-width: 0;
+  padding-left: .35rem;
+  color: var(--color-label-secondary);
+  font-size: var(--font-size-label);
+  text-align: left;
+}
+
+.quotation-editor--ios .editor-save-panel .save-state:empty {
   display: none;
 }
 
-.editor-save-button {
-  width: 100%;
-  min-height: 3.35rem;
+.quotation-editor--ios .editor-save-button {
+  min-height: 2.65rem;
+  flex: 1 1 auto;
   justify-content: center;
-  border-radius: 1rem;
-  font-size: var(--font-size-body);
-  font-weight: 750;
+  gap: .35rem;
+  border-radius: .82rem;
+  background: var(--palette-gold);
+  color: #111;
+  font-size: var(--font-size-secondary);
+  font-weight: var(--font-weight-bold);
 }
 
-.editor-save-button svg {
-  width: 1.15rem;
+.quotation-editor--ios .editor-save-button svg {
+  width: .95rem;
+  height: .95rem;
 }
 
-@media (max-width: 30rem) {
-  .quotation-editor .section-heading {
-    align-items: stretch;
-    flex-direction: column;
+.quotation-editor--ios .editor-group,
+.quotation-editor--ios .material-card,
+.quotation-editor--ios .editor-notes {
+  animation: ios-item-enter 300ms var(--ease-ios) both;
+}
+
+@media (max-width: 26rem) {
+  .quotation-editor--ios {
+    gap: 1.15rem;
   }
 
-  .quotation-editor .section-heading .button {
-    justify-content: center;
+  .quotation-editor--ios .editor-row {
+    grid-template-columns: minmax(6rem, .75fr) minmax(0, 1.25fr);
+    padding-inline: .75rem;
+  }
+
+  .quotation-editor--ios .editor-price-row,
+  .quotation-editor--ios .row-total,
+  .quotation-editor--ios .editor-summary-row {
+    padding-inline: .75rem;
   }
 }
 
+@media (max-width: 22rem) {
+  .quotation-editor--ios .editor-row {
+    grid-template-columns: 1fr;
+    gap: .12rem;
+    padding-block: .6rem;
+  }
 
+  .quotation-editor--ios .editor-row input,
+  .quotation-editor--ios .editor-row select {
+    text-align: left;
+    text-align-last: left;
+  }
+
+  .quotation-editor--ios .editor-material-pair {
+    grid-template-columns: 1fr;
+  }
+
+  .quotation-editor--ios .editor-compact-field + .editor-compact-field {
+    border-top: 1px solid var(--color-separator);
+    border-left: 0;
+  }
+
+  .quotation-editor--ios .editor-section-heading--action {
+    align-items: flex-start;
+  }
+}
