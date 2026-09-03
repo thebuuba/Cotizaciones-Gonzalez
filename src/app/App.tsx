@@ -54,7 +54,18 @@ function QuotationDetailRoute() {
 function ClientsRoute() {
   const clients = useLiveQuery(() => clientRepository.list(), [], [])
   const navigate = useNavigate()
-  return <ClientsPage clients={clients} onSave={(record) => clientRepository.save(record)} onStartQuotation={(clientId, locationId) => navigate(`/cotizaciones/nueva?cliente=${clientId}${locationId ? `&ubicacion=${locationId}` : ''}`)} />
+  const [params] = useSearchParams()
+  const selectedClient = params.get('cliente')
+  const detailTarget = selectedClient === 'nuevo' ? 'new' : selectedClient
+
+  return <ClientsPage
+    clients={clients}
+    detailTarget={detailTarget}
+    onOpenClient={(target) => navigate(`/clientes?cliente=${target === 'new' ? 'nuevo' : encodeURIComponent(target)}`)}
+    onCloseClient={() => navigate('/clientes', { replace: true })}
+    onSave={(record) => clientRepository.save(record)}
+    onStartQuotation={(clientId, locationId) => navigate(`/cotizaciones/nueva?cliente=${clientId}${locationId ? `&ubicacion=${locationId}` : ''}`)}
+  />
 }
 
 export function App() {
