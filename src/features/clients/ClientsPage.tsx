@@ -7,25 +7,49 @@ import { ClientForm } from './ClientForm'
 
 const avatarColors = ['client-avatar--blue', 'client-avatar--pink', 'client-avatar--green', 'client-avatar--purple', 'client-avatar--orange']
 
+type ClientDetailTarget = string | 'new' | null
+
 function initials(name: string): string {
   return name.trim().split(/\s+/).slice(0, 2).map((part) => part[0]?.toUpperCase() ?? '').join('') || 'C'
 }
 
-export function ClientsPage({ clients, onSave }: { clients: ClientRecord[]; onSave: (record: ClientRecord) => void | Promise<void>; onStartQuotation: (clientId: string, locationId?: string) => void }) {
+export function ClientsPage({ clients, onSave, detailTarget, onOpenClient, onCloseClient }: {
+  clients: ClientRecord[]
+  onSave: (record: ClientRecord) => void | Promise<void>
+  onStartQuotation: (clientId: string, locationId?: string) => void
+  detailTarget?: ClientDetailTarget
+  onOpenClient?: (target: Exclude<ClientDetailTarget, null>) => void
+  onCloseClient?: () => void
+}) {
   const [search, setSearch] = useState('')
-  const [editing, setEditing] = useState<ClientRecord | 'new' | null>(null)
+  const [localEditing, setLocalEditing] = useState<ClientRecord | 'new' | null>(null)
   const [transitionDirection, setTransitionDirection] = useState<'none' | 'forward' | 'back'>('none')
   const deferred = useDeferredValue(search)
   const filtered = useMemo(() => clients.filter(({ client }) => client.name.toLocaleLowerCase('es').includes(deferred.trim().toLocaleLowerCase('es'))), [clients, deferred])
+  const isControlled = detailTarget !== undefined
+  const controlledEditing = detailTarget === 'new'
+    ? 'new'
+    : detailTarget
+      ? clients.find(({ client }) => client.id === detailTarget) ?? null
+      : null
+  const editing = isControlled ? controlledEditing : localEditing
 
   const openClient = (record: ClientRecord | 'new') => {
     setTransitionDirection('forward')
-    setEditing(record)
+    if (isControlled && onOpenClient) {
+      onOpenClient(record === 'new' ? 'new' : record.client.id)
+      return
+    }
+    setLocalEditing(record)
   }
 
   const closeClient = () => {
     setTransitionDirection('back')
-    setEditing(null)
+    if (isControlled && onCloseClient) {
+      onCloseClient()
+      return
+    }
+    setLocalEditing(null)
   }
 
   const transitionClass = transitionDirection === 'none' ? 'local-transition' : `local-transition local-transition--${transitionDirection}`
