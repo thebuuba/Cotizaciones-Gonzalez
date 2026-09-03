@@ -47,7 +47,14 @@ export function AuthGate({ children, client }: { children: ReactNode; client?: S
 
   const value = useMemo(() => ({ client, session }), [client, session])
   if (!client) return <main className="auth-screen"><section className="auth-card" role="alert"><h1>Configuración incompleta</h1><p>La conexión segura no está disponible. Configura Supabase durante la compilación antes de usar la aplicación.</p></section></main>
-  if (status === 'loading') return <main className="loading-state">Preparando respaldo…</main>
+  if (status === 'loading') return <main className="app-startup-loader" role="status" aria-label="Cargando aplicación">
+    <div className="app-startup-loader__visual" aria-hidden="true">
+      <span className="app-startup-loader__halo" />
+      <img className="app-startup-loader__icon" src="/icons/app-icon.svg" alt="" />
+      <span className="app-startup-loader__glow" />
+    </div>
+    <span className="sr-only">Cargando aplicación</span>
+  </main>
   if (status === 'error') return <main className="auth-screen"><section className="auth-card" role="alert"><h1>No pudimos conectar</h1><p>Revisa tu internet e inténtalo otra vez.</p><button className="button button--primary" type="button" onClick={() => setAttempt((value) => value + 1)}>Reintentar</button></section></main>
   if (status === 'recovery' && session) return <UpdatePasswordScreen client={client} onComplete={() => setStatus('signedIn')} />
   if (status === 'signedOut' || !session) return <AuthScreen client={client} />
