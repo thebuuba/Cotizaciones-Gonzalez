@@ -1,0 +1,93 @@
+/* Ajuste específico del resumen de totales del editor de cotizaciones. */
+.quotation-editor--ios .totals-section .editor-group {
+  overflow: hidden;
+  border-radius: 1rem;
+}
+
+.quotation-editor--ios .totals-section .editor-summary-row {
+  position: static;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(7.25rem, auto);
+  min-height: 3.65rem;
+  margin: 0;
+  padding: .7rem .9rem;
+  align-items: center;
+  gap: .75rem;
+  box-sizing: border-box;
+  line-height: 1.2;
+}
+
+.quotation-editor--ios .totals-section .editor-summary-row > span,
+.quotation-editor--ios .totals-section .editor-summary-row > label {
+  min-width: 0;
+  margin: 0;
+  line-height: 1.25;
+}
+
+.quotation-editor--ios .totals-section .editor-summary-row > strong {
+  min-width: 0;
+  margin: 0;
+  line-height: 1.1;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.quotation-editor--ios .totals-section .editor-summary-row--input {
+  min-height: 4rem;
+}
+
+.quotation-editor--ios .totals-section .editor-summary-row--input .money-input {
+  min-width: 7.25rem;
+  margin: 0;
+}
+
+.quotation-editor--ios .totals-section .editor-summary-row--input .money-input input {
+  width: 5.5rem;
+  min-height: 2.35rem;
+  line-height: 1.2;
+}
+
+.quotation-editor--ios .totals-section .general-total {
+  min-height: 4.35rem;
+  margin: 0;
+  padding-top: .85rem;
+  padding-bottom: .85rem;
+  align-items: center;
+  overflow: visible;
+  background: color-mix(in srgb, var(--palette-gold) 8%, #fff);
+  box-shadow: none;
+}
+
+.quotation-editor--ios .totals-section .general-total > span {
+  align-self: center;
+  font-weight: var(--font-weight-bold);
+  line-height: 1.15;
+}
+
+.quotation-editor--ios .totals-section .general-total > strong {
+  align-self: center;
+  color: var(--palette-navy);
+  font-size: clamp(1.2rem, 5.4vw, 1.5rem);
+  font-weight: var(--font-weight-heavy);
+  letter-spacing: -.03em;
+  line-height: 1;
+}
+
+@media (max-width: 24rem) {
+  .quotation-editor--ios .totals-section .editor-summary-row {
+    grid-template-columns: minmax(0, 1fr) minmax(6.4rem, auto);
+    padding-inline: .75rem;
+  }
+
+  .quotation-editor--ios .totals-section .editor-summary-row--input .money-input {
+    min-width: 6.4rem;
+  }
+
+  .quotation-editor--ios .totals-section .editor-summary-row--input .money-input input {
+    width: 4.8rem;
+  }
+
+  .quotation-editor--ios .totals-section .general-total > strong {
+    font-size: 1.25rem;
+  }
+}
