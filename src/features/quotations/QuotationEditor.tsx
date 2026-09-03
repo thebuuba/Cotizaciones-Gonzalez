@@ -156,34 +156,69 @@ export function QuotationEditor({ business, clients, initialValue, initialClient
   const displayedStatus = manualStatus === 'idle' ? autosave.status : manualStatus
   const statusText = manualMessage || ({ idle: '', pending: 'Guardando…', saving: 'Guardando…', saved: 'Guardado', error: 'Error al guardar' }[displayedStatus])
 
-  return <form className="quotation-editor" onSubmit={(event) => { event.preventDefault(); void saveNow() }}>
-    <header className="editor-intro"><span>{initialValue ? 'Edición' : 'Nueva'}</span><h1>{initialValue ? 'Editar cotización' : 'Nueva cotización'}</h1><p>Agrega el cliente, los materiales y guarda.</p></header>
+  return <form className="quotation-editor quotation-editor--ios" onSubmit={(event) => { event.preventDefault(); void saveNow() }}>
+    <header className="editor-intro">
+      <span>{initialValue ? 'Edición' : 'Cotización'}</span>
+      <h1>{initialValue ? 'Editar cotización' : 'Nueva cotización'}</h1>
+      <p>{initialValue ? 'Actualiza los datos necesarios.' : 'Completa los datos y agrega las partidas del trabajo.'}</p>
+    </header>
 
-    <fieldset className="editor-section"><legend className="sr-only">Datos del cliente</legend><h2>Datos del cliente</h2>
-      {clients.length > 0 && <label>Cliente<select {...register('clientId')} onChange={(event) => chooseClient(event.target.value)}><option value="">Nuevo cliente</option>{clients.map(({ client }) => <option key={client.id} value={client.id}>{client.name}</option>)}</select></label>}
-      <label>Nombre del cliente<input {...register('clientName')} /></label>
-      <label>Teléfono<input type="tel" {...register('clientPhone')} onChange={(e) => { const formatted = formatPhone(e.target.value); setValue('clientPhone', formatted) }} /></label>
-      <label>Dirección<input {...register('clientAddress')} /></label>
-      <label>Fecha<input type="date" {...register('issueDate')} /></label>
+    <fieldset className="editor-section editor-section--grouped">
+      <legend className="sr-only">Datos del cliente</legend>
+      <div className="editor-section-heading"><span>Cliente</span><h2>Datos del cliente</h2></div>
+      <div className="editor-group">
+        {clients.length > 0 && <label className="editor-row"><span>Cliente</span><select {...register('clientId')} onChange={(event) => chooseClient(event.target.value)}><option value="">Nuevo cliente</option>{clients.map(({ client }) => <option key={client.id} value={client.id}>{client.name}</option>)}</select></label>}
+        <label className="editor-row"><span>Nombre</span><span className="sr-only"> del cliente</span><input {...register('clientName')} aria-label="Nombre del cliente" placeholder="Nombre del cliente" /></label>
+        <label className="editor-row"><span>Teléfono</span><input type="tel" {...register('clientPhone')} onChange={(e) => { const formatted = formatPhone(e.target.value); setValue('clientPhone', formatted) }} placeholder="809-000-0000" /></label>
+        <label className="editor-row"><span>Dirección</span><input {...register('clientAddress')} placeholder="Dirección del proyecto" /></label>
+        <label className="editor-row"><span>Fecha</span><input type="date" {...register('issueDate')} /></label>
+      </div>
     </fieldset>
 
-    <fieldset className="editor-section"><legend className="sr-only">Materiales de la cotización</legend><div className="section-heading"><div><span>Materiales</span><h2>Partidas de la cotización</h2></div></div>
+    <fieldset className="editor-section editor-section--grouped editor-materials-section">
+      <legend className="sr-only">Materiales de la cotización</legend>
+      <div className="editor-section-heading editor-section-heading--action">
+        <div><span>Materiales</span><h2>Partidas de la cotización</h2></div>
+        <button className="editor-text-action" type="button" onClick={() => append(newMaterial())}><Plus aria-hidden="true" />Agregar</button>
+      </div>
       <ol className="material-list" aria-label="Materiales de la cotización">{fields.map((field, index) => <li className="material-card" key={field.fieldKey}>
-        <div className="material-card__heading"><strong>Material {index + 1}</strong><div className="material-actions">
+        <div className="material-card__heading"><strong>Partida {index + 1}</strong><div className="material-actions">
           <button className="icon-button" type="button" disabled={index === 0} onClick={() => swap(index, index - 1)} aria-label={`Subir material ${index + 1}`}><ArrowUp aria-hidden="true" /></button>
           <button className="icon-button" type="button" disabled={index === fields.length - 1} onClick={() => swap(index, index + 1)} aria-label={`Bajar material ${index + 1}`}><ArrowDown aria-hidden="true" /></button>
           <button className="icon-button icon-button--danger" type="button" disabled={fields.length === 1} onClick={() => remove(index)} aria-label={`Eliminar material ${index + 1}`}><Trash2 aria-hidden="true" /></button>
         </div></div>
-        <label>Descripción {index + 1}<input {...register(`materials.${index}.description`)} /></label>
-        <div className="material-grid"><label>Cantidad {index + 1}<input inputMode="decimal" {...register(`materials.${index}.quantity`)} /></label><label>Unidad {index + 1}<select {...register(`materials.${index}.unit`)}>{units.map((unit) => <option key={unit} value={unit}>{unit}</option>)}</select></label></div>
-        <div className="form-field"><label htmlFor={`material-price-${index}`}>Precio unitario {index + 1}</label><div className="money-input"><span>RD$</span><input id={`material-price-${index}`} inputMode="decimal" {...register(`materials.${index}.unitPrice`)} /></div></div>
-        <div className="row-total"><span>Total</span><strong data-testid={`material-total-${index}`}>{formatMoney(rowTotals[index] ?? 0)}</strong></div>
+        <div className="material-card__body">
+          <label className="editor-row editor-row--stack"><span>Descripción<span className="sr-only"> {index + 1}</span></span><input {...register(`materials.${index}.description`)} placeholder="Ej. Pintura interior" /></label>
+          <div className="editor-material-pair">
+            <label className="editor-compact-field"><span>Cantidad<span className="sr-only"> {index + 1}</span></span><input inputMode="decimal" {...register(`materials.${index}.quantity`)} placeholder="0" /></label>
+            <label className="editor-compact-field"><span>Unidad<span className="sr-only"> {index + 1}</span></span><select {...register(`materials.${index}.unit`)}>{units.map((unit) => <option key={unit} value={unit}>{unit}</option>)}</select></label>
+          </div>
+          <div className="editor-price-row">
+            <label htmlFor={`material-price-${index}`}>Precio unitario<span className="sr-only"> {index + 1}</span></label>
+            <div className="money-input"><span>RD$</span><input id={`material-price-${index}`} inputMode="decimal" {...register(`materials.${index}.unitPrice`)} placeholder="0.00" /></div>
+          </div>
+          <div className="row-total"><span>Total</span><strong data-testid={`material-total-${index}`}>{formatMoney(rowTotals[index] ?? 0)}</strong></div>
+        </div>
       </li>)}</ol>
-      <button className="button button--quiet" type="button" onClick={() => append(newMaterial())}><Plus aria-hidden="true" />Agregar material</button>
+      <button className="editor-add-material" type="button" onClick={() => append(newMaterial())}><Plus aria-hidden="true" />Agregar otra partida</button>
     </fieldset>
 
-    <fieldset className="editor-section totals-section"><legend className="sr-only">Totales de la cotización</legend><div><span>Total de materiales</span><strong data-testid="materials-total">{formatMoney(totals.materialsMinor)}</strong></div><div className="form-field"><label htmlFor="quotation-labor">Mano de obra instalación</label><div className="money-input"><span>RD$</span><input id="quotation-labor" inputMode="decimal" {...register('labor')} /></div></div><div className="general-total"><span>Total general</span><strong data-testid="general-total">{formatMoney(totals.totalMinor)}</strong></div></fieldset>
-    <fieldset className="editor-section"><legend className="sr-only">Observaciones</legend><label>Observaciones<textarea rows={5} {...register('observations')} /></label></fieldset>
+    <fieldset className="editor-section editor-section--grouped totals-section">
+      <legend className="sr-only">Totales de la cotización</legend>
+      <div className="editor-section-heading"><span>Resumen</span><h2>Totales</h2></div>
+      <div className="editor-group">
+        <div className="editor-summary-row"><span>Total de materiales</span><strong data-testid="materials-total">{formatMoney(totals.materialsMinor)}</strong></div>
+        <div className="editor-summary-row editor-summary-row--input"><label htmlFor="quotation-labor">Mano de obra instalación</label><div className="money-input"><span>RD$</span><input id="quotation-labor" inputMode="decimal" {...register('labor')} placeholder="0.00" /></div></div>
+        <div className="editor-summary-row general-total"><span>Total general</span><strong data-testid="general-total">{formatMoney(totals.totalMinor)}</strong></div>
+      </div>
+    </fieldset>
+
+    <fieldset className="editor-section editor-section--grouped">
+      <legend className="sr-only">Observaciones</legend>
+      <div className="editor-section-heading"><span>Notas</span><h2>Observaciones</h2></div>
+      <label className="editor-notes"><span className="sr-only">Observaciones</span><textarea rows={5} {...register('observations')} placeholder="Agrega condiciones, detalles o aclaraciones para el cliente…" /></label>
+    </fieldset>
+
     <footer className="editor-save-panel">
       <span className={`save-state save-state--${displayedStatus}`} aria-live="polite">{statusText}</span>
       <button className="button button--primary editor-save-button" type="submit" disabled={manualStatus === 'saving'}><Save aria-hidden="true" />{manualStatus === 'saving' ? 'Guardando…' : 'Guardar cotización'}</button>
