@@ -1,4 +1,4 @@
-import { Award, CheckCircle2, ClipboardList, Grid2X2, Hammer, Heart, MessageCircle, Phone, ShieldCheck, UserRound } from 'lucide-react'
+import { Award, CheckCircle2, ClipboardList, Grid2X2, Hammer, Heart, MessageCircle, Phone, Quote, ShieldCheck, UserRound } from 'lucide-react'
 import { useEffect, useMemo } from 'react'
 
 import banreservasLogo from '../../assets/bank-logos/banreservas.svg'
@@ -8,6 +8,7 @@ import { calculateMaterialTotal, calculateQuotationTotals, formatMoney } from '.
 import type { BusinessProfile, MaterialItem, QuotationSnapshot } from '../../domain/types'
 import { paginateDocument } from './documentPagination'
 import '../../styles/quotation-document.css'
+import '../../styles/quotation-document-refined.css'
 
 function estimateRowHeight(item: MaterialItem): number {
   return 38 + Math.max(0, Math.ceil(item.description.length / 42) - 1) * 15
@@ -48,7 +49,8 @@ function Brand({ business, logoUrl, compact = false, mini = false }: { business:
 }
 
 function MaterialTable({ items, startIndex }: { items: MaterialItem[]; startIndex: number }) {
-  return <div className="document-table" role="table">
+  const compact = items.length > 0 && items.length < 4
+  return <div className={`document-table${compact ? ' document-table--compact' : ''}`} role="table">
     <div role="rowgroup">
       <div className="document-table-row document-table-heading" role="row">
         <div role="columnheader">#</div><div role="columnheader">DESCRIPCIÓN</div><div role="columnheader">CANTIDAD</div><div role="columnheader">UNIDAD</div><div role="columnheader">PRECIO UNITARIO</div><div role="columnheader">TOTAL</div>
@@ -86,21 +88,30 @@ function ClosingBlocks({ snapshot, logoUrl, stampUrl }: { snapshot: QuotationSna
   const totals = calculateQuotationTotals(materialItems, quotation.laborMinor)
 
   return <div className="document-closing">
-    <section className="document-totals">
-      <div><span>Total de materiales</span><strong>{formatMoney(totals.materialsMinor)}</strong></div>
-      <div><span>Mano de obra instalación</span><strong>{formatMoney(totals.laborMinor)}</strong></div>
-      <div className="document-grand-total"><span>Total general</span><strong>{formatMoney(totals.totalMinor)}</strong></div>
-    </section>
-
-    <div className="document-two-column">
-      <section className="document-box">
-        <h3><ClipboardList aria-hidden="true" />TÉRMINOS &amp; CONDICIONES</h3>
-        {business.terms.map((term, index) => <p key={`${index}-${term}`}><CheckCircle2 aria-hidden="true" />{term}</p>)}
-      </section>
+    <div className="document-summary-grid">
       <section className="document-box document-observations">
         <h3>OBSERVACIONES</h3>
         <p>{quotation.observations || 'Sin observaciones.'}</p>
       </section>
+
+      <section className="document-totals">
+        <div><span>Total de materiales</span><strong>{formatMoney(totals.materialsMinor)}</strong></div>
+        <div><span>Mano de obra instalación</span><strong>{formatMoney(totals.laborMinor)}</strong></div>
+        <div className="document-grand-total"><span>Total general</span><strong>{formatMoney(totals.totalMinor)}</strong></div>
+      </section>
+    </div>
+
+    <div className="document-terms-brand-grid">
+      <section className="document-box document-terms-box">
+        <h3><ClipboardList aria-hidden="true" />TÉRMINOS &amp; CONDICIONES</h3>
+        {business.terms.map((term, index) => <p key={`${index}-${term}`}><CheckCircle2 aria-hidden="true" />{term}</p>)}
+      </section>
+
+      <aside className="document-brand-quote" aria-label="Mensaje de marca">
+        <Quote aria-hidden="true" />
+        <p>Construimos hoy los espacios donde vivirás tus mejores momentos.</p>
+        <span aria-hidden="true" />
+      </aside>
     </div>
 
     <section className="document-business-strip">
@@ -109,7 +120,7 @@ function ClosingBlocks({ snapshot, logoUrl, stampUrl }: { snapshot: QuotationSna
         {business.bankAccounts.map((account) => {
           const bankLogo = getBankLogo(account.bank)
           return <div className="document-bank-row" key={account.id}>
-            {bankLogo && <img className="document-bank-logo" src={bankLogo} alt={account.bank} />}
+            {bankLogo && <span className="document-bank-logo-frame"><img className="document-bank-logo" src={bankLogo} alt={account.bank} /></span>}
             <div className="document-bank-info"><strong>{account.bank}</strong><span>{account.type} · {account.number}</span></div>
           </div>
         })}
