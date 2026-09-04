@@ -33,6 +33,7 @@ function SwipeableClientRow({ record, index, revealed, onReveal, onOpen, onDelet
   const revealProgress = revealedWidth / SWIPE_ACTIONS_WIDTH
   const actionParallax = Math.round((1 - revealProgress) * 38)
   const dragging = dragOffset !== null
+  const hasSwipe = revealedWidth > 0
 
   const handlePointerDown = (event: ReactPointerEvent<HTMLButtonElement>) => {
     if (event.pointerType === 'mouse' && event.button !== 0) return
@@ -89,7 +90,7 @@ function SwipeableClientRow({ record, index, revealed, onReveal, onOpen, onDelet
     await onDelete(record)
   }
 
-  return <li className={`client-swipe-row${revealed ? ' is-revealed' : ''}${dragging ? ' is-dragging' : ''}`}>
+  return <li className={`client-swipe-row${revealed ? ' is-revealed' : ''}${dragging ? ' is-dragging' : ''}${hasSwipe ? ' has-swipe' : ''}`}>
     <div
       className="client-swipe-actions"
       aria-hidden={revealedWidth === 0}
