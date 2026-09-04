@@ -1,4 +1,4 @@
-import { useDeferredValue, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
+import { useDeferredValue, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent } from 'react'
 import { ChevronRight, MapPin, Pencil, Plus, Search, Trash2, UserRound } from 'lucide-react'
 import { PageHeader } from '../../components/PageHeader'
 import { EmptyState } from '../../components/EmptyState'
@@ -65,7 +65,7 @@ function SwipeableClientRow({ record, index, revealed, onReveal, onOpen, onDelet
     setDragOffset(null)
   }
 
-  const handleCardClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+  const handleCardClick = (event: ReactMouseEvent<HTMLButtonElement>) => {
     if (pointer.current.moved) {
       event.preventDefault()
       pointer.current.moved = false
