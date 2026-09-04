@@ -44,6 +44,14 @@ describe('quotation export service', () => {
     }))
   })
 
+  it('retries at a safer resolution if the high-resolution mobile capture fails', async () => {
+    const page = exportPage()
+    mocks.toBlob.mockRejectedValueOnce(new Error('canvas memory')).mockResolvedValueOnce(new Blob(['png'], { type: 'image/png' }))
+
+    await expect(renderPagePng(page)).resolves.toBeInstanceOf(Blob)
+    expect(mocks.toBlob).toHaveBeenNthCalledWith(2, page, expect.objectContaining({ pixelRatio: 1.75 }))
+  })
+
   it('returns one safely named image per page', async () => {
     const files = await exportQuotationImages([
       exportPage(), exportPage(),
