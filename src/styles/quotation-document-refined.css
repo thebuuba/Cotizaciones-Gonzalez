@@ -1,0 +1,122 @@
+/* Refinamientos de composición para la cotización aprobada. */
+
+/* 1. Filas más compactas cuando hay pocos materiales. */
+.document-table--compact .document-table-row:not(.document-table-heading) > div {
+  min-height: 3.15cqw;
+  padding-block: .38cqw;
+}
+
+/* 2. Repetir el hilo negro + amarillo en el total de mayor jerarquía. */
+.document-totals .document-grand-total {
+  background: var(--paper-black);
+}
+
+.document-totals .document-grand-total span {
+  color: var(--paper-gold);
+  font-weight: 850;
+}
+
+.document-totals .document-grand-total strong {
+  color: var(--paper-white);
+  font-size: 1.04em;
+  font-weight: 850;
+}
+
+/* Observaciones + totales comparten una fila, con el total dominando visualmente. */
+.document-summary-grid {
+  display: grid;
+  grid-template-columns: minmax(0, .98fr) minmax(0, .92fr);
+  align-items: stretch;
+  gap: 1.4cqw;
+  margin: 1.2cqw 3cqw 0;
+}
+
+.document-summary-grid .document-box,
+.document-summary-grid .document-totals {
+  width: auto;
+  min-height: 9.8cqw;
+  margin: 0;
+}
+
+.document-summary-grid .document-observations p {
+  min-height: 4.8cqw;
+}
+
+/* 3. Términos mandan; la cita se convierte en apoyo de marca secundario. */
+.document-terms-brand-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.42fr) minmax(0, .78fr);
+  align-items: stretch;
+  gap: 1.4cqw;
+  margin: 1.3cqw 3cqw 0;
+}
+
+.document-terms-box {
+  min-height: 12.2cqw;
+}
+
+.document-brand-quote {
+  position: relative;
+  display: grid;
+  min-height: 10.2cqw;
+  align-content: center;
+  gap: .55cqw;
+  padding: 1.15cqw 1.35cqw;
+  overflow: hidden;
+  border: .1cqw solid #e3eadf;
+  border-radius: 1cqw;
+  background: linear-gradient(135deg, #f7faf4 0%, #edf3e9 100%);
+  color: var(--paper-black);
+}
+
+.document-brand-quote > svg {
+  width: 2.45cqw;
+  height: 2.45cqw;
+  padding: .45cqw;
+  border-radius: 50%;
+  background: #dcebd4;
+  color: #31583a;
+  fill: #31583a;
+}
+
+.document-brand-quote p {
+  max-width: 21ch;
+  margin: 0;
+  color: #273029;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: .9em;
+  font-style: italic;
+  font-weight: 650;
+  line-height: 1.32;
+}
+
+.document-brand-quote > span {
+  width: 4.5cqw;
+  height: .38cqw;
+  margin-top: .15cqw;
+  border-radius: 999px;
+  background: var(--paper-gold);
+}
+
+/* 4. Todos los bancos reciben exactamente el mismo espacio visual. */
+.document-bank-logo-frame {
+  display: grid;
+  width: 3.35cqw;
+  height: 2.55cqw;
+  flex: 0 0 3.35cqw;
+  place-items: center;
+}
+
+.document-bank-logo-frame .document-bank-logo {
+  width: 100%;
+  height: 100%;
+  max-width: 3.05cqw;
+  max-height: 2.2cqw;
+  object-fit: contain;
+  object-position: center;
+}
+
+/* Evita que reglas antiguas alteren la caja normalizada. */
+.document-bank-row > .document-bank-logo-frame + .document-bank-info {
+  min-width: 0;
+}
