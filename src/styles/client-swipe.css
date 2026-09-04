@@ -1,6 +1,6 @@
 .client-swipe-row {
   position: relative;
-  overflow: hidden;
+  overflow: visible;
   border-radius: var(--group-radius);
   background: transparent;
   isolation: isolate;
@@ -50,6 +50,7 @@
   gap: .32rem;
   padding: .55rem .25rem;
   border: 0;
+  border-radius: 0;
   color: white;
   font-size: .72rem;
   font-weight: 700;
@@ -80,19 +81,32 @@
   position: relative;
   z-index: 1;
   width: 100%;
-  will-change: transform;
+  flex: 0 0 100%;
+  min-width: 100%;
+  will-change: transform, border-radius;
   touch-action: pan-y;
   user-select: none;
   -webkit-user-select: none;
-  transition: transform 280ms cubic-bezier(.22, .74, .18, 1), background-color var(--duration-fast) var(--ease-standard);
+  transition:
+    transform 280ms cubic-bezier(.22, .74, .18, 1),
+    border-radius 180ms ease-out,
+    background-color var(--duration-fast) var(--ease-standard),
+    box-shadow 180ms ease-out;
 }
 
 .client-swipe-front.is-dragging {
   transition: none;
 }
 
-.client-swipe-row.is-revealed .client-swipe-front {
+.client-swipe-row.has-swipe .client-swipe-front {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
   box-shadow: none;
+}
+
+.client-swipe-row.has-swipe .client-swipe-actions {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
 }
 
 @media (prefers-reduced-motion: reduce) {
