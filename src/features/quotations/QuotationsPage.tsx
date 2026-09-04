@@ -7,10 +7,10 @@ import { EmptyState } from '../../components/EmptyState'
 import { calculateQuotationTotals, formatMoney } from '../../domain/money'
 import type { QuotationSnapshot } from '../../domain/types'
 
-export function QuotationsPage({ quotations }: { quotations: QuotationSnapshot[] }) {
+export function QuotationsPage({ quotations, loading = false }: { quotations: QuotationSnapshot[]; loading?: boolean }) {
   return <div className="quotations-page">
     <div className="quotation-page-heading"><PageHeader title="Cotizaciones" /><Link aria-label="Nueva cotización" className="quotation-new-button" to="/cotizaciones/nueva"><Plus aria-hidden="true" /><span>Nueva</span></Link></div>
-    {quotations.length ? <ul className="quotation-list" aria-label="Lista de cotizaciones">{quotations.map((snapshot) => {
+    {loading ? <p className="loading-state" role="status" aria-live="polite">Cargando cotizaciones…</p> : quotations.length ? <ul className="quotation-list" aria-label="Lista de cotizaciones">{quotations.map((snapshot) => {
       const { quotation, materialItems } = snapshot
       const total = calculateQuotationTotals(materialItems, quotation.laborMinor).totalMinor
       const QuotationIcon = quotation.status === 'approved' ? ShieldCheck : quotation.status === 'sent' ? Send : quotation.status === 'rejected' ? XCircle : FileText
