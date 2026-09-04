@@ -19,11 +19,13 @@ interface SyncContextValue { state: SyncState; syncNow: () => Promise<void>; sig
 const SyncContext = createContext<SyncContextValue>({ state: 'synced', syncNow: async () => undefined })
 export const useSync = () => useContext(SyncContext)
 
+const PERIODIC_SYNC_MS = 60_000
+
 export function startSyncSchedule(run: () => void): () => void {
   const foreground = () => { if (document.visibilityState === 'visible') run() }
   const periodic = window.setInterval(() => {
     if (navigator.onLine && document.visibilityState === 'visible') run()
-  }, 10_000)
+  }, PERIODIC_SYNC_MS)
   window.addEventListener('online', run)
   window.addEventListener('focus', run)
   document.addEventListener('visibilitychange', foreground)
@@ -53,13 +55,11 @@ export function SyncProvider({ children }: { children: ReactNode }) {
     const queueSubscription = liveQuery(() => db.outbox.count()).subscribe(() => { void engine.run() })
     const retry = () => { void engine.run() }
     const stopSchedule = startSyncSchedule(retry)
-    window.addEventListener('offline', retry)
     void engine.run()
     return () => {
       unsubscribeState()
       queueSubscription.unsubscribe()
       stopSchedule()
-      window.removeEventListener('offline', retry)
     }
   }, [engine])
 
