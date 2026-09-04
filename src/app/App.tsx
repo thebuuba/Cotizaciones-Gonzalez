@@ -11,8 +11,11 @@ import { QuotationDetailPage } from '../features/quotations/QuotationDetailPage'
 import { createDefaultBusinessProfile } from '../db/defaults'
 
 function HomeRoute() {
-  const quotations = useLiveQuery(() => quotationRepository.list(), [], [])
+  const quotations = useLiveQuery(() => quotationRepository.list())
   const profile = useLiveQuery(() => businessProfileRepository.get())
+
+  if (quotations === undefined) return null
+
   return <HomePage businessName={profile?.businessName || 'Acabados Modernos Gonzalez'} quotations={quotations} />
 }
 
@@ -31,7 +34,10 @@ function NewQuotationRoute() {
 }
 
 function QuotationsRoute() {
-  const quotations = useLiveQuery(() => quotationRepository.list(), [], [])
+  const quotations = useLiveQuery(() => quotationRepository.list())
+
+  if (quotations === undefined) return null
+
   return <QuotationsPage quotations={quotations} />
 }
 
