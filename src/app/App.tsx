@@ -70,6 +70,7 @@ function ClientsRoute() {
     onOpenClient={(target) => navigate(`/clientes?cliente=${target === 'new' ? 'nuevo' : encodeURIComponent(target)}`)}
     onCloseClient={() => navigate('/clientes', { replace: true })}
     onSave={(record) => clientRepository.save(record)}
+    onDelete={(record) => clientRepository.softDelete(record.client.id, new Date())}
     onStartQuotation={(clientId, locationId) => navigate(`/cotizaciones/nueva?cliente=${clientId}${locationId ? `&ubicacion=${locationId}` : ''}`)}
   />
 }
