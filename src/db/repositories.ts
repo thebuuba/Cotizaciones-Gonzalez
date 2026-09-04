@@ -67,7 +67,27 @@ export class DexieQuotationRepository {
     })
   }
 
-  async duplicate(source: QuotationSnapshot): Promise<void> { await this.save(source) }
+  async duplicate(source: QuotationSnapshot): Promise<void> {
+    const quotationId = crypto.randomUUID()
+    const at = new Date().toISOString()
+    await this.save({
+      ...source,
+      quotation: {
+        ...source.quotation,
+        id: quotationId,
+        number: '',
+        status: 'draft',
+        createdAt: at,
+        updatedAt: at,
+        deletedAt: undefined,
+      },
+      materialItems: source.materialItems.map((item) => ({
+        ...item,
+        id: crypto.randomUUID(),
+        quotationId,
+      })),
+    })
+  }
 
   async softDelete(id: string, now: Date): Promise<void> {
     const snapshot = await this.get(id, true)
