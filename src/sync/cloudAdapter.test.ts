@@ -8,6 +8,7 @@ function transport(): BackupTransport {
   return {
     upsert: vi.fn().mockResolvedValue(undefined),
     list: vi.fn().mockResolvedValue([]),
+    listMaterialsForQuotation: vi.fn().mockResolvedValue([]),
     upload: vi.fn().mockResolvedValue(undefined),
     download: vi.fn().mockResolvedValue(new Blob(['asset'], { type: 'image/png' })),
   }
@@ -51,6 +52,43 @@ describe('SupabaseCloudAdapter', () => {
     expect(api.upsert).toHaveBeenCalledWith('material_items', expect.arrayContaining([
       expect.objectContaining({ id: 'item-1', quotation_id: 'quote-1', payload: expect.objectContaining({ quantityMilli: 10_000, unitPriceMinor: 100_000 }) }),
     ]))
+  })
+
+  it('marks remote materials as deleted when they are removed from a quotation', async () => {
+    const api = transport()
+    vi.mocked(api.listMaterialsForQuotation).mockResolvedValue([
+      { id: 'item-1', quotation_id: 'quote-1', payload: { id: 'item-1' }, updated_at: '2026-08-30T10:00:00.000Z', version: 1 },
+      { id: 'item-old', quotation_id: 'quote-1', payload: { id: 'item-old' }, updated_at: '2026-08-30T10:00:00.000Z', version: 1 },
+    ])
+    const snapshot = quotationSnapshotFactory()
+    snapshot.materialItems = snapshot.materialItems.filter((item) => item.id === 'item-1')
+    const operation: OutboxOperation = {
+      id: 'quotation:1', entityType: 'quotation', entityId: snapshot.quotation.id,
+      action: 'upsert', payload: snapshot, createdAt: snapshot.quotation.updatedAt,
+      nextAttemptAt: snapshot.quotation.updatedAt, attempt: 0,
+    }
+
+    await new SupabaseCloudAdapter(api, 'owner-1').push(operation)
+
+    expect(api.upsert).toHaveBeenCalledWith('material_items', [expect.objectContaining({
+      id: 'item-old', quotation_id: 'quote-1', deleted_at: snapshot.quotation.updatedAt,
+    })])
+  })
+
+  it('marks all remote materials deleted when the quotation is deleted', async () => {
+    const api = transport()
+    vi.mocked(api.listMaterialsForQuotation).mockResolvedValue([
+      { id: 'item-1', quotation_id: 'quote-1', payload: { id: 'item-1' }, updated_at: '2026-08-30T10:00:00.000Z', version: 1 },
+    ])
+    const operation: OutboxOperation = {
+      id: 'quotation:delete', entityType: 'quotation', entityId: 'quote-1',
+      action: 'delete', createdAt: '2026-08-30T12:00:00.000Z',
+      nextAttemptAt: '2026-08-30T12:00:00.000Z', attempt: 0,
+    }
+
+    await new SupabaseCloudAdapter(api, 'owner-1').push(operation)
+
+    expect(api.upsert).toHaveBeenCalledWith('material_items', [expect.objectContaining({ id: 'item-1', deleted_at: operation.createdAt })])
   })
 
   it('pulls all owner-scoped tables as one restore bundle', async () => {
