@@ -1,0 +1,78 @@
+.client-swipe-row {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--group-radius);
+  background: transparent;
+  isolation: isolate;
+}
+
+.client-swipe-actions {
+  position: absolute;
+  inset: 0 0 0 auto;
+  z-index: 0;
+  display: grid;
+  width: 168px;
+  grid-template-columns: repeat(2, 84px);
+  overflow: hidden;
+  border-radius: var(--group-radius);
+}
+
+.client-swipe-action {
+  display: grid;
+  min-width: 0;
+  min-height: 100%;
+  place-content: center;
+  justify-items: center;
+  gap: .32rem;
+  padding: .55rem .25rem;
+  border: 0;
+  color: white;
+  font-size: .72rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.client-swipe-action svg {
+  width: 1.25rem;
+  height: 1.25rem;
+  stroke-width: 2.25;
+}
+
+.client-swipe-action--edit {
+  background: #34c759;
+}
+
+.client-swipe-action--delete {
+  background: #ff3b30;
+}
+
+.client-swipe-action:active {
+  filter: brightness(.9);
+}
+
+.client-swipe-front {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  will-change: transform;
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: transform 280ms cubic-bezier(.22, .74, .18, 1), background-color var(--duration-fast) var(--ease-standard);
+}
+
+.client-swipe-front.is-dragging {
+  transition: none;
+}
+
+.client-swipe-row.is-revealed .client-swipe-front {
+  box-shadow: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .client-swipe-front {
+    transition-duration: .00001ms;
+  }
+}
