@@ -8,6 +8,7 @@ type BackupRow = Record<string, unknown> & { id: string; payload: unknown; updat
 export interface BackupTransport {
   upsert(table: BackupTable, row: Record<string, unknown> | Array<Record<string, unknown>>): Promise<void>
   list(table: BackupTable): Promise<BackupRow[]>
+  listMaterialsForQuotation(quotationId: string): Promise<BackupRow[]>
   upload(path: string, body: Blob): Promise<void>
   download(path: string): Promise<Blob>
 }
@@ -67,12 +68,34 @@ export class SupabaseCloudAdapter {
     await this.transport.upsert('clients', this.baseRow(operation, operation.payload ?? {}))
   }
 
+  private materialTombstone(row: BackupRow, at: string): Record<string, unknown> {
+    return {
+      owner_id: this.ownerId,
+      id: row.id,
+      quotation_id: row.quotation_id,
+      payload: row.payload ?? {},
+      updated_at: at,
+      deleted_at: at,
+      version: versionOf(at),
+    }
+  }
+
   private async pushQuotation(operation: OutboxOperation) {
+    const existingMaterials = await this.transport.listMaterialsForQuotation(operation.entityId)
+
     if (operation.action === 'delete' || !operation.payload) {
       await this.transport.upsert('quotations', this.baseRow(operation, {}))
+      const activeMaterials = existingMaterials.filter((row) => !row.deleted_at)
+      if (activeMaterials.length) {
+        await this.transport.upsert('material_items', activeMaterials.map((row) => this.materialTombstone(row, operation.createdAt)))
+      }
       return
     }
+
     const snapshot = operation.payload as QuotationSnapshot
+    const currentIds = new Set(snapshot.materialItems.map((item) => item.id))
+    const removedMaterials = existingMaterials.filter((row) => !row.deleted_at && !currentIds.has(row.id))
+
     await this.transport.upsert('quotations', {
       ...this.baseRow(operation, {
         quotation: snapshot.quotation,
@@ -80,15 +103,20 @@ export class SupabaseCloudAdapter {
       }),
       client_id: snapshot.quotation.clientId,
     })
-    await this.transport.upsert('material_items', snapshot.materialItems.map((item) => ({
-      owner_id: this.ownerId,
-      id: item.id,
-      quotation_id: item.quotationId,
-      payload: item,
-      updated_at: snapshot.quotation.updatedAt,
-      deleted_at: null,
-      version: versionOf(snapshot.quotation.updatedAt),
-    })))
+    if (snapshot.materialItems.length) {
+      await this.transport.upsert('material_items', snapshot.materialItems.map((item) => ({
+        owner_id: this.ownerId,
+        id: item.id,
+        quotation_id: item.quotationId,
+        payload: item,
+        updated_at: snapshot.quotation.updatedAt,
+        deleted_at: null,
+        version: versionOf(snapshot.quotation.updatedAt),
+      })))
+    }
+    if (removedMaterials.length) {
+      await this.transport.upsert('material_items', removedMaterials.map((row) => this.materialTombstone(row, operation.createdAt)))
+    }
   }
 
   private baseRow(operation: OutboxOperation, payload: unknown): Record<string, unknown> {
