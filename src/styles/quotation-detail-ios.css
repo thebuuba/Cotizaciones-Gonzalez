@@ -275,6 +275,54 @@
   max-width: 794px;
 }
 
+.quotation-export-loading {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  background: rgb(242 242 247 / 78%);
+  backdrop-filter: blur(18px) saturate(135%);
+  -webkit-backdrop-filter: blur(18px) saturate(135%);
+}
+
+.quotation-export-loading__card {
+  display: grid;
+  width: min(100%, 17rem);
+  justify-items: center;
+  gap: .5rem;
+  padding: 1.4rem 1.25rem;
+  border: 1px solid rgb(20 33 61 / 8%);
+  border-radius: 1.25rem;
+  background: rgb(255 255 255 / 96%);
+  box-shadow: 0 18px 48px rgb(20 33 61 / 16%);
+  text-align: center;
+}
+
+.quotation-export-loading__spinner {
+  width: 2rem;
+  height: 2rem;
+  margin-bottom: .2rem;
+  color: var(--palette-gold);
+  animation: quotation-export-spin .8s linear infinite;
+}
+
+.quotation-export-loading__card strong {
+  color: var(--color-text-strong);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-bold);
+}
+
+.quotation-export-loading__card span {
+  max-width: 14rem;
+  color: var(--color-label-secondary);
+  font-size: var(--font-size-label);
+  line-height: 1.35;
+}
+
+@keyframes quotation-export-spin { to { transform: rotate(360deg); } }
+
 /* Render de exportación a tamaño A4 fijo. Está fuera de pantalla, pero sigue renderizado. */
 .quotation-export-stage {
   position: fixed;
@@ -291,7 +339,15 @@
   max-width: none;
 }
 
-.quotation-export-stage .quotation-page { box-shadow: none; }
+.quotation-export-stage .quotation-page {
+  box-shadow: none;
+  font-size: 12.25px;
+  line-height: 1.4;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quotation-export-loading__spinner { animation-duration: 1.6s; }
+}
 
 @media (max-width: 23rem) {
   .quotation-detail-hero h1 { font-size: 1.3rem; }
