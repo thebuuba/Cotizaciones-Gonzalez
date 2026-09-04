@@ -24,6 +24,12 @@ export class SupabaseBackupTransport implements BackupTransport {
     return (data ?? []) as Awaited<ReturnType<BackupTransport['list']>>
   }
 
+  async listMaterialsForQuotation(quotationId: string): ReturnType<BackupTransport['listMaterialsForQuotation']> {
+    const { data, error } = await this.client.from('material_items').select('*').eq('owner_id', this.ownerId).eq('quotation_id', quotationId)
+    if (error) throw error
+    return (data ?? []) as Awaited<ReturnType<BackupTransport['listMaterialsForQuotation']>>
+  }
+
   async upload(path: string, body: Blob): Promise<void> {
     const { error } = await this.client.storage.from('business-assets').upload(path, body, {
       upsert: true,
