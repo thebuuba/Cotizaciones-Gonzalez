@@ -19,18 +19,29 @@ async function waitForAssets(element: HTMLElement): Promise<void> {
   await new Promise<void>((resolve) => setTimeout(resolve, 100))
 }
 
+async function capturePage(element: HTMLElement, pixelRatio: number): Promise<Blob | null> {
+  const { toBlob } = await import('html-to-image')
+  return toBlob(element, {
+    pixelRatio,
+    backgroundColor: '#ffffff',
+    cacheBust: true,
+  })
+}
+
 export async function renderPagePng(element: HTMLElement): Promise<Blob> {
   await waitForAssets(element)
   if (element.offsetWidth < 100 || element.offsetHeight < 100) throw new Error('La página de la cotización no tiene un tamaño válido para exportar.')
 
-  const { toBlob } = await import('html-to-image')
-  const blob = await toBlob(element, {
-    pixelRatio: 2.5,
-    backgroundColor: '#ffffff',
-    cacheBust: true,
-  })
-  if (!blob) throw new Error('No se pudo crear la imagen de la cotización.')
-  return blob
+  try {
+    const blob = await capturePage(element, 2.5)
+    if (blob) return blob
+  } catch (error) {
+    console.warn('La captura de alta resolución falló; reintentando en modo compatible.', error)
+  }
+
+  const fallback = await capturePage(element, 1.75)
+  if (!fallback) throw new Error('No se pudo crear la imagen de la cotización.')
+  return fallback
 }
 
 const nextPaint = () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
