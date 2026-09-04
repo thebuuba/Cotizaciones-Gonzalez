@@ -63,6 +63,23 @@ describe('local quotation repository', () => {
     expect((await quotations.get('quote-1'))?.quotation.number).toBe('COT-0001')
   })
 
+  it('duplicates a quotation with a new id, new material ids, new number and draft status', async () => {
+    const source = quotationSnapshotFactory()
+    await quotations.save(source)
+    await quotations.duplicate(source)
+
+    const rows = await quotations.list()
+    expect(rows).toHaveLength(2)
+    const copy = rows.find((row) => row.quotation.id !== source.quotation.id)
+    expect(copy).toBeDefined()
+    expect(copy?.quotation.number).toBe('COT-0002')
+    expect(copy?.quotation.status).toBe('draft')
+    expect(copy?.materialItems).toHaveLength(source.materialItems.length)
+    expect(copy?.materialItems.every((item) => item.quotationId === copy.quotation.id)).toBe(true)
+    expect(copy?.materialItems.map((item) => item.id)).not.toEqual(source.materialItems.map((item) => item.id))
+    expect((await quotations.get(source.quotation.id))?.quotation.number).toBe(source.quotation.number)
+  })
+
   it('queues a tombstone when a quotation is deleted', async () => {
     await quotations.save(quotationSnapshotFactory())
     await quotations.softDelete('quote-1', new Date('2026-08-30T12:00:00.000Z'))
