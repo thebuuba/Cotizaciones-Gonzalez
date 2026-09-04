@@ -16,7 +16,7 @@ async function waitForAssets(element: HTMLElement): Promise<void> {
       image.onerror = () => resolve()
     })
   }))
-  await new Promise<void>((resolve) => setTimeout(resolve, 100))
+  await new Promise<void>((resolve) => setTimeout(resolve, 120))
 }
 
 async function capturePage(element: HTMLElement, pixelRatio: number): Promise<Blob | null> {
@@ -32,16 +32,16 @@ export async function renderPagePng(element: HTMLElement): Promise<Blob> {
   await waitForAssets(element)
   if (element.offsetWidth < 100 || element.offsetHeight < 100) throw new Error('La página de la cotización no tiene un tamaño válido para exportar.')
 
-  try {
-    const blob = await capturePage(element, 2.5)
-    if (blob) return blob
-  } catch (error) {
-    console.warn('La captura de alta resolución falló; reintentando en modo compatible.', error)
+  for (const pixelRatio of [3.25, 2.75, 2.25]) {
+    try {
+      const blob = await capturePage(element, pixelRatio)
+      if (blob) return blob
+    } catch (error) {
+      console.warn(`La captura a ${pixelRatio}x falló; reintentando en modo compatible.`, error)
+    }
   }
 
-  const fallback = await capturePage(element, 1.75)
-  if (!fallback) throw new Error('No se pudo crear la imagen de la cotización.')
-  return fallback
+  throw new Error('No se pudo crear la imagen de la cotización.')
 }
 
 const nextPaint = () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
@@ -87,12 +87,12 @@ export async function exportQuotationPdf(elements: readonly HTMLElement[], baseN
   if (!elements.length) throw new Error('No hay páginas para exportar.')
   const { jsPDF } = await import('jspdf')
   return withStableViewport(async () => {
-    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4', compress: true })
+    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4', compress: true, precision: 16 })
     for (const [index, element] of elements.entries()) {
       if (index > 0) pdf.addPage('a4', 'portrait')
       const blob = await renderPagePng(element)
       const dataUrl = await blobToDataUrl(blob)
-      pdf.addImage(dataUrl, 'PNG', 0, 0, 210, 297, undefined, 'MEDIUM')
+      pdf.addImage(dataUrl, 'PNG', 0, 0, 210, 297, undefined, 'SLOW')
     }
     return new File([pdf.output('blob')], `${sanitizeExportName(baseName)}.pdf`, { type: 'application/pdf' })
   })
@@ -106,7 +106,7 @@ function downloadFile(file: File): void {
   document.body.appendChild(anchor)
   anchor.click()
   anchor.remove()
-  window.setTimeout(() => URL.revokeObjectURL(url), 1000)
+  window.setTimeout(() => URL.revokeObjectURL(url), 1500)
 }
 
 export async function shareOrDownload(files: File[]): Promise<'shared' | 'downloaded'> {
