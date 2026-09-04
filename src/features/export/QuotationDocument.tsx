@@ -153,7 +153,7 @@ export function QuotationDocument({ snapshot, rowHeight = estimateRowHeight }: {
   const pages = paginateDocument(snapshot.materialItems, {
     firstPageCapacity: 690,
     continuationPageCapacity: 900,
-    closingHeight: 320,
+    closingHeight: 390,
     rowHeight,
   })
 
