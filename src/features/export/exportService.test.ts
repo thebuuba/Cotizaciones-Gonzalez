@@ -33,23 +33,27 @@ describe('quotation export service', () => {
     mocks.output.mockReturnValue(new Blob(['pdf'], { type: 'application/pdf' }))
   })
 
-  it('captures each canonical page as a high-resolution white PNG', async () => {
+  it('captures each canonical page as an extra-high-resolution white PNG', async () => {
     const page = exportPage()
     await renderPagePng(page)
 
     expect(mocks.toBlob).toHaveBeenCalledWith(page, expect.objectContaining({
-      pixelRatio: 2.5,
+      pixelRatio: 3.25,
       backgroundColor: '#ffffff',
       cacheBust: true,
     }))
   })
 
-  it('retries at a safer resolution if the high-resolution mobile capture fails', async () => {
+  it('retries progressively safer resolutions if a mobile capture runs out of canvas memory', async () => {
     const page = exportPage()
-    mocks.toBlob.mockRejectedValueOnce(new Error('canvas memory')).mockResolvedValueOnce(new Blob(['png'], { type: 'image/png' }))
+    mocks.toBlob
+      .mockRejectedValueOnce(new Error('canvas memory'))
+      .mockRejectedValueOnce(new Error('canvas memory'))
+      .mockResolvedValueOnce(new Blob(['png'], { type: 'image/png' }))
 
     await expect(renderPagePng(page)).resolves.toBeInstanceOf(Blob)
-    expect(mocks.toBlob).toHaveBeenNthCalledWith(2, page, expect.objectContaining({ pixelRatio: 1.75 }))
+    expect(mocks.toBlob).toHaveBeenNthCalledWith(2, page, expect.objectContaining({ pixelRatio: 2.75 }))
+    expect(mocks.toBlob).toHaveBeenNthCalledWith(3, page, expect.objectContaining({ pixelRatio: 2.25 }))
   })
 
   it('returns one safely named image per page', async () => {
