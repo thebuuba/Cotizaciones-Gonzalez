@@ -1,5 +1,5 @@
 import { CheckCircle2, ChevronLeft, FileImage, FileText, Loader2, MapPin, Maximize2, Minus, MoreHorizontal, Pencil, Phone, Plus, Share2, Trash2, X } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type TouchEvent as ReactTouchEvent } from 'react'
 import { createPortal } from 'react-dom'
 import { Link } from 'react-router-dom'
 
@@ -66,6 +66,7 @@ export function QuotationDetailPage({ snapshot, onStatusChange, onDelete }: {
   const [previewOpen, setPreviewOpen] = useState(false)
   const [previewScale, setPreviewScale] = useState(1)
   const menuRef = useRef<HTMLDivElement>(null)
+  const previewPinchRef = useRef<{ distance: number; scale: number } | null>(null)
   const totals = calculateQuotationTotals(snapshot.materialItems, snapshot.quotation.laborMinor)
   const baseName = `${snapshot.quotation.number} ${snapshot.quotation.clientName}`
   const exportPages = () => Array.from(exportDocumentRef.current?.querySelectorAll<HTMLElement>('[data-export-page]') ?? [])
@@ -153,8 +154,36 @@ export function QuotationDetailPage({ snapshot, onStatusChange, onDelete }: {
   }, [exporting, previewOpen])
 
   useEffect(() => {
-    if (!previewOpen) setPreviewScale(1)
+    if (!previewOpen) {
+      setPreviewScale(1)
+      previewPinchRef.current = null
+    }
   }, [previewOpen])
+
+  const handlePreviewTouchStart = (event: ReactTouchEvent<HTMLDivElement>) => {
+    if (event.touches.length !== 2) {
+      previewPinchRef.current = null
+      return
+    }
+    const first = event.touches[0]
+    const second = event.touches[1]
+    const distance = Math.hypot(second.clientX - first.clientX, second.clientY - first.clientY)
+    previewPinchRef.current = { distance, scale: previewScale }
+  }
+
+  const handlePreviewTouchMove = (event: ReactTouchEvent<HTMLDivElement>) => {
+    if (event.touches.length !== 2 || !previewPinchRef.current) return
+    if (event.cancelable) event.preventDefault()
+    const first = event.touches[0]
+    const second = event.touches[1]
+    const distance = Math.hypot(second.clientX - first.clientX, second.clientY - first.clientY)
+    const ratio = distance / Math.max(1, previewPinchRef.current.distance)
+    setPreviewScale(Math.min(3, Math.max(.75, previewPinchRef.current.scale * ratio)))
+  }
+
+  const handlePreviewTouchEnd = (event: ReactTouchEvent<HTMLDivElement>) => {
+    if (event.touches.length < 2) previewPinchRef.current = null
+  }
 
   const handleDelete = async () => {
     setMenuOpen(false)
@@ -190,10 +219,16 @@ export function QuotationDetailPage({ snapshot, onStatusChange, onDelete }: {
         <div className="quotation-preview-viewer__zoom" aria-label="Controles de zoom">
           <button type="button" onClick={() => setPreviewScale((value) => Math.max(.75, value - .25))} disabled={previewScale <= .75} aria-label="Alejar"><Minus aria-hidden="true" /></button>
           <span>{Math.round(previewScale * 100)}%</span>
-          <button type="button" onClick={() => setPreviewScale((value) => Math.min(2.5, value + .25))} disabled={previewScale >= 2.5} aria-label="Acercar"><Plus aria-hidden="true" /></button>
+          <button type="button" onClick={() => setPreviewScale((value) => Math.min(3, value + .25))} disabled={previewScale >= 3} aria-label="Acercar"><Plus aria-hidden="true" /></button>
         </div>
       </header>
-      <div className="quotation-preview-viewer__scroll">
+      <div
+        className="quotation-preview-viewer__scroll"
+        onTouchStart={handlePreviewTouchStart}
+        onTouchMove={handlePreviewTouchMove}
+        onTouchEnd={handlePreviewTouchEnd}
+        onTouchCancel={handlePreviewTouchEnd}
+      >
         <div className="quotation-preview-viewer__document" style={{ zoom: previewScale }} onDoubleClick={() => setPreviewScale((value) => value > 1 ? 1 : 2)}>
           <QuotationDocument snapshot={snapshot} />
         </div>
