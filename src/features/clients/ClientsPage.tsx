@@ -13,8 +13,9 @@ function initials(name: string): string {
   return name.trim().split(/\s+/).slice(0, 2).map((part) => part[0]?.toUpperCase() ?? '').join('') || 'C'
 }
 
-export function ClientsPage({ clients, onSave, detailTarget, onOpenClient, onCloseClient }: {
+export function ClientsPage({ clients, loading = false, onSave, detailTarget, onOpenClient, onCloseClient }: {
   clients: ClientRecord[]
+  loading?: boolean
   onSave: (record: ClientRecord) => void | Promise<void>
   onStartQuotation: (clientId: string, locationId?: string) => void
   detailTarget?: ClientDetailTarget
@@ -62,11 +63,11 @@ export function ClientsPage({ clients, onSave, detailTarget, onOpenClient, onClo
       <label className="clients-search">
         <Search aria-hidden="true"/>
         <span className="sr-only">Buscar clientes</span>
-        <input type="search" aria-label="Buscar clientes" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar"/>
+        <input type="search" aria-label="Buscar clientes" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar" disabled={loading}/>
       </label>
-      <button className="clients-add" type="button" onClick={() => openClient('new')} aria-label="Nuevo cliente"><Plus aria-hidden="true"/></button>
+      <button className="clients-add" type="button" onClick={() => openClient('new')} aria-label="Nuevo cliente" disabled={loading}><Plus aria-hidden="true"/></button>
     </div>
-    {filtered.length ? <ul className="client-list client-panel-list" aria-label="Lista de clientes">{filtered.map((record, index) => { const { client, locations } = record; const address = locations[0]?.address || client.address || 'Sin ubicación'; return <li key={client.id}>
+    {loading ? <p className="loading-state" role="status" aria-live="polite">Cargando clientes…</p> : filtered.length ? <ul className="client-list client-panel-list" aria-label="Lista de clientes">{filtered.map((record, index) => { const { client, locations } = record; const address = locations[0]?.address || client.address || 'Sin ubicación'; return <li key={client.id}>
       <button className="client-panel-card" type="button" onClick={() => openClient(record)} aria-label={`Abrir ${client.name}`}>
         <span className={`client-panel-avatar ${avatarColors[index % avatarColors.length]}`}>{initials(client.name)}</span>
         <span className="client-panel-info"><strong>{client.name}</strong><small><MapPin aria-hidden="true"/>{address}</small></span>
