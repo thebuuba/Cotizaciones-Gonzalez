@@ -1,9 +1,19 @@
 /* Refinamientos de composición para la cotización aprobada. */
 
-/* 1. Filas más compactas cuando hay pocos materiales. */
+/* Escala ligeramente mayor para mejorar lectura sin perder densidad. */
+.quotation-page {
+  font-size: clamp(5.2px, 1.43cqw, 11.4px);
+  line-height: 1.38;
+}
+
+/* 1. Con pocos materiales la tabla sigue compacta, pero no queda aplastada. */
 .document-table--compact .document-table-row:not(.document-table-heading) > div {
-  min-height: 3.15cqw;
-  padding-block: .38cqw;
+  min-height: 3.55cqw;
+  padding-block: .48cqw;
+}
+
+.document-table--compact .document-table-heading > div {
+  min-height: 4.15cqw;
 }
 
 /* 2. Repetir el hilo negro + amarillo en el total de mayor jerarquía. */
@@ -18,50 +28,71 @@
 
 .document-totals .document-grand-total strong {
   color: var(--paper-white);
-  font-size: 1.04em;
+  font-size: 1.08em;
   font-weight: 850;
 }
 
-/* Observaciones + totales comparten una fila, con el total dominando visualmente. */
+/* Observaciones + totales comparten una fila con más respiración. */
 .document-summary-grid {
   display: grid;
   grid-template-columns: minmax(0, .98fr) minmax(0, .92fr);
   align-items: stretch;
-  gap: 1.4cqw;
-  margin: 1.2cqw 3cqw 0;
+  gap: 1.55cqw;
+  margin: 1.8cqw 3cqw 0;
 }
 
 .document-summary-grid .document-box,
 .document-summary-grid .document-totals {
   width: auto;
-  min-height: 9.8cqw;
+  min-height: 12.2cqw;
   margin: 0;
 }
 
-.document-summary-grid .document-observations p {
-  min-height: 4.8cqw;
+.document-summary-grid .document-box {
+  padding: 1.5cqw 1.55cqw;
 }
 
-/* 3. Términos mandan; la cita se convierte en apoyo de marca secundario. */
+.document-summary-grid .document-observations p {
+  min-height: 6.3cqw;
+  margin-top: .9cqw;
+}
+
+.document-summary-grid .document-totals > div {
+  min-height: 3.7cqw;
+}
+
+.document-summary-grid .document-totals span,
+.document-summary-grid .document-totals strong {
+  padding-block: .72cqw;
+}
+
+/* 3. Términos mandan; la cita es un apoyo de marca secundario, no una caja rival. */
 .document-terms-brand-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.42fr) minmax(0, .78fr);
+  grid-template-columns: minmax(0, 1.38fr) minmax(0, .82fr);
   align-items: stretch;
-  gap: 1.4cqw;
-  margin: 1.3cqw 3cqw 0;
+  gap: 1.55cqw;
+  margin: 1.7cqw 3cqw 0;
 }
 
 .document-terms-box {
-  min-height: 12.2cqw;
+  min-height: 15.2cqw;
+  padding: 1.55cqw 1.6cqw;
+}
+
+.document-terms-box p {
+  margin-top: .9cqw;
+  font-size: .84em;
+  line-height: 1.42;
 }
 
 .document-brand-quote {
   position: relative;
   display: grid;
-  min-height: 10.2cqw;
+  min-height: 13.2cqw;
   align-content: center;
-  gap: .55cqw;
-  padding: 1.15cqw 1.35cqw;
+  gap: .72cqw;
+  padding: 1.45cqw 1.55cqw;
   overflow: hidden;
   border: .1cqw solid #e3eadf;
   border-radius: 1cqw;
@@ -70,9 +101,9 @@
 }
 
 .document-brand-quote > svg {
-  width: 2.45cqw;
-  height: 2.45cqw;
-  padding: .45cqw;
+  width: 2.7cqw;
+  height: 2.7cqw;
+  padding: .48cqw;
   border-radius: 50%;
   background: #dcebd4;
   color: #31583a;
@@ -80,20 +111,20 @@
 }
 
 .document-brand-quote p {
-  max-width: 21ch;
+  max-width: 22ch;
   margin: 0;
   color: #273029;
   font-family: Georgia, "Times New Roman", serif;
-  font-size: .9em;
+  font-size: .94em;
   font-style: italic;
   font-weight: 650;
-  line-height: 1.32;
+  line-height: 1.38;
 }
 
 .document-brand-quote > span {
-  width: 4.5cqw;
-  height: .38cqw;
-  margin-top: .15cqw;
+  width: 4.8cqw;
+  height: .4cqw;
+  margin-top: .2cqw;
   border-radius: 999px;
   background: var(--paper-gold);
 }
@@ -116,7 +147,50 @@
   object-position: center;
 }
 
-/* Evita que reglas antiguas alteren la caja normalizada. */
 .document-bank-row > .document-bank-logo-frame + .document-bank-info {
   min-width: 0;
+}
+
+/* 5. Balance vertical: el bloque corporativo se ancla visualmente al pie.
+   Así el blanco intermedio funciona como respiración deliberada y no como contenido faltante. */
+.document-business-strip {
+  margin: auto 3cqw 1.9cqw;
+  padding: 1.65cqw 0 1.45cqw;
+}
+
+.document-contact-label {
+  margin-bottom: .9cqw;
+  font-size: .66em;
+}
+
+.document-bank-row {
+  margin: .62cqw 0;
+}
+
+.document-bank-info strong {
+  font-size: .8em;
+}
+
+.document-bank-info span {
+  font-size: .7em;
+}
+
+.document-phone-row {
+  margin: .7cqw 0;
+}
+
+.document-phone-row strong {
+  font-size: .86em;
+}
+
+.manager-name {
+  margin-top: .8cqw;
+  font-size: .86em;
+}
+
+/* El espacio libre lo administra el bloque corporativo; el footer ya no compite con otro auto-margin. */
+.document-footer {
+  margin-top: 0;
+  min-height: 8.2%;
+  padding-block: 1.35cqw;
 }
