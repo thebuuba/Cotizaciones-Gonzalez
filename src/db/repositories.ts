@@ -144,4 +144,19 @@ export class DexieClientRepository {
       await this.db.outbox.put(item)
     })
   }
+  async softDelete(id: string, now: Date): Promise<void> {
+    const client = await this.db.clients.get(id)
+    if (!client) return
+    const at = now.toISOString()
+    const deletedClient = { ...client, deletedAt: at, updatedAt: at }
+    const item: OutboxOperation = {
+      id: `client:${id}:delete:${at}`,
+      entityType: 'client', entityId: id, action: 'delete', payload: undefined,
+      createdAt: at, nextAttemptAt: at, attempt: 0,
+    }
+    await this.db.transaction('rw', this.db.clients, this.db.outbox, async () => {
+      await this.db.clients.put(deletedClient)
+      await this.db.outbox.put(item)
+    })
+  }
 }
