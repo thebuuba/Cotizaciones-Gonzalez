@@ -1,4 +1,4 @@
-import { CheckCircle2, ChevronLeft, FileImage, FileText, Loader2, MapPin, MoreHorizontal, Pencil, Phone, Share2, Trash2 } from 'lucide-react'
+import { CheckCircle2, ChevronLeft, FileImage, FileText, Loader2, MapPin, Maximize2, Minus, MoreHorizontal, Pencil, Phone, Plus, Share2, Trash2, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Link } from 'react-router-dom'
@@ -63,6 +63,8 @@ export function QuotationDetailPage({ snapshot, onStatusChange, onDelete }: {
   const [exportReady, setExportReady] = useState(false)
   const [exportMessage, setExportMessage] = useState('')
   const [menuOpen, setMenuOpen] = useState(false)
+  const [previewOpen, setPreviewOpen] = useState(false)
+  const [previewScale, setPreviewScale] = useState(1)
   const menuRef = useRef<HTMLDivElement>(null)
   const totals = calculateQuotationTotals(snapshot.materialItems, snapshot.quotation.laborMinor)
   const baseName = `${snapshot.quotation.number} ${snapshot.quotation.clientName}`
@@ -144,11 +146,15 @@ export function QuotationDetailPage({ snapshot, onStatusChange, onDelete }: {
   }, [menuOpen])
 
   useEffect(() => {
-    if (!exporting) return
+    if (!exporting && !previewOpen) return
     const previousOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
     return () => { document.body.style.overflow = previousOverflow }
-  }, [exporting])
+  }, [exporting, previewOpen])
+
+  useEffect(() => {
+    if (!previewOpen) setPreviewScale(1)
+  }, [previewOpen])
 
   const handleDelete = async () => {
     setMenuOpen(false)
@@ -176,8 +182,29 @@ export function QuotationDetailPage({ snapshot, onStatusChange, onDelete }: {
     document.body,
   ) : null
 
+  const previewViewer = previewOpen ? createPortal(
+    <div className="quotation-preview-viewer" role="dialog" aria-modal="true" aria-label="Vista ampliada de la cotización">
+      <header className="quotation-preview-viewer__toolbar">
+        <button type="button" onClick={() => setPreviewOpen(false)} aria-label="Cerrar vista previa"><X aria-hidden="true" /></button>
+        <strong>Vista previa</strong>
+        <div className="quotation-preview-viewer__zoom" aria-label="Controles de zoom">
+          <button type="button" onClick={() => setPreviewScale((value) => Math.max(.75, value - .25))} disabled={previewScale <= .75} aria-label="Alejar"><Minus aria-hidden="true" /></button>
+          <span>{Math.round(previewScale * 100)}%</span>
+          <button type="button" onClick={() => setPreviewScale((value) => Math.min(2.5, value + .25))} disabled={previewScale >= 2.5} aria-label="Acercar"><Plus aria-hidden="true" /></button>
+        </div>
+      </header>
+      <div className="quotation-preview-viewer__scroll">
+        <div className="quotation-preview-viewer__document" style={{ zoom: previewScale }} onDoubleClick={() => setPreviewScale((value) => value > 1 ? 1 : 2)}>
+          <QuotationDocument snapshot={snapshot} />
+        </div>
+      </div>
+    </div>,
+    document.body,
+  ) : null
+
   return <div className="quotation-detail quotation-detail-ios" aria-busy={Boolean(exporting)}>
     {exportOverlay}
+    {previewViewer}
 
     <nav className="quotation-detail-nav" aria-label="Navegación de la cotización">
       <Link className="quotation-detail-nav-back" to="/cotizaciones" aria-label="Volver a cotizaciones"><ChevronLeft aria-hidden="true" />Cotizaciones</Link>
@@ -243,7 +270,17 @@ export function QuotationDetailPage({ snapshot, onStatusChange, onDelete }: {
 
     <section className="quotation-detail-group quotation-detail-preview" aria-labelledby="quotation-preview-title">
       <h2 id="quotation-preview-title">Vista previa</h2>
-      <div className="quotation-detail-preview-frame"><QuotationDocument snapshot={snapshot} /></div>
+      <div
+        className="quotation-detail-preview-frame quotation-detail-preview-frame--interactive"
+        role="button"
+        tabIndex={0}
+        aria-label="Abrir vista previa ampliada"
+        onClick={() => setPreviewOpen(true)}
+        onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); setPreviewOpen(true) } }}
+      >
+        <QuotationDocument snapshot={snapshot} />
+        <span className="quotation-detail-preview-open"><Maximize2 aria-hidden="true" />Ampliar</span>
+      </div>
     </section>
 
     <div className="quotation-export-stage" ref={exportDocumentRef} aria-hidden="true">
