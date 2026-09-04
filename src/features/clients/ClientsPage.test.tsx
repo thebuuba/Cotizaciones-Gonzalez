@@ -11,10 +11,18 @@ const records: ClientRecord[] = [
   { client: { id: 'c2', name: 'Carlos López', phone: '809-222-2222', email: '', address: 'Santiago', updatedAt: '2026-08-29T12:00:00.000Z' }, locations: [] },
 ]
 
+const page = (overrides: Partial<Parameters<typeof ClientsPage>[0]> = {}) => <ClientsPage
+  clients={records}
+  onSave={vi.fn()}
+  onDelete={vi.fn()}
+  onStartQuotation={vi.fn()}
+  {...overrides}
+/>
+
 describe('ClientsPage', () => {
   it('filters clients without losing their data', async () => {
     const user = userEvent.setup()
-    render(<ClientsPage clients={records} onSave={vi.fn()} onStartQuotation={vi.fn()} />)
+    render(page())
     await user.type(screen.getByRole('searchbox', { name: 'Buscar clientes' }), 'María')
     expect(screen.getByText('María García')).toBeInTheDocument()
     expect(screen.queryByText('Carlos López')).not.toBeInTheDocument()
@@ -24,23 +32,38 @@ describe('ClientsPage', () => {
 
   it('opens client creation from the empty state', async () => {
     const user = userEvent.setup()
-    render(<ClientsPage clients={[]} onSave={vi.fn()} onStartQuotation={vi.fn()} />)
+    render(page({ clients: [] }))
     await user.click(screen.getByRole('button', { name: 'Agregar cliente' }))
     expect(screen.getByRole('heading', { name: 'Nuevo cliente' })).toBeInTheDocument()
   })
 
   it('opens an existing client for editing', async () => {
     const user = userEvent.setup()
-    render(<ClientsPage clients={records} onSave={vi.fn()} onStartQuotation={vi.fn()} />)
+    render(page())
     await user.click(screen.getByText('María García'))
     expect(screen.getByLabelText('Nombre del cliente')).toHaveValue('María García')
   })
 
   it('opens new client form from page action button', async () => {
     const user = userEvent.setup()
-    render(<ClientsPage clients={records} onSave={vi.fn()} onStartQuotation={vi.fn()} />)
+    render(page())
     await user.click(screen.getByRole('button', { name: 'Nuevo cliente' }))
     expect(screen.getByRole('heading', { name: 'Nuevo cliente' })).toBeInTheDocument()
+  })
+
+  it('exposes edit and delete actions for each swipeable client row', () => {
+    render(page())
+    expect(screen.getByRole('button', { name: 'Editar María García', hidden: true })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Eliminar María García', hidden: true })).toBeInTheDocument()
+  })
+
+  it('deletes a client after confirmation', async () => {
+    const user = userEvent.setup()
+    const onDelete = vi.fn()
+    vi.spyOn(window, 'confirm').mockReturnValue(true)
+    render(page({ onDelete }))
+    await user.click(screen.getByRole('button', { name: 'Eliminar María García', hidden: true }))
+    expect(onDelete).toHaveBeenCalledWith(records[0])
   })
 })
 
