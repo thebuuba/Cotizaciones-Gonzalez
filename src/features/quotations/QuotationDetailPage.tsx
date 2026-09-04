@@ -1,5 +1,6 @@
-import { ChevronLeft, FileImage, FileText, Loader2, MapPin, MoreHorizontal, Pencil, Phone, Share2, Trash2 } from 'lucide-react'
+import { CheckCircle2, ChevronLeft, FileImage, FileText, Loader2, MapPin, MoreHorizontal, Pencil, Phone, Share2, Trash2 } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { Link } from 'react-router-dom'
 
 import { calculateMaterialTotal, calculateQuotationTotals, formatMoney } from '../../domain/money'
@@ -59,6 +60,7 @@ export function QuotationDetailPage({ snapshot, onStatusChange, onDelete }: {
 }) {
   const exportDocumentRef = useRef<HTMLDivElement>(null)
   const [exporting, setExporting] = useState<'pdf' | 'image' | 'share' | null>(null)
+  const [exportReady, setExportReady] = useState(false)
   const [exportMessage, setExportMessage] = useState('')
   const [menuOpen, setMenuOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
@@ -66,13 +68,24 @@ export function QuotationDetailPage({ snapshot, onStatusChange, onDelete }: {
   const baseName = `${snapshot.quotation.number} ${snapshot.quotation.clientName}`
   const exportPages = () => Array.from(exportDocumentRef.current?.querySelectorAll<HTMLElement>('[data-export-page]') ?? [])
 
-  const shareQuotation = async () => {
-    setExporting('share')
+  const showReadyState = async () => {
+    setExportReady(true)
+    await nextPaint()
+  }
+
+  const beginExport = async (type: 'pdf' | 'image' | 'share') => {
+    setExportReady(false)
+    setExporting(type)
     setExportMessage('')
     await letLoadingScreenPaint()
+  }
+
+  const shareQuotation = async () => {
+    await beginExport('share')
     const text = buildQuotationShareText(snapshot)
     try {
       if ('share' in navigator && typeof navigator.share === 'function') {
+        await showReadyState()
         await navigator.share({ title: `Cotización ${snapshot.quotation.number}`, text })
         setExportMessage('Cotización compartida')
       } else if (navigator.clipboard?.writeText) {
@@ -86,36 +99,37 @@ export function QuotationDetailPage({ snapshot, onStatusChange, onDelete }: {
       console.error('Error al compartir cotización', error)
       setExportMessage('No se pudo compartir la cotización. Intenta nuevamente.')
     } finally {
+      setExportReady(false)
       setExporting(null)
     }
   }
 
   const exportPdf = async () => {
-    setExporting('pdf')
-    setExportMessage('')
-    await letLoadingScreenPaint()
+    await beginExport('pdf')
     try {
-      await shareOrDownload([await exportQuotationPdf(exportPages(), baseName)])
+      const file = await exportQuotationPdf(exportPages(), baseName)
+      await shareOrDownload([file], showReadyState)
       setExportMessage('PDF preparado')
     } catch (error) {
       console.error('Error al exportar PDF', error)
       setExportMessage('No se pudo exportar el PDF. Intenta nuevamente.')
     } finally {
+      setExportReady(false)
       setExporting(null)
     }
   }
 
   const exportImages = async () => {
-    setExporting('image')
-    setExportMessage('')
-    await letLoadingScreenPaint()
+    await beginExport('image')
     try {
-      await shareOrDownload(await exportQuotationImages(exportPages(), baseName))
+      const files = await exportQuotationImages(exportPages(), baseName)
+      await shareOrDownload(files, showReadyState)
       setExportMessage('Imagen preparada')
     } catch (error) {
       console.error('Error al exportar imagen', error)
       setExportMessage('No se pudo exportar la imagen. Intenta nuevamente.')
     } finally {
+      setExportReady(false)
       setExporting(null)
     }
   }
@@ -141,20 +155,29 @@ export function QuotationDetailPage({ snapshot, onStatusChange, onDelete }: {
     if (window.confirm('¿Seguro que deseas eliminar esta cotización?')) await onDelete()
   }
 
-  const loadingCopy = exporting === 'pdf'
-    ? ['Preparando PDF…', 'Generando un documento de alta calidad.']
-    : exporting === 'image'
-      ? ['Preparando imagen…', 'Renderizando la cotización en alta resolución.']
-      : ['Abriendo opciones…', 'Preparando la cotización para compartir.']
+  const loadingCopy = exportReady
+    ? ['Listo para compartir', 'La hoja de compartir de iOS está abierta.']
+    : exporting === 'pdf'
+      ? ['Preparando PDF…', 'Generando un documento de máxima calidad.']
+      : exporting === 'image'
+        ? ['Preparando imagen…', 'Renderizando la cotización en máxima resolución.']
+        : ['Abriendo opciones…', 'Preparando la cotización para compartir.']
 
-  return <div className="quotation-detail quotation-detail-ios" aria-busy={Boolean(exporting)}>
-    {exporting && <div className="quotation-export-loading" role="status" aria-live="assertive">
+  const exportOverlay = exporting ? createPortal(
+    <div className={`quotation-export-loading${exportReady ? ' is-ready' : ''}`} role="status" aria-live="assertive">
       <div className="quotation-export-loading__card">
-        <Loader2 className="quotation-export-loading__spinner" aria-hidden="true" />
+        {exportReady
+          ? <CheckCircle2 className="quotation-export-loading__check" aria-hidden="true" />
+          : <Loader2 className="quotation-export-loading__spinner" aria-hidden="true" />}
         <strong>{loadingCopy[0]}</strong>
         <span>{loadingCopy[1]}</span>
       </div>
-    </div>}
+    </div>,
+    document.body,
+  ) : null
+
+  return <div className="quotation-detail quotation-detail-ios" aria-busy={Boolean(exporting)}>
+    {exportOverlay}
 
     <nav className="quotation-detail-nav" aria-label="Navegación de la cotización">
       <Link className="quotation-detail-nav-back" to="/cotizaciones" aria-label="Volver a cotizaciones"><ChevronLeft aria-hidden="true" />Cotizaciones</Link>
