@@ -19,7 +19,14 @@ export function AppShell() {
   const previousPathRef = useRef<string | null>(null)
   const previousPath = previousPathRef.current
   const primaryTab = isTabRoute(location.pathname)
-  const routeKey = primaryTab ? 'primary-tabs' : `${location.pathname}${location.search}`
+
+  // Every top-level tab gets its own keyed surface. Reusing a single
+  // "primary-tabs" node allowed the previous tab's contents to survive for a
+  // frame while React Router swapped the Outlet, which was especially visible
+  // when Cotizaciones was showing its empty state.
+  const routeKey = primaryTab
+    ? `tab:${location.pathname}`
+    : `${location.pathname}${location.search}`
 
   let direction: 'initial' | 'forward' | 'back' | 'tab' = 'initial'
   if (previousPath) {
