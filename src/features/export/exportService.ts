@@ -32,7 +32,7 @@ export async function renderPagePng(element: HTMLElement): Promise<Blob> {
   await waitForAssets(element)
   if (element.offsetWidth < 100 || element.offsetHeight < 100) throw new Error('La página de la cotización no tiene un tamaño válido para exportar.')
 
-  for (const pixelRatio of [3.25, 2.75, 2.25]) {
+  for (const pixelRatio of [4, 3.5, 3, 2.5]) {
     try {
       const blob = await capturePage(element, pixelRatio)
       if (blob) return blob
@@ -87,12 +87,12 @@ export async function exportQuotationPdf(elements: readonly HTMLElement[], baseN
   if (!elements.length) throw new Error('No hay páginas para exportar.')
   const { jsPDF } = await import('jspdf')
   return withStableViewport(async () => {
-    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4', compress: true, precision: 16 })
+    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4', compress: false, precision: 16 })
     for (const [index, element] of elements.entries()) {
       if (index > 0) pdf.addPage('a4', 'portrait')
       const blob = await renderPagePng(element)
       const dataUrl = await blobToDataUrl(blob)
-      pdf.addImage(dataUrl, 'PNG', 0, 0, 210, 297, undefined, 'SLOW')
+      pdf.addImage(dataUrl, 'PNG', 0, 0, 210, 297, undefined, 'NONE')
     }
     return new File([pdf.output('blob')], `${sanitizeExportName(baseName)}.pdf`, { type: 'application/pdf' })
   })
@@ -109,9 +109,10 @@ function downloadFile(file: File): void {
   window.setTimeout(() => URL.revokeObjectURL(url), 1500)
 }
 
-export async function shareOrDownload(files: File[]): Promise<'shared' | 'downloaded'> {
+export async function shareOrDownload(files: File[], onShareOpening?: () => void | Promise<void>): Promise<'shared' | 'downloaded'> {
   if (navigator.share && navigator.canShare?.({ files })) {
     try {
+      await onShareOpening?.()
       await navigator.share({ files, title: 'Cotización' })
       return 'shared'
     } catch (error) {
