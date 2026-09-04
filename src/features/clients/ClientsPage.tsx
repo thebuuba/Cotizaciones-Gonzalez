@@ -29,6 +29,10 @@ function SwipeableClientRow({ record, index, revealed, onReveal, onOpen, onDelet
   const pointer = useRef({ x: 0, y: 0, startOffset: 0, moved: false, horizontal: false })
 
   const offset = dragOffset ?? (revealed ? -SWIPE_ACTIONS_WIDTH : 0)
+  const revealedWidth = Math.max(0, Math.min(SWIPE_ACTIONS_WIDTH, -offset))
+  const revealProgress = revealedWidth / SWIPE_ACTIONS_WIDTH
+  const actionParallax = Math.round((1 - revealProgress) * 38)
+  const dragging = dragOffset !== null
 
   const handlePointerDown = (event: ReactPointerEvent<HTMLButtonElement>) => {
     if (event.pointerType === 'mouse' && event.button !== 0) return
@@ -85,17 +89,23 @@ function SwipeableClientRow({ record, index, revealed, onReveal, onOpen, onDelet
     await onDelete(record)
   }
 
-  return <li className={`client-swipe-row${revealed ? ' is-revealed' : ''}`}>
-    <div className="client-swipe-actions" aria-hidden={!revealed && dragOffset === null}>
-      <button className="client-swipe-action client-swipe-action--edit" type="button" onClick={() => { onReveal(null); onOpen(record) }} aria-label={`Editar ${client.name}`}>
-        <Pencil aria-hidden="true"/><span>Editar</span>
-      </button>
-      <button className="client-swipe-action client-swipe-action--delete" type="button" onClick={() => void handleDelete()} aria-label={`Eliminar ${client.name}`}>
-        <Trash2 aria-hidden="true"/><span>Eliminar</span>
-      </button>
+  return <li className={`client-swipe-row${revealed ? ' is-revealed' : ''}${dragging ? ' is-dragging' : ''}`}>
+    <div
+      className="client-swipe-actions"
+      aria-hidden={revealedWidth === 0}
+      style={{ width: `${revealedWidth}px`, opacity: revealProgress }}
+    >
+      <div className="client-swipe-actions__track" style={{ transform: `translate3d(${actionParallax}px, 0, 0)` }}>
+        <button className="client-swipe-action client-swipe-action--edit" type="button" tabIndex={revealed ? 0 : -1} onClick={() => { onReveal(null); onOpen(record) }} aria-label={`Editar ${client.name}`}>
+          <Pencil aria-hidden="true"/><span>Editar</span>
+        </button>
+        <button className="client-swipe-action client-swipe-action--delete" type="button" tabIndex={revealed ? 0 : -1} onClick={() => void handleDelete()} aria-label={`Eliminar ${client.name}`}>
+          <Trash2 aria-hidden="true"/><span>Eliminar</span>
+        </button>
+      </div>
     </div>
     <button
-      className={`client-panel-card client-swipe-front${dragOffset !== null ? ' is-dragging' : ''}`}
+      className={`client-panel-card client-swipe-front${dragging ? ' is-dragging' : ''}`}
       type="button"
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
