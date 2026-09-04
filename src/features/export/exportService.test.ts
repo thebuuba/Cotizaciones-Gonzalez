@@ -33,27 +33,23 @@ describe('quotation export service', () => {
     mocks.output.mockReturnValue(new Blob(['pdf'], { type: 'application/pdf' }))
   })
 
-  it('captures each canonical page as an extra-high-resolution white PNG', async () => {
+  it('captures each canonical page as a maximum-resolution white PNG', async () => {
     const page = exportPage()
     await renderPagePng(page)
 
     expect(mocks.toBlob).toHaveBeenCalledWith(page, expect.objectContaining({
-      pixelRatio: 3.25,
+      pixelRatio: 4,
       backgroundColor: '#ffffff',
       cacheBust: true,
     }))
   })
 
-  it('retries progressively safer resolutions if a mobile capture runs out of canvas memory', async () => {
+  it('retries progressively at safer resolutions if the highest-resolution mobile capture fails', async () => {
     const page = exportPage()
-    mocks.toBlob
-      .mockRejectedValueOnce(new Error('canvas memory'))
-      .mockRejectedValueOnce(new Error('canvas memory'))
-      .mockResolvedValueOnce(new Blob(['png'], { type: 'image/png' }))
+    mocks.toBlob.mockRejectedValueOnce(new Error('canvas memory')).mockResolvedValueOnce(new Blob(['png'], { type: 'image/png' }))
 
     await expect(renderPagePng(page)).resolves.toBeInstanceOf(Blob)
-    expect(mocks.toBlob).toHaveBeenNthCalledWith(2, page, expect.objectContaining({ pixelRatio: 2.75 }))
-    expect(mocks.toBlob).toHaveBeenNthCalledWith(3, page, expect.objectContaining({ pixelRatio: 2.25 }))
+    expect(mocks.toBlob).toHaveBeenNthCalledWith(2, page, expect.objectContaining({ pixelRatio: 3.5 }))
   })
 
   it('returns one safely named image per page', async () => {
@@ -75,22 +71,25 @@ describe('quotation export service', () => {
 
     expect(file.name).toBe('COT-0001-Maria-Rodriguez.pdf')
     expect(mocks.addImage).toHaveBeenCalledTimes(2)
+    expect(mocks.addImage).toHaveBeenCalledWith(expect.any(String), 'PNG', 0, 0, 210, 297, undefined, 'NONE')
     expect(mocks.addPage).toHaveBeenCalledTimes(1)
     expect(scrollTo).toHaveBeenCalled()
   })
 
-  it('uses Web Share for supported files and downloads otherwise', async () => {
+  it('signals when Web Share is about to open and downloads otherwise', async () => {
     const files = [new File(['pdf'], 'cotizacion.pdf', { type: 'application/pdf' })]
     const share = vi.fn().mockResolvedValue(undefined)
+    const onShareOpening = vi.fn()
     Object.defineProperty(navigator, 'canShare', { configurable: true, value: () => true })
     Object.defineProperty(navigator, 'share', { configurable: true, value: share })
-    expect(await shareOrDownload(files)).toBe('shared')
+    expect(await shareOrDownload(files, onShareOpening)).toBe('shared')
+    expect(onShareOpening).toHaveBeenCalledTimes(1)
     expect(share).toHaveBeenCalledWith(expect.objectContaining({ files }))
 
     Object.defineProperty(navigator, 'canShare', { configurable: true, value: () => false })
     const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => undefined)
     vi.stubGlobal('URL', { createObjectURL: () => 'blob:test', revokeObjectURL: vi.fn() })
-    expect(await shareOrDownload(files)).toBe('downloaded')
+    expect(await shareOrDownload(files, onShareOpening)).toBe('downloaded')
     expect(click).toHaveBeenCalledTimes(1)
     vi.unstubAllGlobals()
   })
