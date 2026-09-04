@@ -8,13 +8,37 @@
 
 .client-swipe-actions {
   position: absolute;
-  inset: 0 0 0 auto;
+  top: 0;
+  right: 0;
+  bottom: 0;
   z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  border-radius: 0 var(--group-radius) var(--group-radius) 0;
+  transition:
+    width 280ms cubic-bezier(.22, .74, .18, 1),
+    opacity 180ms ease-out;
+}
+
+.client-swipe-row.is-revealed .client-swipe-actions {
+  pointer-events: auto;
+}
+
+.client-swipe-actions__track {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
   display: grid;
   width: 168px;
   grid-template-columns: repeat(2, 84px);
-  overflow: hidden;
-  border-radius: var(--group-radius);
+  will-change: transform;
+  transition: transform 280ms cubic-bezier(.22, .74, .18, 1);
+}
+
+.client-swipe-row.is-dragging .client-swipe-actions,
+.client-swipe-row.is-dragging .client-swipe-actions__track {
+  transition: none;
 }
 
 .client-swipe-action {
@@ -72,7 +96,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .client-swipe-front {
+  .client-swipe-front,
+  .client-swipe-actions,
+  .client-swipe-actions__track {
     transition-duration: .00001ms;
   }
 }
