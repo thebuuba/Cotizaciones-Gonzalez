@@ -1,4 +1,4 @@
-import { Award, CheckCircle2, ClipboardList, Grid2X2, Hammer, Heart, MessageCircle, Phone, Quote, ShieldCheck, UserRound } from 'lucide-react'
+import { Award, CheckCircle2, Grid2X2, Hammer, Heart, MessageCircle, Phone, ShieldCheck } from 'lucide-react'
 import { useEffect, useMemo } from 'react'
 
 import banreservasLogo from '../../assets/bank-logos/banreservas.svg'
@@ -11,7 +11,7 @@ import '../../styles/quotation-document.css'
 import '../../styles/quotation-document-refined.css'
 
 function estimateRowHeight(item: MaterialItem): number {
-  return 38 + Math.max(0, Math.ceil(item.description.length / 42) - 1) * 15
+  return 40 + Math.max(0, Math.ceil(item.description.length / 42) - 1) * 15
 }
 
 function formatQuantity(quantityMilli: number): string {
@@ -53,7 +53,7 @@ function MaterialTable({ items, startIndex }: { items: MaterialItem[]; startInde
   return <div className={`document-table${compact ? ' document-table--compact' : ''}`} role="table">
     <div role="rowgroup">
       <div className="document-table-row document-table-heading" role="row">
-        <div role="columnheader">#</div><div role="columnheader">DESCRIPCIÓN</div><div role="columnheader">CANTIDAD</div><div role="columnheader">UNIDAD</div><div role="columnheader">PRECIO UNITARIO</div><div role="columnheader">TOTAL</div>
+        <div role="columnheader">#</div><div role="columnheader">DESCRIPCIÓN</div><div role="columnheader">CANT.</div><div role="columnheader">UND.</div><div role="columnheader">PRECIO</div><div role="columnheader">TOTAL</div>
       </div>
     </div>
     <div role="rowgroup">
@@ -87,36 +87,28 @@ function ClosingBlocks({ snapshot, logoUrl, stampUrl }: { snapshot: QuotationSna
   const { business, quotation, materialItems } = snapshot
   const totals = calculateQuotationTotals(materialItems, quotation.laborMinor)
 
-  return <div className="document-closing">
-    <div className="document-summary-grid">
-      <section className="document-box document-observations">
-        <h3>OBSERVACIONES</h3>
-        <p>{quotation.observations || 'Sin observaciones.'}</p>
-      </section>
+  return <div className="document-closing document-closing--commercial">
+    <section className="document-totals document-totals--commercial" aria-label="Resumen económico">
+      <div><span>Materiales</span><strong>{formatMoney(totals.materialsMinor)}</strong></div>
+      <div><span>Mano de obra</span><strong>{formatMoney(totals.laborMinor)}</strong></div>
+      <div className="document-grand-total"><span>Total general</span><strong>{formatMoney(totals.totalMinor)}</strong></div>
+    </section>
 
-      <section className="document-totals">
-        <div><span>Total de materiales</span><strong>{formatMoney(totals.materialsMinor)}</strong></div>
-        <div><span>Mano de obra instalación</span><strong>{formatMoney(totals.laborMinor)}</strong></div>
-        <div className="document-grand-total"><span>Total general</span><strong>{formatMoney(totals.totalMinor)}</strong></div>
-      </section>
-    </div>
+    <section className="document-clean-section document-observations-clean">
+      <h3>OBSERVACIONES</h3>
+      <p>{quotation.observations || 'Sin observaciones.'}</p>
+    </section>
 
-    <div className="document-terms-brand-grid">
-      <section className="document-box document-terms-box">
-        <h3><ClipboardList aria-hidden="true" />TÉRMINOS &amp; CONDICIONES</h3>
+    <section className="document-clean-section document-terms-clean">
+      <h3>TÉRMINOS Y CONDICIONES</h3>
+      <div className="document-terms-list">
         {business.terms.map((term, index) => <p key={`${index}-${term}`}><CheckCircle2 aria-hidden="true" />{term}</p>)}
-      </section>
+      </div>
+    </section>
 
-      <aside className="document-brand-quote" aria-label="Mensaje de marca">
-        <Quote aria-hidden="true" />
-        <p>Construimos hoy los espacios donde vivirás tus mejores momentos.</p>
-        <span aria-hidden="true" />
-      </aside>
-    </div>
-
-    <section className="document-business-strip">
+    <section className="document-business-strip document-business-strip--commercial">
       <div className="document-contact-col document-contact-col--accounts">
-        <span className="document-contact-label">CUENTAS PARA DEPÓSITO / TRANSFERENCIA</span>
+        <span className="document-contact-label">DATOS PARA PAGO</span>
         {business.bankAccounts.map((account) => {
           const bankLogo = getBankLogo(account.bank)
           return <div className="document-bank-row" key={account.id}>
@@ -127,6 +119,7 @@ function ClosingBlocks({ snapshot, logoUrl, stampUrl }: { snapshot: QuotationSna
       </div>
 
       <div className="document-contact-col document-contact-col--identity">
+        <span className="document-contact-label">RESPONSABLE</span>
         {stampUrl ? <img className="document-stamp" src={stampUrl} alt="Sello del negocio" /> : <Brand business={business} logoUrl={logoUrl} mini />}
         <div className="manager-name">{business.managerName}</div>
         <div className="manager-title">{business.managerTitle}</div>
@@ -139,9 +132,11 @@ function ClosingBlocks({ snapshot, logoUrl, stampUrl }: { snapshot: QuotationSna
       </div>
     </section>
 
-    <footer className="document-footer">
-      <p><ShieldCheck aria-hidden="true" />{business.footerQuality}</p>
-      <p><Award aria-hidden="true" />{business.footerCommitment}</p>
+    <footer className="document-footer document-footer--commercial">
+      <div className="document-footer-points">
+        <p><ShieldCheck aria-hidden="true" />{business.footerQuality}</p>
+        <p><Award aria-hidden="true" />{business.footerCommitment}</p>
+      </div>
       <strong>{business.footerFaith} <Heart aria-hidden="true" /></strong>
     </footer>
   </div>
@@ -151,9 +146,9 @@ export function QuotationDocument({ snapshot, rowHeight = estimateRowHeight }: {
   const logoUrl = useBlobUrl(snapshot.business.logoBlob)
   const stampUrl = useBlobUrl(snapshot.business.stampBlob)
   const pages = paginateDocument(snapshot.materialItems, {
-    firstPageCapacity: 690,
+    firstPageCapacity: 650,
     continuationPageCapacity: 900,
-    closingHeight: 390,
+    closingHeight: 410,
     rowHeight,
   })
 
@@ -162,21 +157,21 @@ export function QuotationDocument({ snapshot, rowHeight = estimateRowHeight }: {
     const pageStart = startIndex
     startIndex += page.items.length
 
-    return <article className="quotation-page" data-export-page data-testid={`quotation-page-${page.pageNumber}`} key={page.pageNumber}>
+    return <article className="quotation-page quotation-page--commercial" data-export-page data-testid={`quotation-page-${page.pageNumber}`} key={page.pageNumber}>
       {page.isFirst ? <>
-        <header className="document-header">
+        <header className="document-header document-header--commercial">
           <div className="document-header-band">
             <Brand business={snapshot.business} logoUrl={logoUrl} />
             <div className="document-header-contact"><small>CONTACTO</small><strong><Phone aria-hidden="true" />{snapshot.business.headerPhone}</strong></div>
           </div>
-          <div className="document-title-row">
+          <div className="document-title-row document-title-row--commercial">
             <div className="document-title-copy"><span>PROPUESTA COMERCIAL</span><h2>COTIZACIÓN</h2><small>{snapshot.quotation.number}</small></div>
             <div className="document-date"><span>FECHA</span><strong>{formatDate(snapshot.quotation.issueDate)}</strong></div>
           </div>
         </header>
 
-        <section className="document-client">
-          <h3><UserRound aria-hidden="true" />DATOS DEL CLIENTE</h3>
+        <section className="document-client document-client--commercial">
+          <h3>CLIENTE</h3>
           <div className="document-client-fields">
             <p><strong>Nombre</strong><span>{snapshot.quotation.clientName}</span></p>
             <p><strong>Dirección</strong><span>{snapshot.quotation.clientAddress}</span></p>
