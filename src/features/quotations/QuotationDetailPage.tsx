@@ -1,4 +1,4 @@
-import { ChevronLeft, FileImage, FileText, MapPin, MoreHorizontal, Pencil, Phone, Share2, Trash2 } from 'lucide-react'
+import { ChevronLeft, FileImage, FileText, Loader2, MapPin, MoreHorizontal, Pencil, Phone, Share2, Trash2 } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 
@@ -21,6 +21,12 @@ function formatDate(value: string): string {
 
 function formatQuantity(quantityMilli: number): string {
   return new Intl.NumberFormat('es-DO', { maximumFractionDigits: 3 }).format(quantityMilli / 1000)
+}
+
+const nextPaint = () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
+async function letLoadingScreenPaint(): Promise<void> {
+  await nextPaint()
+  await nextPaint()
 }
 
 export function buildQuotationShareText(snapshot: QuotationSnapshot): string {
@@ -63,6 +69,7 @@ export function QuotationDetailPage({ snapshot, onStatusChange, onDelete }: {
   const shareQuotation = async () => {
     setExporting('share')
     setExportMessage('')
+    await letLoadingScreenPaint()
     const text = buildQuotationShareText(snapshot)
     try {
       if ('share' in navigator && typeof navigator.share === 'function') {
@@ -86,6 +93,7 @@ export function QuotationDetailPage({ snapshot, onStatusChange, onDelete }: {
   const exportPdf = async () => {
     setExporting('pdf')
     setExportMessage('')
+    await letLoadingScreenPaint()
     try {
       await shareOrDownload([await exportQuotationPdf(exportPages(), baseName)])
       setExportMessage('PDF preparado')
@@ -100,6 +108,7 @@ export function QuotationDetailPage({ snapshot, onStatusChange, onDelete }: {
   const exportImages = async () => {
     setExporting('image')
     setExportMessage('')
+    await letLoadingScreenPaint()
     try {
       await shareOrDownload(await exportQuotationImages(exportPages(), baseName))
       setExportMessage('Imagen preparada')
@@ -120,12 +129,33 @@ export function QuotationDetailPage({ snapshot, onStatusChange, onDelete }: {
     return () => document.removeEventListener('mousedown', handleClick)
   }, [menuOpen])
 
+  useEffect(() => {
+    if (!exporting) return
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => { document.body.style.overflow = previousOverflow }
+  }, [exporting])
+
   const handleDelete = async () => {
     setMenuOpen(false)
     if (window.confirm('¿Seguro que deseas eliminar esta cotización?')) await onDelete()
   }
 
-  return <div className="quotation-detail quotation-detail-ios">
+  const loadingCopy = exporting === 'pdf'
+    ? ['Preparando PDF…', 'Generando un documento de alta calidad.']
+    : exporting === 'image'
+      ? ['Preparando imagen…', 'Renderizando la cotización en alta resolución.']
+      : ['Abriendo opciones…', 'Preparando la cotización para compartir.']
+
+  return <div className="quotation-detail quotation-detail-ios" aria-busy={Boolean(exporting)}>
+    {exporting && <div className="quotation-export-loading" role="status" aria-live="assertive">
+      <div className="quotation-export-loading__card">
+        <Loader2 className="quotation-export-loading__spinner" aria-hidden="true" />
+        <strong>{loadingCopy[0]}</strong>
+        <span>{loadingCopy[1]}</span>
+      </div>
+    </div>}
+
     <nav className="quotation-detail-nav" aria-label="Navegación de la cotización">
       <Link className="quotation-detail-nav-back" to="/cotizaciones" aria-label="Volver a cotizaciones"><ChevronLeft aria-hidden="true" />Cotizaciones</Link>
       <strong>Cotización</strong>
