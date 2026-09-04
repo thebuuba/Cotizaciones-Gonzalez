@@ -14,9 +14,11 @@ function HomeRoute() {
   const quotations = useLiveQuery(() => quotationRepository.list())
   const profile = useLiveQuery(() => businessProfileRepository.get())
 
-  if (quotations === undefined) return null
-
-  return <HomePage businessName={profile?.businessName || 'Acabados Modernos Gonzalez'} quotations={quotations} />
+  return <HomePage
+    businessName={profile?.businessName || 'Acabados Modernos Gonzalez'}
+    quotations={quotations ?? []}
+    loading={quotations === undefined}
+  />
 }
 
 function NewQuotationRoute() {
@@ -35,17 +37,14 @@ function NewQuotationRoute() {
 
 function QuotationsRoute() {
   const quotations = useLiveQuery(() => quotationRepository.list())
-
-  if (quotations === undefined) return null
-
-  return <QuotationsPage quotations={quotations} />
+  return <QuotationsPage quotations={quotations ?? []} loading={quotations === undefined} />
 }
 
 function EditQuotationRoute() {
   const { id } = useParams()
   const snapshot = useLiveQuery(() => id ? quotationRepository.get(id) : undefined, [id])
   const clients = useLiveQuery(() => clientRepository.list(), [], [])
-  if (!snapshot) return <p className="loading-state">Cargando cotización…</p>
+  if (!snapshot) return <p className="loading-state" role="status">Cargando cotización…</p>
   return <QuotationEditor business={snapshot.business} clients={clients} initialValue={snapshot} onSave={(value) => quotationRepository.save(value)} />
 }
 
@@ -53,19 +52,20 @@ function QuotationDetailRoute() {
   const { id } = useParams()
   const navigate = useNavigate()
   const snapshot = useLiveQuery(() => id ? quotationRepository.get(id) : undefined, [id])
-  if (!snapshot) return <p className="loading-state">Cargando cotización…</p>
+  if (!snapshot) return <p className="loading-state" role="status">Cargando cotización…</p>
   return <QuotationDetailPage snapshot={snapshot} onStatusChange={(status) => quotationRepository.save({ ...snapshot, quotation: { ...snapshot.quotation, status, updatedAt: new Date().toISOString() } })} onDelete={async () => { await quotationRepository.softDelete(snapshot.quotation.id, new Date()); navigate('/cotizaciones', { replace: true }) }} />
 }
 
 function ClientsRoute() {
-  const clients = useLiveQuery(() => clientRepository.list(), [], [])
+  const clients = useLiveQuery(() => clientRepository.list())
   const navigate = useNavigate()
   const [params] = useSearchParams()
   const selectedClient = params.get('cliente')
   const detailTarget = selectedClient === 'nuevo' ? 'new' : selectedClient
 
   return <ClientsPage
-    clients={clients}
+    clients={clients ?? []}
+    loading={clients === undefined}
     detailTarget={detailTarget}
     onOpenClient={(target) => navigate(`/clientes?cliente=${target === 'new' ? 'nuevo' : encodeURIComponent(target)}`)}
     onCloseClient={() => navigate('/clientes', { replace: true })}
