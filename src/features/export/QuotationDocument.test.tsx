@@ -14,19 +14,19 @@ describe('QuotationDocument', () => {
 
     const page = screen.getByTestId('quotation-page-1')
     expect(within(page).getByText('COTIZACIÓN')).toBeInTheDocument()
-    expect(within(page).getByText('DATOS DEL CLIENTE')).toBeInTheDocument()
+    expect(within(page).getByText('CLIENTE')).toBeInTheDocument()
     expect(within(page).getByText('María Rodríguez')).toBeInTheDocument()
     expect(within(page).getByText('Cerámica')).toBeInTheDocument()
     expect(within(page).getAllByRole('row')).toHaveLength(2)
-    for (const heading of ['#', 'DESCRIPCIÓN', 'CANTIDAD', 'UNIDAD', 'PRECIO UNITARIO', 'TOTAL']) {
+    for (const heading of ['#', 'DESCRIPCIÓN', 'CANT.', 'UND.', 'PRECIO', 'TOTAL']) {
       expect(within(page).getByRole('columnheader', { name: heading })).toBeInTheDocument()
     }
-    expect(within(page).getByText('Total de materiales')).toBeInTheDocument()
-    expect(within(page).getByText('Mano de obra instalación')).toBeInTheDocument()
+    expect(within(page).getByText('Materiales')).toBeInTheDocument()
+    expect(within(page).getByText('Mano de obra')).toBeInTheDocument()
     expect(within(page).getByText('Total general')).toBeInTheDocument()
-    expect(within(page).getByText('TÉRMINOS & CONDICIONES')).toBeInTheDocument()
+    expect(within(page).getByText('TÉRMINOS Y CONDICIONES')).toBeInTheDocument()
     expect(within(page).getByText('OBSERVACIONES')).toBeInTheDocument()
-    expect(within(page).getByText('CUENTAS PARA DEPÓSITO / TRANSFERENCIA')).toBeInTheDocument()
+    expect(within(page).getByText('DATOS PARA PAGO')).toBeInTheDocument()
     expect(within(page).getByText('Jefferson Gonzalez Del Rosario')).toBeInTheDocument()
     expect(within(page).getByText('Dios es bueno todo el tiempo')).toBeInTheDocument()
   })

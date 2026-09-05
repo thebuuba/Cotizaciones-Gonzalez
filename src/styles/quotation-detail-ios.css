@@ -476,8 +476,7 @@
 
 .quotation-export-stage .quotation-page {
   box-shadow: none;
-  font-size: 13px;
-  line-height: 1.42;
+
 }
 
 @media (prefers-reduced-motion: reduce) {

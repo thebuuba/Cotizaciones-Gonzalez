@@ -41,4 +41,19 @@ describe('paginateDocument', () => {
 
     expect(tallPages.length).toBeGreaterThan(shortPages.length)
   })
+  it('moves the closing to a new page when a single row fills the first page', () => {
+    const source = items(1)
+    const pages = paginateDocument(source, { firstPageCapacity: 650, continuationPageCapacity: 900, closingHeight: 410, rowHeight: () => 250 })
+    expect(pages.flatMap((page) => page.items)).toEqual(source)
+    expect(pages.at(-1)?.includesClosing).toBe(true)
+    expect(pages).toHaveLength(2)
+  })
+
+  it('preserves the closing even when the final row cannot share a continuation page', () => {
+    const pages = paginateDocument(items(2), { firstPageCapacity: 650, continuationPageCapacity: 900, closingHeight: 410, rowHeight: () => 600 })
+    expect(pages.flatMap((page) => page.items)).toHaveLength(2)
+    expect(pages.filter((page) => page.includesClosing)).toHaveLength(1)
+    expect(pages.at(-1)?.items).toHaveLength(0)
+  })
+
 })
