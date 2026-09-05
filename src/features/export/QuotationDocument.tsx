@@ -8,7 +8,6 @@ import { calculateMaterialTotal, calculateQuotationTotals, formatMoney } from '.
 import type { BusinessProfile, MaterialItem, QuotationSnapshot } from '../../domain/types'
 import { paginateDocument } from './documentPagination'
 import '../../styles/quotation-document.css'
-import '../../styles/quotation-document-refined.css'
 
 function estimateRowHeight(item: MaterialItem): number {
   return 40 + Math.max(0, Math.ceil(item.description.length / 42) - 1) * 15
@@ -88,6 +87,7 @@ function ClosingBlocks({ snapshot, logoUrl, stampUrl }: { snapshot: QuotationSna
   const totals = calculateQuotationTotals(materialItems, quotation.laborMinor)
 
   return <div className="document-closing document-closing--commercial">
+    <div className="document-summary-grid">
     <section className="document-totals document-totals--commercial" aria-label="Resumen económico">
       <div><span>Materiales</span><strong>{formatMoney(totals.materialsMinor)}</strong></div>
       <div><span>Mano de obra</span><strong>{formatMoney(totals.laborMinor)}</strong></div>
@@ -98,6 +98,8 @@ function ClosingBlocks({ snapshot, logoUrl, stampUrl }: { snapshot: QuotationSna
       <h3>OBSERVACIONES</h3>
       <p>{quotation.observations || 'Sin observaciones.'}</p>
     </section>
+
+    </div>
 
     <section className="document-clean-section document-terms-clean">
       <h3>TÉRMINOS Y CONDICIONES</h3>
@@ -182,8 +184,9 @@ export function QuotationDocument({ snapshot, rowHeight = estimateRowHeight }: {
         <div><span>{snapshot.quotation.number}</span><small>Página {page.pageNumber}</small></div>
       </header>}
 
-      <MaterialTable items={page.items} startIndex={pageStart} />
+      {page.items.length > 0 && <MaterialTable items={page.items} startIndex={pageStart} />}
       {page.includesClosing && <ClosingBlocks snapshot={snapshot} logoUrl={logoUrl} stampUrl={stampUrl} />}
+      <div className="document-page-number"><span>{snapshot.quotation.number}</span><span>Página {page.pageNumber} de {pages.length}</span></div>
     </article>
   })}</div>
 }

@@ -48,5 +48,9 @@ export function paginateDocument<T>(source: readonly T[], measurements: Paginati
     pages.push({ items, isFirst, includesClosing: false, pageNumber: pages.length + 1 })
   }
 
+  // A final row may fit alone but not alongside the closing blocks.
+  if (!pages.at(-1)?.includesClosing) {
+    pages.push({ items: [], isFirst: false, includesClosing: true, pageNumber: pages.length + 1 })
+  }
   return pages
 }
