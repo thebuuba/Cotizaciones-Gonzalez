@@ -16,19 +16,11 @@ async function waitForAssets(element: HTMLElement): Promise<void> {
       image.onerror = () => resolve()
     })
   }))
-  await new Promise<void>((resolve) => setTimeout(resolve, 120))
+  await new Promise<void>((resolve) => setTimeout(resolve, 160))
 }
 
 function isMobileBrowser(): boolean {
-  return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && window.innerWidth <= 1024)
-}
-
-function captureRatios(element: HTMLElement): number[] {
-  const ratios = isMobileBrowser() ? [2, 1.75, 1.5, 1.25, 1] : [4, 3.5, 3, 2.5, 2]
-  // WebKit can terminate the page when a canvas allocation is too large instead of
-  // throwing a catchable error. Keep mobile captures below a conservative pixel budget.
-  const maxPixels = isMobileBrowser() ? 8_000_000 : 28_000_000
-  return ratios.filter((ratio) => element.offsetWidth * element.offsetHeight * ratio * ratio <= maxPixels)
+  return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || navigator.maxTouchPoints > 1
 }
 
 async function capturePage(element: HTMLElement, pixelRatio: number): Promise<Blob | null> {
@@ -36,7 +28,7 @@ async function capturePage(element: HTMLElement, pixelRatio: number): Promise<Bl
   return toBlob(element, {
     pixelRatio,
     backgroundColor: '#ffffff',
-    cacheBust: true,
+    cacheBust: false,
     skipAutoScale: false,
   })
 }
@@ -45,75 +37,55 @@ export async function renderPagePng(element: HTMLElement): Promise<Blob> {
   await waitForAssets(element)
   if (element.offsetWidth < 100 || element.offsetHeight < 100) throw new Error('La página de la cotización no tiene un tamaño válido para exportar.')
 
-  const ratios = captureRatios(element)
-  for (const pixelRatio of ratios.length ? ratios : [1]) {
+  // Phones use a deliberately small canvas. Older iPhones/WebViews can abort the
+  // whole page on large SVG/canvas allocations before JavaScript can catch an error.
+  const ratios = isMobileBrowser() ? [1.25, 1, .85] : [4, 3, 2, 1.5]
+  for (const pixelRatio of ratios) {
     try {
       const blob = await capturePage(element, pixelRatio)
       if (blob) return blob
     } catch (error) {
-      console.warn(`La captura a ${pixelRatio}x falló; reintentando en modo compatible.`, error)
+      console.warn(`La captura a ${pixelRatio}x falló; reintentando.`, error)
     }
   }
-
   throw new Error('No se pudo crear la imagen de la cotización.')
 }
 
 const nextPaint = () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
-
-async function withStableViewport<T>(work: () => Promise<T>): Promise<T> {
-  const previous = { left: window.scrollX, top: window.scrollY }
-  window.scrollTo(0, 0)
+const releaseMobileMemory = async () => {
   await nextPaint()
-  try {
-    return await work()
-  } finally {
-    await nextPaint()
-    window.scrollTo(previous.left, previous.top)
-  }
+  if (isMobileBrowser()) await new Promise<void>((resolve) => setTimeout(resolve, 80))
 }
 
 export async function exportQuotationImages(elements: readonly HTMLElement[], baseName: string): Promise<File[]> {
   if (!elements.length) throw new Error('No hay páginas para exportar.')
   const safeName = sanitizeExportName(baseName)
-  return withStableViewport(async () => {
-    const files: File[] = []
-    for (const [index, element] of elements.entries()) {
-      const blob = await renderPagePng(element)
-      files.push(new File(
-        [blob],
-        elements.length === 1 ? `${safeName}.png` : `${safeName}-pagina-${index + 1}.png`,
-        { type: 'image/png' },
-      ))
-      // Give mobile WebKit a paint/GC opportunity between large canvas captures.
-      await nextPaint()
-    }
-    return files
-  })
-}
-
-function blobToDataUrl(blob: Blob): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onerror = () => reject(reader.error ?? new Error('No se pudo leer la imagen.'))
-    reader.onload = () => resolve(String(reader.result))
-    reader.readAsDataURL(blob)
-  })
+  const files: File[] = []
+  for (const [index, element] of elements.entries()) {
+    const blob = await renderPagePng(element)
+    files.push(new File([blob], elements.length === 1 ? `${safeName}.png` : `${safeName}-pagina-${index + 1}.png`, { type: 'image/png' }))
+    await releaseMobileMemory()
+  }
+  return files
 }
 
 export async function exportQuotationPdf(elements: readonly HTMLElement[], baseName: string): Promise<File> {
   if (!elements.length) throw new Error('No hay páginas para exportar.')
   const { jsPDF } = await import('jspdf')
-  return withStableViewport(async () => {
-    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4', compress: true, precision: 12 })
-    for (const [index, element] of elements.entries()) {
-      if (index > 0) pdf.addPage('a4', 'portrait')
-      const blob = await renderPagePng(element)
-      const dataUrl = await blobToDataUrl(blob)
-      pdf.addImage(dataUrl, 'PNG', 0, 0, 210, 297, undefined, 'FAST')
-      await nextPaint()
+  const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4', compress: true, precision: 10 })
+  for (const [index, element] of elements.entries()) {
+    if (index > 0) pdf.addPage('a4', 'portrait')
+    const blob = await renderPagePng(element)
+    // Object URLs avoid the extra in-memory base64 copy that was expensive on iOS.
+    const objectUrl = URL.createObjectURL(blob)
+    try {
+      pdf.addImage(objectUrl, 'PNG', 0, 0, 210, 297, undefined, 'FAST')
+    } finally {
+      URL.revokeObjectURL(objectUrl)
     }
-    return new File([pdf.output('blob')], `${sanitizeExportName(baseName)}.pdf`, { type: 'application/pdf' })
-  })
+    await releaseMobileMemory()
+  }
+  return new File([pdf.output('blob')], `${sanitizeExportName(baseName)}.pdf`, { type: 'application/pdf' })
 }
 
 function downloadFile(file: File): void {
@@ -121,10 +93,11 @@ function downloadFile(file: File): void {
   const anchor = document.createElement('a')
   anchor.href = url
   anchor.download = file.name
+  anchor.rel = 'noopener'
   document.body.appendChild(anchor)
   anchor.click()
   anchor.remove()
-  window.setTimeout(() => URL.revokeObjectURL(url), 10_000)
+  window.setTimeout(() => URL.revokeObjectURL(url), 30_000)
 }
 
 export async function shareOrDownload(files: File[], onShareOpening?: () => void | Promise<void>): Promise<'shared' | 'downloaded'> {
