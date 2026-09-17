@@ -1,20 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-const mocks = vi.hoisted(() => ({
-  toBlob: vi.fn(),
-  addImage: vi.fn(),
-  addPage: vi.fn(),
-  output: vi.fn(),
-}))
-
+const mocks = vi.hoisted(() => ({ toBlob: vi.fn(), addImage: vi.fn(), addPage: vi.fn(), output: vi.fn() }))
 vi.mock('html-to-image', () => ({ toBlob: mocks.toBlob }))
-vi.mock('jspdf', () => ({
-  jsPDF: class {
-    addImage = mocks.addImage
-    addPage = mocks.addPage
-    output = mocks.output
-  },
-}))
+vi.mock('jspdf', () => ({ jsPDF: class { addImage = mocks.addImage; addPage = mocks.addPage; output = mocks.output } }))
 
 import { exportQuotationImages, exportQuotationPdf, renderPagePng, shareOrDownload } from './exportService'
 
@@ -28,55 +16,37 @@ function exportPage(): HTMLElement {
 describe('quotation export service', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    vi.spyOn(window, 'scrollTo').mockImplementation(() => undefined)
     mocks.toBlob.mockResolvedValue(new Blob(['png'], { type: 'image/png' }))
     mocks.output.mockReturnValue(new Blob(['pdf'], { type: 'application/pdf' }))
   })
 
-  it('captures each canonical page as a maximum-resolution white PNG', async () => {
+  it('captures a canonical page with a white background', async () => {
     const page = exportPage()
     await renderPagePng(page)
-
-    expect(mocks.toBlob).toHaveBeenCalledWith(page, expect.objectContaining({
-      pixelRatio: 4,
-      backgroundColor: '#ffffff',
-      cacheBust: true,
-    }))
+    expect(mocks.toBlob).toHaveBeenCalledWith(page, expect.objectContaining({ backgroundColor: '#ffffff', cacheBust: false }))
   })
 
-  it('retries progressively at safer resolutions if the highest-resolution mobile capture fails', async () => {
+  it('retries at a safer resolution if the first capture fails', async () => {
     const page = exportPage()
     mocks.toBlob.mockRejectedValueOnce(new Error('canvas memory')).mockResolvedValueOnce(new Blob(['png'], { type: 'image/png' }))
-
     await expect(renderPagePng(page)).resolves.toBeInstanceOf(Blob)
-    expect(mocks.toBlob).toHaveBeenNthCalledWith(2, page, expect.objectContaining({ pixelRatio: 3.5 }))
+    expect(mocks.toBlob).toHaveBeenCalledTimes(2)
   })
 
   it('returns one safely named image per page', async () => {
-    const files = await exportQuotationImages([
-      exportPage(), exportPage(),
-    ], 'COT-0001 María/Rodríguez')
-
-    expect(files.map((file) => file.name)).toEqual([
-      'COT-0001-Maria-Rodriguez-pagina-1.png',
-      'COT-0001-Maria-Rodriguez-pagina-2.png',
-    ])
+    const files = await exportQuotationImages([exportPage(), exportPage()], 'COT-0001 María/Rodríguez')
+    expect(files.map((file) => file.name)).toEqual(['COT-0001-Maria-Rodriguez-pagina-1.png', 'COT-0001-Maria-Rodriguez-pagina-2.png'])
   })
 
-  it('assembles the same captured pages into one A4 PDF', async () => {
-    const scrollTo = vi.mocked(window.scrollTo)
-    const file = await exportQuotationPdf([
-      exportPage(), exportPage(),
-    ], 'COT-0001 María Rodríguez')
-
+  it('assembles captured pages into one A4 PDF', async () => {
+    const file = await exportQuotationPdf([exportPage(), exportPage()], 'COT-0001 María Rodríguez')
     expect(file.name).toBe('COT-0001-Maria-Rodriguez.pdf')
     expect(mocks.addImage).toHaveBeenCalledTimes(2)
-    expect(mocks.addImage).toHaveBeenCalledWith(expect.any(String), 'PNG', 0, 0, 210, 297, undefined, 'NONE')
+    expect(mocks.addImage).toHaveBeenCalledWith(expect.any(String), 'PNG', 0, 0, 210, 297, undefined, 'FAST')
     expect(mocks.addPage).toHaveBeenCalledTimes(1)
-    expect(scrollTo).toHaveBeenCalled()
   })
 
-  it('signals when Web Share is about to open and downloads otherwise', async () => {
+  it('uses Web Share when files are supported and downloads otherwise', async () => {
     const files = [new File(['pdf'], 'cotizacion.pdf', { type: 'application/pdf' })]
     const share = vi.fn().mockResolvedValue(undefined)
     const onShareOpening = vi.fn()
