@@ -39,11 +39,11 @@ export async function renderPagePng(element: HTMLElement, onProgress?: ExportPro
   if (element.offsetWidth < 100 || element.offsetHeight < 100) throw new Error('La página de la cotización no tiene un tamaño válido para exportar.')
 
   // A4 is rendered at a fixed 794px width. The primary mobile capture targets
-  // 1920px wide (about 1920x2715 for A4), so small text stays genuinely sharp.
-  const fullHdRatio = 1920 / element.offsetWidth
+  // 2560px wide (about 2560x3620 for A4), giving the exported image and PDF enough resolution for crisp small text and deep zoom.
+  const ultraHdRatio = 2560 / element.offsetWidth
   const ratios = isMobileBrowser()
-    ? uniqueRatios([fullHdRatio, 2.25, 2])
-    : uniqueRatios([3.2, fullHdRatio, 2.5])
+    ? uniqueRatios([ultraHdRatio, 3, 2.5])
+    : uniqueRatios([4, ultraHdRatio, 3])
 
   let lastError: unknown
   for (const ratio of ratios) {
