@@ -28,7 +28,11 @@ export async function renderPagePng(element: HTMLElement, onProgress?: ExportPro
   await onProgress?.('assets', { width: element.offsetWidth, height: element.offsetHeight })
   await waitForAssets(element)
   if (element.offsetWidth < 100 || element.offsetHeight < 100) throw new Error('La página de la cotización no tiene un tamaño válido para exportar.')
-  const ratios = isMobileBrowser() ? [1, .8, .65] : [3, 2, 1.5, 1]
+
+  // The export document is rendered at a fixed 794px A4 width. 2x therefore
+  // produces roughly 1588x2246px: sharp enough for small text while staying
+  // well below the canvas sizes that caused older phones to abort exports.
+  const ratios = isMobileBrowser() ? [2, 1.75, 1.5, 1.25] : [3, 2.5, 2]
   let lastError: unknown
   for (const ratio of ratios) {
     try {
@@ -59,24 +63,17 @@ export async function exportQuotationImages(elements: readonly HTMLElement[], ba
   return files
 }
 
-function blobToDataUrl(blob: Blob): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onerror = () => reject(reader.error ?? new Error('No se pudo leer la imagen.'))
-    reader.onload = () => resolve(String(reader.result))
-    reader.readAsDataURL(blob)
-  })
-}
-
 export async function exportQuotationPdf(elements: readonly HTMLElement[], baseName: string, onProgress?: ExportProgress): Promise<File> {
   if (!elements.length) throw new Error('No hay páginas para exportar.')
   const { jsPDF } = await import('jspdf')
-  const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4', compress: true, precision: 8 })
+  const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4', compress: true, precision: 12 })
   for (const [index, element] of elements.entries()) {
     if (index > 0) pdf.addPage('a4', 'portrait')
     const blob = await renderPagePng(element, onProgress)
-    const dataUrl = await blobToDataUrl(blob)
-    pdf.addImage(dataUrl, 'PNG', 0, 0, 210, 297, undefined, 'FAST')
+    // Uint8Array avoids a second base64 copy in memory and preserves the PNG
+    // pixels exactly, which improves reliability and quality on mobile.
+    const bytes = new Uint8Array(await blob.arrayBuffer())
+    pdf.addImage(bytes, 'PNG', 0, 0, 210, 297, undefined, 'MEDIUM')
     await onProgress?.('pdf', { page: index + 1, imageBytes: blob.size })
     await releaseMemory()
   }
