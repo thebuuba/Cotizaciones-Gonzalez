@@ -21,7 +21,16 @@ function isMobileBrowser(): boolean {
 
 async function capturePage(element: HTMLElement, pixelRatio: number): Promise<Blob | null> {
   const { toBlob } = await import('html-to-image')
-  return toBlob(element, { pixelRatio, backgroundColor: '#ffffff', cacheBust: false, skipAutoScale: false })
+  return toBlob(element, {
+    pixelRatio,
+    backgroundColor: '#ffffff',
+    cacheBust: false,
+    skipAutoScale: false,
+  })
+}
+
+function uniqueRatios(values: number[]): number[] {
+  return values.filter((value, index) => value > 0 && values.findIndex((candidate) => Math.abs(candidate - value) < 0.01) === index)
 }
 
 export async function renderPagePng(element: HTMLElement, onProgress?: ExportProgress): Promise<Blob> {
@@ -29,14 +38,23 @@ export async function renderPagePng(element: HTMLElement, onProgress?: ExportPro
   await waitForAssets(element)
   if (element.offsetWidth < 100 || element.offsetHeight < 100) throw new Error('La página de la cotización no tiene un tamaño válido para exportar.')
 
-  // The export document is rendered at a fixed 794px A4 width. 2x therefore
-  // produces roughly 1588x2246px: sharp enough for small text while staying
-  // well below the canvas sizes that caused older phones to abort exports.
-  const ratios = isMobileBrowser() ? [2, 1.75, 1.5, 1.25] : [3, 2.5, 2]
+  // A4 is rendered at a fixed 794px width. The primary mobile capture targets
+  // 1920px wide (about 1920x2715 for A4), so small text stays genuinely sharp.
+  const fullHdRatio = 1920 / element.offsetWidth
+  const ratios = isMobileBrowser()
+    ? uniqueRatios([fullHdRatio, 2.25, 2])
+    : uniqueRatios([3.2, fullHdRatio, 2.5])
+
   let lastError: unknown
   for (const ratio of ratios) {
     try {
-      await onProgress?.('capture', { ratio, width: element.offsetWidth, height: element.offsetHeight })
+      await onProgress?.('capture', {
+        ratio,
+        width: element.offsetWidth,
+        height: element.offsetHeight,
+        outputWidth: Math.round(element.offsetWidth * ratio),
+        outputHeight: Math.round(element.offsetHeight * ratio),
+      })
       const blob = await capturePage(element, ratio)
       if (blob) return blob
     } catch (error) {
@@ -47,7 +65,7 @@ export async function renderPagePng(element: HTMLElement, onProgress?: ExportPro
   throw lastError instanceof Error ? lastError : new Error('No se pudo crear la exportación en este dispositivo.')
 }
 
-const releaseMemory = () => new Promise<void>((resolve) => setTimeout(resolve, isMobileBrowser() ? 150 : 20))
+const releaseMemory = () => new Promise<void>((resolve) => setTimeout(resolve, isMobileBrowser() ? 180 : 20))
 
 export async function exportQuotationImages(elements: readonly HTMLElement[], baseName: string, onProgress?: ExportProgress): Promise<File[]> {
   if (!elements.length) throw new Error('No hay páginas para exportar.')
@@ -70,10 +88,8 @@ export async function exportQuotationPdf(elements: readonly HTMLElement[], baseN
   for (const [index, element] of elements.entries()) {
     if (index > 0) pdf.addPage('a4', 'portrait')
     const blob = await renderPagePng(element, onProgress)
-    // Uint8Array avoids a second base64 copy in memory and preserves the PNG
-    // pixels exactly, which improves reliability and quality on mobile.
     const bytes = new Uint8Array(await blob.arrayBuffer())
-    pdf.addImage(bytes, 'PNG', 0, 0, 210, 297, undefined, 'MEDIUM')
+    pdf.addImage(bytes, 'PNG', 0, 0, 210, 297, undefined, 'NONE')
     await onProgress?.('pdf', { page: index + 1, imageBytes: blob.size })
     await releaseMemory()
   }
