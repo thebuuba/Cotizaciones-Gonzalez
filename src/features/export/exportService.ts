@@ -7,16 +7,9 @@ async function waitForAssets(element: HTMLElement): Promise<void> {
   const images = Array.from(element.querySelectorAll('img'))
   await Promise.all(images.map(async (image) => {
     if (image.complete && image.naturalWidth > 0) return
-    if (image.decode) {
-      try { await image.decode() } catch { /* ignore */ }
-    }
-    await new Promise<void>((resolve) => {
-      if (image.complete) { resolve(); return }
-      image.onload = () => resolve()
-      image.onerror = () => resolve()
-    })
+    try { await image.decode?.() } catch { /* ignore */ }
   }))
-  await new Promise<void>((resolve) => setTimeout(resolve, 160))
+  await new Promise<void>((resolve) => setTimeout(resolve, 100))
 }
 
 function isMobileBrowser(): boolean {
@@ -25,37 +18,23 @@ function isMobileBrowser(): boolean {
 
 async function capturePage(element: HTMLElement, pixelRatio: number): Promise<Blob | null> {
   const { toBlob } = await import('html-to-image')
-  return toBlob(element, {
-    pixelRatio,
-    backgroundColor: '#ffffff',
-    cacheBust: false,
-    skipAutoScale: false,
-  })
+  return toBlob(element, { pixelRatio, backgroundColor: '#ffffff', cacheBust: false, skipAutoScale: false })
 }
 
 export async function renderPagePng(element: HTMLElement): Promise<Blob> {
   await waitForAssets(element)
   if (element.offsetWidth < 100 || element.offsetHeight < 100) throw new Error('La página de la cotización no tiene un tamaño válido para exportar.')
-
-  // Phones use a deliberately small canvas. Older iPhones/WebViews can abort the
-  // whole page on large SVG/canvas allocations before JavaScript can catch an error.
-  const ratios = isMobileBrowser() ? [1.25, 1, .85] : [4, 3, 2, 1.5]
-  for (const pixelRatio of ratios) {
+  const ratios = isMobileBrowser() ? [1, .8, .65] : [3, 2, 1.5, 1]
+  for (const ratio of ratios) {
     try {
-      const blob = await capturePage(element, pixelRatio)
+      const blob = await capturePage(element, ratio)
       if (blob) return blob
-    } catch (error) {
-      console.warn(`La captura a ${pixelRatio}x falló; reintentando.`, error)
-    }
+    } catch (error) { console.warn(`Captura a ${ratio}x falló.`, error) }
   }
-  throw new Error('No se pudo crear la imagen de la cotización.')
+  throw new Error('No se pudo crear la exportación en este dispositivo.')
 }
 
-const nextPaint = () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
-const releaseMobileMemory = async () => {
-  await nextPaint()
-  if (isMobileBrowser()) await new Promise<void>((resolve) => setTimeout(resolve, 80))
-}
+const releaseMemory = () => new Promise<void>((resolve) => setTimeout(resolve, isMobileBrowser() ? 150 : 20))
 
 export async function exportQuotationImages(elements: readonly HTMLElement[], baseName: string): Promise<File[]> {
   if (!elements.length) throw new Error('No hay páginas para exportar.')
@@ -64,26 +43,30 @@ export async function exportQuotationImages(elements: readonly HTMLElement[], ba
   for (const [index, element] of elements.entries()) {
     const blob = await renderPagePng(element)
     files.push(new File([blob], elements.length === 1 ? `${safeName}.png` : `${safeName}-pagina-${index + 1}.png`, { type: 'image/png' }))
-    await releaseMobileMemory()
+    await releaseMemory()
   }
   return files
+}
+
+function blobToDataUrl(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onerror = () => reject(reader.error ?? new Error('No se pudo leer la imagen.'))
+    reader.onload = () => resolve(String(reader.result))
+    reader.readAsDataURL(blob)
+  })
 }
 
 export async function exportQuotationPdf(elements: readonly HTMLElement[], baseName: string): Promise<File> {
   if (!elements.length) throw new Error('No hay páginas para exportar.')
   const { jsPDF } = await import('jspdf')
-  const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4', compress: true, precision: 10 })
+  const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4', compress: true, precision: 8 })
   for (const [index, element] of elements.entries()) {
     if (index > 0) pdf.addPage('a4', 'portrait')
     const blob = await renderPagePng(element)
-    // Object URLs avoid the extra in-memory base64 copy that was expensive on iOS.
-    const objectUrl = URL.createObjectURL(blob)
-    try {
-      pdf.addImage(objectUrl, 'PNG', 0, 0, 210, 297, undefined, 'FAST')
-    } finally {
-      URL.revokeObjectURL(objectUrl)
-    }
-    await releaseMobileMemory()
+    const dataUrl = await blobToDataUrl(blob)
+    pdf.addImage(dataUrl, 'PNG', 0, 0, 210, 297, undefined, 'FAST')
+    await releaseMemory()
   }
   return new File([pdf.output('blob')], `${sanitizeExportName(baseName)}.pdf`, { type: 'application/pdf' })
 }
@@ -97,19 +80,16 @@ function downloadFile(file: File): void {
   document.body.appendChild(anchor)
   anchor.click()
   anchor.remove()
-  window.setTimeout(() => URL.revokeObjectURL(url), 30_000)
+  window.setTimeout(() => URL.revokeObjectURL(url), 60_000)
 }
 
 export async function shareOrDownload(files: File[], onShareOpening?: () => void | Promise<void>): Promise<'shared' | 'downloaded'> {
-  if (navigator.share && navigator.canShare?.({ files })) {
+  if (!isMobileBrowser() && navigator.share && navigator.canShare?.({ files })) {
     try {
       await onShareOpening?.()
       await navigator.share({ files, title: 'Cotización' })
       return 'shared'
-    } catch (error) {
-      if (error instanceof DOMException && error.name === 'AbortError') return 'shared'
-      console.warn('Web Share falló; usando descarga compatible.', error)
-    }
+    } catch (error) { console.warn('Web Share falló; usando descarga.', error) }
   }
   files.forEach(downloadFile)
   return 'downloaded'
