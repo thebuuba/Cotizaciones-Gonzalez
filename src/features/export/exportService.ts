@@ -19,12 +19,25 @@ async function waitForAssets(element: HTMLElement): Promise<void> {
   await new Promise<void>((resolve) => setTimeout(resolve, 120))
 }
 
+function isMobileBrowser(): boolean {
+  return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && window.innerWidth <= 1024)
+}
+
+function captureRatios(element: HTMLElement): number[] {
+  const ratios = isMobileBrowser() ? [2, 1.75, 1.5, 1.25, 1] : [4, 3.5, 3, 2.5, 2]
+  // WebKit can terminate the page when a canvas allocation is too large instead of
+  // throwing a catchable error. Keep mobile captures below a conservative pixel budget.
+  const maxPixels = isMobileBrowser() ? 8_000_000 : 28_000_000
+  return ratios.filter((ratio) => element.offsetWidth * element.offsetHeight * ratio * ratio <= maxPixels)
+}
+
 async function capturePage(element: HTMLElement, pixelRatio: number): Promise<Blob | null> {
   const { toBlob } = await import('html-to-image')
   return toBlob(element, {
     pixelRatio,
     backgroundColor: '#ffffff',
     cacheBust: true,
+    skipAutoScale: false,
   })
 }
 
@@ -32,7 +45,8 @@ export async function renderPagePng(element: HTMLElement): Promise<Blob> {
   await waitForAssets(element)
   if (element.offsetWidth < 100 || element.offsetHeight < 100) throw new Error('La página de la cotización no tiene un tamaño válido para exportar.')
 
-  for (const pixelRatio of [4, 3.5, 3, 2.5]) {
+  const ratios = captureRatios(element)
+  for (const pixelRatio of ratios.length ? ratios : [1]) {
     try {
       const blob = await capturePage(element, pixelRatio)
       if (blob) return blob
@@ -64,11 +78,14 @@ export async function exportQuotationImages(elements: readonly HTMLElement[], ba
   return withStableViewport(async () => {
     const files: File[] = []
     for (const [index, element] of elements.entries()) {
+      const blob = await renderPagePng(element)
       files.push(new File(
-        [await renderPagePng(element)],
+        [blob],
         elements.length === 1 ? `${safeName}.png` : `${safeName}-pagina-${index + 1}.png`,
         { type: 'image/png' },
       ))
+      // Give mobile WebKit a paint/GC opportunity between large canvas captures.
+      await nextPaint()
     }
     return files
   })
@@ -87,12 +104,13 @@ export async function exportQuotationPdf(elements: readonly HTMLElement[], baseN
   if (!elements.length) throw new Error('No hay páginas para exportar.')
   const { jsPDF } = await import('jspdf')
   return withStableViewport(async () => {
-    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4', compress: false, precision: 16 })
+    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4', compress: true, precision: 12 })
     for (const [index, element] of elements.entries()) {
       if (index > 0) pdf.addPage('a4', 'portrait')
       const blob = await renderPagePng(element)
       const dataUrl = await blobToDataUrl(blob)
-      pdf.addImage(dataUrl, 'PNG', 0, 0, 210, 297, undefined, 'NONE')
+      pdf.addImage(dataUrl, 'PNG', 0, 0, 210, 297, undefined, 'FAST')
+      await nextPaint()
     }
     return new File([pdf.output('blob')], `${sanitizeExportName(baseName)}.pdf`, { type: 'application/pdf' })
   })
@@ -106,7 +124,7 @@ function downloadFile(file: File): void {
   document.body.appendChild(anchor)
   anchor.click()
   anchor.remove()
-  window.setTimeout(() => URL.revokeObjectURL(url), 1500)
+  window.setTimeout(() => URL.revokeObjectURL(url), 10_000)
 }
 
 export async function shareOrDownload(files: File[], onShareOpening?: () => void | Promise<void>): Promise<'shared' | 'downloaded'> {
@@ -117,6 +135,7 @@ export async function shareOrDownload(files: File[], onShareOpening?: () => void
       return 'shared'
     } catch (error) {
       if (error instanceof DOMException && error.name === 'AbortError') return 'shared'
+      console.warn('Web Share falló; usando descarga compatible.', error)
     }
   }
   files.forEach(downloadFile)
