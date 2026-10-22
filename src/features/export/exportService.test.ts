@@ -42,7 +42,7 @@ describe('quotation export service', () => {
     const file = await exportQuotationPdf([exportPage(), exportPage()], 'COT-0001 María Rodríguez')
     expect(file.name).toBe('COT-0001-Maria-Rodriguez.pdf')
     expect(mocks.addImage).toHaveBeenCalledTimes(2)
-    expect(mocks.addImage).toHaveBeenCalledWith(expect.any(String), 'PNG', 0, 0, 210, 297, undefined, 'FAST')
+    expect(mocks.addImage).toHaveBeenCalledWith(expect.any(Uint8Array), 'PNG', 0, 0, 210, 297, undefined, 'NONE')
     expect(mocks.addPage).toHaveBeenCalledTimes(1)
   })
 

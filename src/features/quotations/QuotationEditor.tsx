@@ -53,15 +53,16 @@ export function QuotationEditor({ business, clients, initialValue, initialClient
 }) {
   const createdAt = useRef(initialValue?.quotation.createdAt ?? new Date().toISOString())
   const quotationId = useRef(initialValue?.quotation.id ?? crypto.randomUUID())
-  const inlineClientId = useRef(initialValue?.client.id ?? crypto.randomUUID())
+  const inlineClientId = useRef(crypto.randomUUID())
   const defaults = initialDraft(initialValue)
   const preselected = clients.find(({ client }) => client.id === initialClientId)
   if (!initialValue && preselected) {
     defaults.clientId = preselected.client.id
     defaults.clientName = preselected.client.name
+    defaults.clientPhone = preselected.client.phone ?? ''
     defaults.clientAddress = preselected.locations.find((location) => location.id === initialLocationId)?.address ?? preselected.client.address
   }
-  const { control, getValues, register, setValue } = useForm<QuotationDraft>({ defaultValues: defaults })
+  const { control, getValues, register, resetField, setValue, formState: { dirtyFields } } = useForm<QuotationDraft>({ defaultValues: defaults })
   const { fields, append, remove, swap } = useFieldArray({ control, name: 'materials', keyName: 'fieldKey' })
   const draft = useWatch({ control }) as QuotationDraft
 
@@ -70,7 +71,13 @@ export function QuotationEditor({ business, clients, initialValue, initialClient
     if (!parsed.success) return undefined
     const now = new Date().toISOString()
     const clientRecord = clients.find(({ client }) => client.id === parsed.data.clientId)
-    const client: Client = clientRecord?.client ?? {
+    const existingClient = clientRecord?.client ?? (initialValue?.client.id === parsed.data.clientId ? initialValue.client : undefined)
+    const phoneChanged = dirtyFields.clientPhone && parsed.data.clientPhone !== (existingClient?.phone ?? '')
+    const client: Client = existingClient ? {
+      ...existingClient,
+      phone: phoneChanged ? parsed.data.clientPhone : existingClient.phone,
+      updatedAt: phoneChanged ? now : existingClient.updatedAt,
+    } : {
       id: inlineClientId.current,
       name: parsed.data.clientName,
       phone: parsed.data.clientPhone,
@@ -110,8 +117,14 @@ export function QuotationEditor({ business, clients, initialValue, initialClient
     } catch {
       return undefined
     }
-  }, [business, clients, draft, initialValue])
-  const autosave = useAutosave({ value: snapshot as QuotationSnapshot, canSave: Boolean(snapshot && initialValue), onSave, revision: JSON.stringify(draft) })
+  }, [business, clients, dirtyFields.clientPhone, draft, initialValue])
+  const saveSnapshot = async (value: QuotationSnapshot) => {
+    await onSave(value)
+    if (getValues('clientPhone') === (value.client.phone ?? '')) {
+      resetField('clientPhone', { defaultValue: value.client.phone ?? '' })
+    }
+  }
+  const autosave = useAutosave({ value: snapshot as QuotationSnapshot, canSave: Boolean(snapshot && initialValue), onSave: saveSnapshot, revision: JSON.stringify(draft) })
   const [manualStatus, setManualStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
   const [manualMessage, setManualMessage] = useState('')
   const saveNow = async () => {
@@ -123,7 +136,7 @@ export function QuotationEditor({ business, clients, initialValue, initialClient
     setManualStatus('saving')
     setManualMessage('')
     try {
-      await onSave(snapshot)
+      await saveSnapshot(snapshot)
       setManualStatus('saved')
       setManualMessage('Cotización guardada')
     } catch {
@@ -139,7 +152,7 @@ export function QuotationEditor({ business, clients, initialValue, initialClient
     const record = clients.find(({ client }) => client.id === clientId)
     setValue('clientId', clientId)
     setValue('clientName', record?.client.name ?? '')
-    setValue('clientPhone', record?.client.phone ?? '')
+    resetField('clientPhone', { defaultValue: record?.client.phone ?? '' })
     setValue('clientAddress', record?.locations[0]?.address ?? record?.client.address ?? '')
   }
 
@@ -160,7 +173,7 @@ export function QuotationEditor({ business, clients, initialValue, initialClient
     <header className="editor-intro">
       <span>{initialValue ? 'Edición' : 'Cotización'}</span>
       <h1>{initialValue ? 'Editar cotización' : 'Nueva cotización'}</h1>
-      <p>{initialValue ? 'Actualiza los datos necesarios.' : 'Completa los datos y agrega las partidas del trabajo.'}</p>
+      <p>{initialValue ? 'Actualiza los datos necesarios.' : 'Completa los datos y agrega los materiales del trabajo.'}</p>
     </header>
 
     <fieldset className="editor-section editor-section--grouped">
@@ -169,7 +182,7 @@ export function QuotationEditor({ business, clients, initialValue, initialClient
       <div className="editor-group">
         {clients.length > 0 && <label className="editor-row"><span>Cliente</span><select {...register('clientId')} onChange={(event) => chooseClient(event.target.value)}><option value="">Nuevo cliente</option>{clients.map(({ client }) => <option key={client.id} value={client.id}>{client.name}</option>)}</select></label>}
         <label className="editor-row"><span>Nombre</span><span className="sr-only"> del cliente</span><input {...register('clientName')} aria-label="Nombre del cliente" placeholder="Nombre del cliente" /></label>
-        <label className="editor-row"><span>Teléfono</span><input type="tel" {...register('clientPhone')} onChange={(e) => { const formatted = formatPhone(e.target.value); setValue('clientPhone', formatted) }} placeholder="809-000-0000" /></label>
+        <label className="editor-row"><span>Teléfono</span><input type="tel" {...register('clientPhone')} onChange={(e) => { const formatted = formatPhone(e.target.value); setValue('clientPhone', formatted, { shouldDirty: true }) }} placeholder="809-000-0000" /></label>
         <label className="editor-row"><span>Dirección</span><input {...register('clientAddress')} placeholder="Dirección del proyecto" /></label>
         <label className="editor-row"><span>Fecha</span><input type="date" {...register('issueDate')} /></label>
       </div>
@@ -178,11 +191,11 @@ export function QuotationEditor({ business, clients, initialValue, initialClient
     <fieldset className="editor-section editor-section--grouped editor-materials-section">
       <legend className="sr-only">Materiales de la cotización</legend>
       <div className="editor-section-heading editor-section-heading--action">
-        <div><span>Materiales</span><h2>Partidas de la cotización</h2></div>
+        <div><span>Materiales</span><h2>Materiales de la cotización</h2></div>
         <button className="editor-text-action" type="button" aria-label="Agregar material" onClick={() => append(newMaterial())}><Plus aria-hidden="true" />Agregar</button>
       </div>
       <ol className="material-list" aria-label="Materiales de la cotización">{fields.map((field, index) => <li className="material-card" key={field.fieldKey}>
-        <div className="material-card__heading"><strong>Partida {index + 1}</strong><div className="material-actions">
+        <div className="material-card__heading"><strong>Material {index + 1}</strong><div className="material-actions">
           <button className="icon-button" type="button" disabled={index === 0} onClick={() => swap(index, index - 1)} aria-label={`Subir material ${index + 1}`}><ArrowUp aria-hidden="true" /></button>
           <button className="icon-button" type="button" disabled={index === fields.length - 1} onClick={() => swap(index, index + 1)} aria-label={`Bajar material ${index + 1}`}><ArrowDown aria-hidden="true" /></button>
           <button className="icon-button icon-button--danger" type="button" disabled={fields.length === 1} onClick={() => remove(index)} aria-label={`Eliminar material ${index + 1}`}><Trash2 aria-hidden="true" /></button>
@@ -200,7 +213,7 @@ export function QuotationEditor({ business, clients, initialValue, initialClient
           <div className="row-total"><span>Total</span><strong data-testid={`material-total-${index}`}>{formatMoney(rowTotals[index] ?? 0)}</strong></div>
         </div>
       </li>)}</ol>
-      <button className="editor-add-material" type="button" onClick={() => append(newMaterial())}><Plus aria-hidden="true" />Agregar otra partida</button>
+      <button className="editor-add-material" type="button" onClick={() => append(newMaterial())}><Plus aria-hidden="true" />Agregar otro material</button>
     </fieldset>
 
     <fieldset className="editor-section editor-section--grouped totals-section">

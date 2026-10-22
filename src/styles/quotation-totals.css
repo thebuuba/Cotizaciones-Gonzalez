@@ -1,5 +1,7 @@
 /* Ajuste específico del resumen de totales del editor de cotizaciones. */
 .quotation-editor--ios .totals-section .editor-group {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
   overflow: hidden;
   border-radius: 1rem;
 }
@@ -48,6 +50,7 @@
 }
 
 .quotation-editor--ios .totals-section .general-total {
+  border-radius: 0;
   min-height: 4.35rem;
   margin: 0;
   padding-top: .85rem;

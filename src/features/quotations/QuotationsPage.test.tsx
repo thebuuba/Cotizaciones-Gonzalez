@@ -49,7 +49,7 @@ describe('QuotationDetailPage', () => {
     render(<MemoryRouter><QuotationDetailPage snapshot={quotationSnapshotFactory()} onStatusChange={onStatusChange} onDelete={vi.fn()} /></MemoryRouter>)
 
     expect(screen.getByRole('heading', { level: 2, name: 'Materiales' })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { level: 2, name: 'Vista previa' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Abrir vista previa de la cotización' })).toBeInTheDocument()
     await user.selectOptions(screen.getByLabelText('Estado de la cotización'), 'sent')
 
     expect(onStatusChange).toHaveBeenCalledWith('sent')

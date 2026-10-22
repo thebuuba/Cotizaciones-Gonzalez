@@ -18,6 +18,70 @@ const clientRecord = (): ClientRecord => {
 }
 
 describe('QuotationEditor', () => {
+  it('keeps the phone when creating a quotation for a route-preselected client', () => {
+    render(<QuotationEditor business={quotationSnapshotFactory().business} clients={[clientRecord()]} initialClientId="client-1" onSave={vi.fn()} />)
+
+    expect(screen.getByLabelText('Teléfono')).toHaveValue('809-555-0102')
+  })
+
+  it('saves an edited existing client phone without dropping other client fields', async () => {
+    const snapshot = quotationSnapshotFactory()
+    const onSave = vi.fn().mockResolvedValue(undefined)
+    render(<QuotationEditor business={snapshot.business} clients={[clientRecord()]} initialValue={snapshot} onSave={onSave} />)
+    fireEvent.change(screen.getByLabelText('Teléfono'), { target: { value: '8099999999' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Guardar cotización' }))
+
+    await screen.findByText('Cotización guardada')
+    expect(onSave).toHaveBeenCalledWith(expect.objectContaining({
+      client: expect.objectContaining({ id: 'client-1', phone: '(809) 999-9999', email: 'maria@example.com' }),
+    }))
+    expect(onSave.mock.calls[0]![0].client.updatedAt).not.toBe(snapshot.client.updatedAt)
+  })
+
+  it('assigns a new client id when replacing an existing quotation client with a new client', async () => {
+    const snapshot = quotationSnapshotFactory()
+    const onSave = vi.fn().mockResolvedValue(undefined)
+    render(<QuotationEditor business={snapshot.business} clients={[clientRecord()]} initialValue={snapshot} onSave={onSave} />)
+    fireEvent.change(screen.getByLabelText('Cliente'), { target: { value: '' } })
+    fireEvent.change(screen.getByLabelText('Nombre del cliente'), { target: { value: 'Nuevo cliente' } })
+    fireEvent.change(screen.getByLabelText('Dirección'), { target: { value: 'Nueva dirección' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Guardar cotización' }))
+
+    await screen.findByText('Cotización guardada')
+    const saved = onSave.mock.calls[0]![0]
+    expect(saved.client.id).not.toBe(snapshot.client.id)
+    expect(saved.quotation.clientId).toBe(saved.client.id)
+  })
+
+  it('preserves a remotely updated phone when the user only edits quotation observations', async () => {
+    const snapshot = quotationSnapshotFactory()
+    const onSave = vi.fn().mockResolvedValue(undefined)
+    const view = render(<QuotationEditor business={snapshot.business} clients={[clientRecord()]} initialValue={snapshot} onSave={onSave} />)
+    const updatedClient = { ...snapshot.client, phone: '809-111-2222', updatedAt: '2026-10-22T12:00:00.000Z' }
+    view.rerender(<QuotationEditor business={snapshot.business} clients={[{ client: updatedClient, locations: [] }]} initialValue={{ ...snapshot, client: updatedClient }} onSave={onSave} />)
+    fireEvent.change(screen.getByLabelText('Observaciones'), { target: { value: 'Solo cambio de observaciones' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Guardar cotización' }))
+
+    await screen.findByText('Cotización guardada')
+    expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ client: updatedClient }))
+  })
+
+  it('rebases the phone after saving so a later remote phone is not overwritten', async () => {
+    const snapshot = quotationSnapshotFactory()
+    const onSave = vi.fn().mockResolvedValue(undefined)
+    const view = render(<QuotationEditor business={snapshot.business} clients={[clientRecord()]} initialValue={snapshot} onSave={onSave} />)
+    fireEvent.change(screen.getByLabelText('Teléfono'), { target: { value: '8099999999' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Guardar cotización' }))
+    await screen.findByText('Cotización guardada')
+    const updatedClient = { ...snapshot.client, phone: '809-111-2222', updatedAt: '2026-10-22T12:00:00.000Z' }
+    view.rerender(<QuotationEditor business={snapshot.business} clients={[{ client: updatedClient, locations: [] }]} initialValue={{ ...snapshot, client: updatedClient }} onSave={onSave} />)
+    fireEvent.change(screen.getByLabelText('Observaciones'), { target: { value: 'Solo cambio de observaciones' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Guardar cotización' }))
+    await screen.findByText('Cotización guardada')
+
+    expect(onSave.mock.lastCall![0].client).toEqual(updatedClient)
+  })
+
   it('saves a new quotation even when there are no previously registered clients', async () => {
     const user = userEvent.setup()
     const onSave = vi.fn().mockResolvedValue(undefined)

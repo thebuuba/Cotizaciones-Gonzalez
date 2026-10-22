@@ -39,6 +39,33 @@ describe('local quotation repository', () => {
     expect((await quotations.get('quote-1'))?.materialItems.map((item) => item.id)).toEqual(['item-2'])
   })
 
+  it('preserves newer client and business data when saving an older quotation snapshot', async () => {
+    const snapshot = quotationSnapshotFactory()
+    await quotations.save(snapshot)
+    await db.outbox.clear()
+    const updatedAt = '2026-08-30T12:00:00.000Z'
+    await new DexieClientRepository(db).save({ client: { ...snapshot.client, phone: '809-999-9999', updatedAt }, locations: [] })
+    await new DexieBusinessProfileRepository(db).save({ ...snapshot.business, headerPhone: '809-888-8888', updatedAt })
+    await quotations.save({ ...snapshot, quotation: { ...snapshot.quotation, status: 'sent', updatedAt: '2026-08-31T12:00:00.000Z' } })
+
+    expect((await db.clients.get(snapshot.client.id))?.phone).toBe('809-999-9999')
+    expect((await db.businessProfiles.get(snapshot.business.id))?.headerPhone).toBe('809-888-8888')
+    const pending = await outbox.pending(25)
+    expect(pending.filter(item => item.entityType === 'client')).toHaveLength(1)
+    expect(pending.filter(item => item.entityType === 'businessProfile')).toHaveLength(1)
+    expect(pending.find(item => item.entityType === 'client')?.createdAt).toBe(updatedAt)
+  })
+
+  it('queues related records at their own version instead of the quotation edit time', async () => {
+    const snapshot = quotationSnapshotFactory()
+    snapshot.quotation.updatedAt = '2026-08-31T12:00:00.000Z'
+    await quotations.save(snapshot)
+
+    const pending = await outbox.pending(25)
+    expect(pending.find(item => item.entityType === 'client')?.createdAt).toBe('2026-08-29T12:00:00.000Z')
+    expect(pending.find(item => item.entityType === 'businessProfile')?.createdAt).toBe('2026-08-29T12:00:00.000Z')
+  })
+
   it('assigns sequential human-readable numbers to new quotations', async () => {
     const first = quotationSnapshotFactory()
     first.quotation.number = ''

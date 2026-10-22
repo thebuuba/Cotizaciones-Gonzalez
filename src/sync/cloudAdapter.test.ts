@@ -15,6 +15,22 @@ function transport(): BackupTransport {
 }
 
 describe('SupabaseCloudAdapter', () => {
+  it.each(['businessProfile', 'client'] as const)('preserves the actual %s version when uploading an older queued operation', async (entityType) => {
+    const api = transport()
+    const snapshot = quotationSnapshotFactory()
+    const operation: OutboxOperation = {
+      id: 'legacy-queued', entityType, entityId: entityType === 'client' ? snapshot.client.id : snapshot.business.id,
+      action: 'upsert', payload: entityType === 'client' ? { client: snapshot.client, locations: [] } : snapshot.business,
+      createdAt: '2026-08-31T12:00:00.000Z', nextAttemptAt: '2026-08-31T12:00:00.000Z', attempt: 0,
+    }
+
+    await new SupabaseCloudAdapter(api, 'owner-1').push(operation)
+
+    expect(api.upsert).toHaveBeenCalledWith(entityType === 'client' ? 'clients' : 'business_profiles', expect.objectContaining({
+      updated_at: '2026-08-29T12:00:00.000Z', version: Date.parse('2026-08-29T12:00:00.000Z'), deleted_at: null,
+    }))
+  })
+
   it('uploads business images separately and never embeds Blob values in JSON', async () => {
     const api = transport()
     const snapshot = quotationSnapshotFactory()
@@ -29,10 +45,22 @@ describe('SupabaseCloudAdapter', () => {
     await new SupabaseCloudAdapter(api, 'owner-1').push(operation)
 
     expect(api.upload).toHaveBeenCalledTimes(2)
-    expect(api.upload).toHaveBeenCalledWith('owner-1/business-1/logo.png', snapshot.business.logoBlob)
+    expect(api.upload).toHaveBeenCalledWith('owner-1/business-1/1788004800000/logo.png', snapshot.business.logoBlob)
     const row = vi.mocked(api.upsert).mock.calls[0]![1] as { payload: Record<string, unknown> }
     expect(row.payload).not.toHaveProperty('logoBlob')
     expect(row.payload).not.toHaveProperty('stampBlob')
+  })
+
+  it('does not overwrite a newer logo when an older profile is uploaded later', async () => {
+    const api = transport()
+    const adapter = new SupabaseCloudAdapter(api, 'owner-1')
+    const profile = { ...quotationSnapshotFactory().business, logoBlob: new Blob(['old'], { type: 'image/png' }) }
+    for (const current of [{ ...profile, updatedAt: '2026-08-30T12:00:00.000Z', logoBlob: new Blob(['new'], { type: 'image/png' }) }, profile]) {
+      await adapter.push({ id: current.updatedAt, entityType: 'businessProfile', entityId: current.id, action: 'upsert',
+        payload: current, createdAt: current.updatedAt, nextAttemptAt: current.updatedAt, attempt: 0 })
+    }
+    const paths = vi.mocked(api.upload).mock.calls.map(([path]) => path)
+    expect(new Set(paths).size).toBe(2)
   })
 
   it('backs up quotation materials without converting integer amounts or quantities', async () => {

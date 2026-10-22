@@ -22,7 +22,7 @@ export interface CloudBackup {
 
 interface OutboxPort {
   nextBatch(limit: number): Promise<OutboxOperation[]>
-  pending(limit: number): Promise<OutboxOperation[]>
+  pending(limit?: number): Promise<OutboxOperation[]>
   markSucceeded(id: string): Promise<void>
   markFailed(id: string, error: string, nextAttemptAt: string): Promise<void>
 }
@@ -39,6 +39,7 @@ interface LocalRestorePort {
 export class SyncEngine {
   private state: SyncState = 'pending'
   private running?: Promise<void>
+  private rerunRequested = false
   private readonly listeners = new Set<(state: SyncState) => void>()
 
   constructor(private readonly dependencies: {
@@ -63,13 +64,19 @@ export class SyncEngine {
   }
 
   run(): Promise<void> {
-    if (this.running) return this.running
+    if (this.running) { this.rerunRequested = true; return this.running }
     const isOnline = this.dependencies.isOnline ?? (() => navigator.onLine)
     if (!isOnline()) {
       this.setState('offline')
       return Promise.resolve()
     }
-    this.running = this.synchronize().catch(() => { this.setState('error') }).finally(() => { this.running = undefined })
+    this.running = (async () => {
+      do {
+        this.rerunRequested = false
+        await this.synchronize()
+      } while (this.rerunRequested && this.state !== 'error' && isOnline()
+        && (await this.dependencies.outbox.nextBatch(1)).length > 0)
+    })().catch(() => { this.setState('error') }).finally(() => { this.running = undefined })
     return this.running
   }
 
@@ -92,7 +99,7 @@ export class SyncEngine {
     }
 
     const remote = await cloud.pull()
-    const pending = await outbox.pending(1_000)
+    const pending = await outbox.pending()
     const protectedEntities = new Set(pending.map((item) => `${item.entityType}:${item.entityId}`))
     await local.restore(remote, protectedEntities)
     this.setState(pending.length ? 'pending' : 'synced')

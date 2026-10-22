@@ -1,4 +1,5 @@
 import type { OutboxOperation } from '../db/database'
+import type { ClientRecord } from '../db/repositories'
 import type { BusinessProfile, QuotationSnapshot } from '../domain/types'
 import type { CloudBackup, CloudMaterialRecord, CloudRecord } from './syncEngine'
 
@@ -55,17 +56,19 @@ export class SupabaseCloudAdapter {
       await this.transport.upsert('business_profiles', this.baseRow(operation, {}))
       return
     }
-    const logoPath = profile.logoBlob ? `${this.ownerId}/${profile.id}/logo.${extension(profile.logoBlob)}` : undefined
-    const stampPath = profile.stampBlob ? `${this.ownerId}/${profile.id}/stamp.${extension(profile.stampBlob)}` : undefined
+    const assetDirectory = `${this.ownerId}/${profile.id}/${versionOf(profile.updatedAt)}`
+    const logoPath = profile.logoBlob ? `${assetDirectory}/logo.${extension(profile.logoBlob)}` : undefined
+    const stampPath = profile.stampBlob ? `${assetDirectory}/stamp.${extension(profile.stampBlob)}` : undefined
     if (profile.logoBlob && logoPath) await this.transport.upload(logoPath, profile.logoBlob)
     if (profile.stampBlob && stampPath) await this.transport.upload(stampPath, profile.stampBlob)
     await this.transport.upsert('business_profiles', {
-      ...this.baseRow(operation, withoutBlobs(profile)), logo_path: logoPath, stamp_path: stampPath,
+      ...this.baseRow(operation, withoutBlobs(profile), profile.updatedAt), logo_path: logoPath, stamp_path: stampPath,
     })
   }
 
   private async pushClient(operation: OutboxOperation) {
-    await this.transport.upsert('clients', this.baseRow(operation, operation.payload ?? {}))
+    const record = operation.payload as ClientRecord | undefined
+    await this.transport.upsert('clients', this.baseRow(operation, record ?? {}, record?.client.updatedAt))
   }
 
   private materialTombstone(row: BackupRow, at: string): Record<string, unknown> {
@@ -119,14 +122,15 @@ export class SupabaseCloudAdapter {
     }
   }
 
-  private baseRow(operation: OutboxOperation, payload: unknown): Record<string, unknown> {
+  private baseRow(operation: OutboxOperation, payload: unknown, updatedAt = operation.createdAt): Record<string, unknown> {
+    const at = operation.action === 'delete' ? operation.createdAt : updatedAt
     return {
       owner_id: this.ownerId,
       id: operation.entityId,
       payload,
-      updated_at: operation.createdAt,
+      updated_at: at,
       deleted_at: operation.action === 'delete' ? operation.createdAt : null,
-      version: versionOf(operation.createdAt),
+      version: versionOf(at),
     }
   }
 

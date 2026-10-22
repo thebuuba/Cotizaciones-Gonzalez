@@ -45,25 +45,25 @@ export class DexieQuotationRepository {
         const number = existingNumber || `COT-${String(Math.max(0, ...numbers) + 1).padStart(4, '0')}`
         savedSnapshot = { ...snapshot, quotation: { ...snapshot.quotation, number } }
       }
-      await this.db.businessProfiles.put(savedSnapshot.business)
-      await this.db.clients.put(savedSnapshot.client)
+      const storedBusiness = await this.db.businessProfiles.get(savedSnapshot.business.id)
+      if (!storedBusiness || Date.parse(savedSnapshot.business.updatedAt) > Date.parse(storedBusiness.updatedAt)) {
+        await new DexieBusinessProfileRepository(this.db).save(savedSnapshot.business)
+      }
+      const storedClient = await this.db.clients.get(savedSnapshot.client.id)
+      if (!storedClient || Date.parse(savedSnapshot.client.updatedAt) > Date.parse(storedClient.updatedAt)) {
+        await this.db.clients.put(savedSnapshot.client)
+        const locations = await this.db.projectLocations.where('clientId').equals(savedSnapshot.client.id).filter((location) => !location.deletedAt).toArray()
+        await this.db.outbox.put({
+          id: `client:${savedSnapshot.client.id}:upsert:${savedSnapshot.client.updatedAt}`,
+          entityType: 'client', entityId: savedSnapshot.client.id, action: 'upsert',
+          payload: { client: savedSnapshot.client, locations }, createdAt: savedSnapshot.client.updatedAt,
+          nextAttemptAt: savedSnapshot.client.updatedAt, attempt: 0,
+        })
+      }
       await this.db.quotations.put(savedSnapshot.quotation)
       await this.db.materialItems.where('quotationId').equals(savedSnapshot.quotation.id).delete()
       await this.db.materialItems.bulkPut(savedSnapshot.materialItems)
-      const locations = await this.db.projectLocations.where('clientId').equals(savedSnapshot.client.id).filter((location) => !location.deletedAt).toArray()
-      await this.db.outbox.put({
-        id: `client:${savedSnapshot.client.id}:upsert:${savedSnapshot.quotation.updatedAt}`,
-        entityType: 'client', entityId: savedSnapshot.client.id, action: 'upsert',
-        payload: { client: savedSnapshot.client, locations }, createdAt: savedSnapshot.quotation.updatedAt,
-        nextAttemptAt: savedSnapshot.quotation.updatedAt, attempt: 0,
-      })
       await this.db.outbox.put(operation(savedSnapshot, 'upsert', savedSnapshot.quotation.updatedAt))
-      await this.db.outbox.put({
-        id: `businessProfile:${savedSnapshot.business.id}:upsert:${savedSnapshot.quotation.updatedAt}`,
-        entityType: 'businessProfile', entityId: savedSnapshot.business.id, action: 'upsert',
-        payload: savedSnapshot.business, createdAt: savedSnapshot.quotation.updatedAt,
-        nextAttemptAt: savedSnapshot.quotation.updatedAt, attempt: 0,
-      })
     })
   }
 
@@ -108,7 +108,7 @@ export class DexieOutboxRepository {
     const now = new Date().toISOString()
     return this.db.outbox.filter((item) => item.nextAttemptAt <= now).sortBy('createdAt').then((items) => items.slice(0, limit))
   }
-  pending(limit: number): Promise<OutboxOperation[]> { return this.db.outbox.toCollection().sortBy('createdAt').then((items) => items.slice(0, limit)) }
+  pending(limit?: number): Promise<OutboxOperation[]> { return this.db.outbox.toCollection().sortBy('createdAt').then((items) => limit === undefined ? items : items.slice(0, limit)) }
   async enqueue(item: OutboxOperation): Promise<void> { await this.db.outbox.put(item) }
   async markSucceeded(id: string): Promise<void> { await this.db.outbox.delete(id) }
   async markFailed(id: string, error: string, nextAttemptAt: string): Promise<void> {
