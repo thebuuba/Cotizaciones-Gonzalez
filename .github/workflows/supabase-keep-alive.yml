@@ -1,0 +1,34 @@
+name: Supabase keep-alive
+
+on:
+  schedule:
+    - cron: '17 */6 * * *'
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  database-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    env:
+      SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+      SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+    steps:
+      - name: Query database without accessing private rows
+        shell: bash
+        run: |
+          set -euo pipefail
+          : "${SUPABASE_URL:?Missing repository variable SUPABASE_URL}"
+          : "${SUPABASE_PUBLISHABLE_KEY:?Missing repository secret SUPABASE_PUBLISHABLE_KEY}"
+          response_file="$RUNNER_TEMP/supabase-keep-alive.json"
+          curl --fail --silent --show-error \
+            --retry 3 --retry-all-errors --retry-delay 5 \
+            --connect-timeout 10 --max-time 30 \
+            --get "${SUPABASE_URL%/}/rest/v1/export_diagnostics" \
+            --data-urlencode 'select=id' --data-urlencode 'limit=1' \
+            --header "apikey: $SUPABASE_PUBLISHABLE_KEY" \
+            --output "$response_file"
+          # RLS must hide all rows from this unauthenticated request.
+          test "$(cat "$response_file")" = '[]'
+          echo 'Database responded successfully; private rows remain inaccessible.'

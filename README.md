@@ -32,6 +32,22 @@ Copia `.env.e2e.example` a `.env.e2e.local` y completa las credenciales del úni
 npm run test:e2e
 ```
 
+## Keep-alive de Supabase
+
+El workflow `Supabase keep-alive` consulta la base cada seis horas, a las
+00:17, 06:17, 12:17 y 18:17 UTC. Se puede ejecutar manualmente desde Actions.
+Configura en el repositorio de GitHub la variable `SUPABASE_URL` y el secreto
+`SUPABASE_PUBLISHABLE_KEY` con la URL y clave pública del proyecto.
+
+La consulta anónima a `export_diagnostics` debe responder `200` con `[]`:
+comprueba PostgreSQL sin exponer filas protegidas por RLS ni usar claves de
+administrador. No modifica datos y falla si la consulta no funciona o devuelve filas.
+
+Esto reduce el riesgo de pausa por inactividad en Free; no garantiza que nunca
+se pause. [Supabase recomienda un plan de pago para evitar esa pausa](https://supabase.com/docs/guides/platform/free-project-pausing).
+Además, [GitHub desactiva los workflows programados de repositorios públicos tras 60 días sin actividad](https://docs.github.com/en/actions/how-tos/manage-workflow-runs/disable-and-enable-workflows).
+Revisa Actions y sus avisos de fallo, y vuelve a habilitar el workflow si se desactiva.
+
 ## Verificación esencial
 
 ```bash
