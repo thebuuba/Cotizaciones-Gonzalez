@@ -11,6 +11,14 @@
 @import './quotation-detail-ios.css';
 @import './quotation-totals.css';
 
+body :is(.total-card, .stat-card, .quote-card, .quotation-list-card,
+  .client-panel-card, .client-detail-card, .settings-ios-group,
+  .settings-form-group, .settings-bank-card,
+  .quotation-detail-card, .quotation-editor--ios .editor-group,
+  .quotation-editor--ios .material-card, .quotation-editor--ios .editor-notes) {
+  box-shadow: var(--shadow-card);
+}
+
 @font-face {
   font-family: 'Poppins';
   font-style: normal;

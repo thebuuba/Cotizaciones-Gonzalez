@@ -173,7 +173,7 @@ export function QuotationEditor({ business, clients, initialValue, initialClient
     <header className="editor-intro">
       <span>{initialValue ? 'Edición' : 'Cotización'}</span>
       <h1>{initialValue ? 'Editar cotización' : 'Nueva cotización'}</h1>
-      <p>{initialValue ? 'Actualiza los datos necesarios.' : 'Completa los datos y agrega los materiales del trabajo.'}</p>
+      {initialValue && <p>Actualiza los datos necesarios.</p>}
     </header>
 
     <fieldset className="editor-section editor-section--grouped">
