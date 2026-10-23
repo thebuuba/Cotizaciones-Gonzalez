@@ -10,3 +10,5 @@ graphify-out/
 *.tsbuildinfo
 test-results/
 tmp/
+.vercel
+.env*
