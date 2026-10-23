@@ -1,10 +1,9 @@
 import { useLiveQuery } from 'dexie-react-hooks'
-import { BrowserRouter, Route, Routes, useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { BrowserRouter, Navigate, Route, Routes, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { quotationRepository, businessProfileRepository, clientRepository } from './providers'
 import { AppShell } from '../components/AppShell'
 import { HomePage } from '../features/home/HomePage'
 import { QuotationsPage } from '../features/quotations/QuotationsPage'
-import { ClientsPage } from '../features/clients/ClientsPage'
 import { SettingsPage } from '../features/settings/SettingsPage'
 import { QuotationEditor } from '../features/quotations/QuotationEditor'
 import { QuotationDetailPage } from '../features/quotations/QuotationDetailPage'
@@ -56,25 +55,6 @@ function QuotationDetailRoute() {
   return <QuotationDetailPage snapshot={snapshot} onStatusChange={(status) => quotationRepository.save({ ...snapshot, quotation: { ...snapshot.quotation, status, updatedAt: new Date().toISOString() } })} onDelete={async () => { await quotationRepository.softDelete(snapshot.quotation.id, new Date()); navigate('/cotizaciones', { replace: true }) }} />
 }
 
-function ClientsRoute() {
-  const clients = useLiveQuery(() => clientRepository.list())
-  const navigate = useNavigate()
-  const [params] = useSearchParams()
-  const selectedClient = params.get('cliente')
-  const detailTarget = selectedClient === 'nuevo' ? 'new' : selectedClient
-
-  return <ClientsPage
-    clients={clients ?? []}
-    loading={clients === undefined}
-    detailTarget={detailTarget}
-    onOpenClient={(target) => navigate(`/clientes?cliente=${target === 'new' ? 'nuevo' : encodeURIComponent(target)}`)}
-    onCloseClient={() => navigate('/clientes', { replace: true })}
-    onSave={(record) => clientRepository.save(record)}
-    onDelete={(record) => clientRepository.softDelete(record.client.id, new Date())}
-    onStartQuotation={(clientId, locationId) => navigate(`/cotizaciones/nueva?cliente=${clientId}${locationId ? `&ubicacion=${locationId}` : ''}`)}
-  />
-}
-
 export function App() {
-  return <BrowserRouter><Routes><Route element={<AppShell/>}><Route index element={<HomeRoute/>}/><Route path="cotizaciones" element={<QuotationsRoute/>}/><Route path="cotizaciones/nueva" element={<NewQuotationRoute/>}/><Route path="cotizaciones/:id" element={<QuotationDetailRoute/>}/><Route path="cotizaciones/:id/editar" element={<EditQuotationRoute/>}/><Route path="clientes/*" element={<ClientsRoute/>}/><Route path="ajustes" element={<SettingsPage/>}/></Route></Routes></BrowserRouter>
+  return <BrowserRouter><Routes><Route element={<AppShell/>}><Route index element={<HomeRoute/>}/><Route path="cotizaciones" element={<QuotationsRoute/>}/><Route path="cotizaciones/nueva" element={<NewQuotationRoute/>}/><Route path="cotizaciones/:id" element={<QuotationDetailRoute/>}/><Route path="cotizaciones/:id/editar" element={<EditQuotationRoute/>}/><Route path="clientes/*" element={<Navigate to="/" replace/>}/><Route path="ajustes" element={<SettingsPage/>}/></Route></Routes></BrowserRouter>
 }

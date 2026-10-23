@@ -1,10 +1,9 @@
-import { FileText, Home, Settings, Users } from 'lucide-react'
+import { FileText, Home, Settings } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
 
 const destinations = [
   { label: 'Inicio', to: '/', Icon: Home },
   { label: 'Cotizaciones', to: '/cotizaciones', Icon: FileText },
-  { label: 'Clientes', to: '/clientes', Icon: Users },
   { label: 'Ajustes', to: '/ajustes', Icon: Settings },
 ]
 export function BottomNav() {

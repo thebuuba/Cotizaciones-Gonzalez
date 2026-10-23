@@ -3,7 +3,7 @@ import { Outlet, useLocation } from 'react-router-dom'
 import { BottomNav } from './BottomNav'
 
 function routeDepth(pathname: string): number {
-  if (pathname === '/' || pathname === '/cotizaciones' || pathname === '/clientes' || pathname === '/ajustes') return 0
+  if (pathname === '/' || pathname === '/cotizaciones' || pathname === '/ajustes') return 0
   if (pathname === '/cotizaciones/nueva') return 1
   if (/^\/cotizaciones\/[^/]+\/editar$/.test(pathname)) return 2
   if (/^\/cotizaciones\/[^/]+$/.test(pathname)) return 1
@@ -11,7 +11,7 @@ function routeDepth(pathname: string): number {
 }
 
 function isTabRoute(pathname: string): boolean {
-  return pathname === '/' || pathname === '/cotizaciones' || pathname === '/clientes' || pathname === '/ajustes'
+  return pathname === '/' || pathname === '/cotizaciones' || pathname === '/ajustes'
 }
 
 export function AppShell() {
